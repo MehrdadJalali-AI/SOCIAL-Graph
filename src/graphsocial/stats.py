@@ -9,11 +9,13 @@ from scipy import stats
 
 def wilcoxon_paired(a: np.ndarray, b: np.ndarray, alternative: str = "two-sided") -> float:
     """Paired Wilcoxon signed-rank p-value (zero differences dropped); 1.0 if all differences are zero."""
-    d = np.asarray(a, dtype=float) - np.asarray(b, dtype=float)
+    # Recall values are multiples of 1/K; rounding makes tied differences exactly equal regardless of how
+    # the values were stored (e.g. after a CSV round-trip), so ranks and p-values are reproducible.
+    d = np.round(np.asarray(a, dtype=float) - np.asarray(b, dtype=float), 10)
     if np.allclose(d, 0):
         return 1.0
     try:
-        return float(stats.wilcoxon(a, b, zero_method="wilcox", alternative=alternative).pvalue)
+        return float(stats.wilcoxon(d, zero_method="wilcox", alternative=alternative).pvalue)
     except ValueError:
         return 1.0
 
@@ -66,7 +68,7 @@ def power_paired(diffs: np.ndarray, alpha: float = 0.05, n_boot: int = 2000, see
     """
     from statsmodels.stats.power import TTestPower
 
-    d = np.asarray(diffs, dtype=float)
+    d = np.round(np.asarray(diffs, dtype=float), 10)
     n = len(d)
     sd = d.std(ddof=1)
     dz = float(d.mean() / sd) if sd > 0 else np.nan

@@ -134,7 +134,7 @@ def _bundle(cfg: dict, results_md: Path) -> Path:
         for f in sorted((root / "configs").glob("*.yaml")):
             z.write(f, f"configs/{f.name}")
         for name in ("reports/DEVIATIONS.md", "reports/DATA_INSPECTION.md"):
-            if (root / name).exists():
+            if (root / name).exists() and name not in z.namelist():
                 z.write(root / name, name)
         z.writestr("environment_freeze.json", json.dumps(dict(sorted(env.items())), indent=1))
     return zpath

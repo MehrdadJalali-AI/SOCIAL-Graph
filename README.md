@@ -13,8 +13,25 @@ SOCIAL is used as a model-free, structure-aware acquisition policy: it decides w
 | 5 — method invariants | **PASS**: all 10 methods |
 | 6 — H1 pilot | **FAIL**: Graph-SOCIAL beats random search (recall 0.063 vs 0.011, p ≈ 0.001), but MOFGalaxyNet does not significantly beat the degree-preserving random topology (p = 0.20; +ρ=0.10: p = 0.087). See `reports/PHASE6_PILOT.md` |
 
-Phases 7–8 were run with `--force` by user decision (DEVIATIONS D7). Hyperparameters are unchanged, and `no_neighbor` and decoupled-embedding ablations were added. H1 is reported as "not supported at pilot scale". Because gate 6 is FAIL, re-running stage 7 or 8 needs `--force`.
-The ASOC SOCIAL paper is not redistributed in `docs/`; place `SOCIAL_ASOC_2026.pdf` there yourself.
+Phases 7–8 were run with `--force` by user decision (DEVIATIONS D7), with unchanged hyperparameters and two added ablations (`no_neighbor` and a decoupled geometric embedding). Because gate 6 is FAIL, re-running stage 7 or 8 needs `--force`.
+
+**Main findings** (full details in [RESULTS.md](RESULTS.md)):
+- H1 is **not supported at pilot scale**. In the 30-seed runs, MOFGalaxyNet's advantage over a degree-preserving random topology is small and objective-dependent (Cliff's δ ≤ 0.22, power ≤ 0.64, not significant after correction).
+- H3 (bridge nodes) is not supported: 42.7% of new-family hits had a top-decile-betweenness neighbour, against a base rate of 51.3%.
+- Graph-SOCIAL ranks 5th of 10 (Friedman). Ensemble Thompson sampling ranks 1st, followed by PSO, DE and GA. Graph-SOCIAL beats random search only on O2, and that advantage comes from its chemistry-aware embedding (the decoupled embedding removes it).
+
+Both reference papers in `docs/` are open access (CC BY 4.0).
+
+## Manuscript
+
+`manuscript/` holds the Applied Soft Computing (elsarticle) manuscript, with `main.pdf` and `highlights.pdf` included. Every table is generated from `results/tables/`, and the figures come from `results/figures/`:
+
+```bash
+python manuscript/make_tables.py
+cd manuscript && latexmk -pdf main.tex
+```
+
+Placeholders shown in red (CRediT, competing interests, funding, AI-use statement) must be completed by the authors.
 
 ## Install (datalab: Python 3.13, CPU only)
 

@@ -100,6 +100,7 @@ def graph_overview(top, comm: np.ndarray, bc: np.ndarray, stem: Path, max_nodes:
         start = int(nodes[np.argmax(bc[nodes])])
         order = g.bfs(start)[0]
         nodes = np.asarray(order[:max_nodes])
+    nodes = np.sort(nodes)  # induced_subgraph orders vertices by id; keep attributes aligned with it
     sub = g.induced_subgraph(nodes.tolist())
     ig.set_random_number_generator(__import__("random").Random(seed))
     lay = np.asarray(sub.layout_fruchterman_reingold(niter=500).coords)

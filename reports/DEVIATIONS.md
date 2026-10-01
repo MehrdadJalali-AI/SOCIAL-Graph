@@ -43,7 +43,7 @@ Stage logic lives in `src/graphsocial/stages/phaseN.py`; `run.py` dispatches to 
 | f | Agent with no neighbours | x ← (1−γ_t−δ_t)·x + γ_t·x_gbest + δ_t·x_elite (then sync, mutation). | As the specification states. Algorithm 1 would keep x unchanged. |
 | g | Mutation | Worse-than-median agents with probability p_m jump to a random unevaluated MOF in the community with the fewest evaluated MOFs (ties broken at random). The periodic perturbation of Algorithm 1 (t mod 10 = 0, probability 0.05, U(−0.5, 0.5)^D) is kept in embedding units. `social_ws` uses the paper's continuous mutation (s_t schedule). | Specification plus paper. |
 | h | Iterations and leftovers | The initial design counts as iteration 0. T = ⌊B/P⌋ iterations in total; B − T·P leftover evaluations go to the unevaluated MOFs nearest the elite. The same rule applies to DE, PSO and GA. | Keeps every method at exactly B evaluations. |
-| i | Minimum budget | budget = max(⌈frac·N⌉, 40). This only triggers for smoke runs; at N = 8,697 the smallest budget is 44. | So that P = 20 has at least one update iteration. |
+| i | Minimum budget | budget = max(⌈frac·N⌉, 40). On the full data this applies only to O4 at 0.5% (N = 5,359: 27 → 40 evaluations, i.e. 0.75%). All other budgets are exact; the smallest is 44. | So that P = 20 has at least one update iteration. |
 | j | Greedy walk | Best-first: take a random unevaluated neighbour of the best evaluated MOF that still has one. If none of the evaluated MOFs has one, restart at a random unevaluated MOF. | Interpretation of "best-first graph walk". |
 | k | Ensemble TS | Each step, only the sampled forest (100 trees) is fitted on its own bootstrap resample. | Same in distribution as refitting all 10 members, and 10× cheaper. GNN ensemble replaced, as the specification allows. |
 | l | GP-EI | Constant × Matern(ν=2.5, isotropic) + White; normalize_y; one optimiser start; EI with ξ = 0. | CPU cost. |
@@ -64,3 +64,7 @@ Stage logic lives in `src/graphsocial/stages/phaseN.py`; `run.py` dispatches to 
   - sizes of the top-1% hit sets;
   - how initial-design evaluations are counted (they count toward the budget and all metrics);
   - Cliff's delta and achieved power (paired t at the observed d_z, plus bootstrap Wilcoxon) for the topology comparisons.
+
+## D8 — Tie handling in the Wilcoxon test (Phase 8, 2026-10-01)
+
+Recall values are multiples of 1/K. Phase 6 computed the pilot tests from in-memory values, Phase 8 from CSV, and floating-point noise broke exact ties differently (pilot p = 0.195 / 0.087 in Phase 6 vs 0.166 / 0.076 in Phase 8). Paired differences are now rounded to 10 decimals before ranking. Phases 6 and 8 were re-run from the cached runs, which did not need recomputing. The Gate 6 outcome (FAIL) is unchanged.

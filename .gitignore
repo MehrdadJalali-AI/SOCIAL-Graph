@@ -11,4 +11,11 @@ results/runs/
 results/smoke/
 results/state.json
 results_bundle.zip
-docs/SOCIAL_ASOC_2026.pdf
+manuscript/*.aux
+manuscript/*.log
+manuscript/*.fls
+manuscript/*.fdb_latexmk
+manuscript/*.out
+manuscript/*.blg
+manuscript/*.bbl
+manuscript/*.spl
