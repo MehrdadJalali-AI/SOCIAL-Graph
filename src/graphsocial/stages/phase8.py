@@ -47,6 +47,11 @@ def run(cfg: dict, force: bool = False) -> GateResult:
 
     # T3 main results.
     main_specs = plan.main_specs(cfg)
+    complete = _completeness(cfg, main_specs, tables)
+    provisional = bool(cfg.get("provisional"))
+    if not complete and not provisional:
+        raise RuntimeError("Phase 7 runs are incomplete (see results/tables/completeness.csv); finish stage 7, "
+                           "or pass --provisional for a clearly marked draft analysis")
     res = load_results(main_specs, cfg)
     if res.empty:
         raise RuntimeError("no Phase 7 results found; run stage 7 first")
@@ -79,13 +84,28 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     out["T4"] = _write(t4, tables, "T4_pairwise_stats")
 
     # Friedman + Nemenyi over (objective x budget) blocks, F5.
-    blocks = res.pivot_table(index=["objective", "budget_frac"], columns="method", values="final_recall")
-    chi2, pf, ranks, nem = S.friedman_nemenyi(blocks)
+    # Rank within each (objective, budget) block on mean final recall over seeds, then average over blocks.
+    blocks = res.groupby(["objective", "budget_frac", "method"])["final_recall"].mean().unstack("method")
+    blocks = blocks.reindex(columns=cfg["phase7"]["methods"])
+    n_blocks = len(plan.objectives_to_run(cfg)) * len(cfg["phase7"]["budgets"])
+    try:
+        chi2, pf, ranks, nem = S.friedman_nemenyi(blocks, n_blocks, len(cfg["phase7"]["methods"]))
+    except S.IncompleteBlocks as exc:
+        if not provisional:
+            raise
+        chi2, pf = float("nan"), float("nan")
+        ranks = pd.Series(np.nan, index=blocks.columns)
+        nem = pd.DataFrame(np.nan, index=blocks.columns, columns=blocks.columns)
+        print(f"[provisional] Friedman not computed: {exc}")
+    blocks.to_csv(tables / "T4d_friedman_blocks.csv")
     fried = pd.DataFrame({"method": ranks.index, "mean_rank": ranks.values}).sort_values("mean_rank")
     out["friedman"] = (f"Friedman χ² = {chi2:.2f}, p = {pf:.3g} over {len(blocks)} blocks.\n\n"
                        + _write(fried, tables, "T4b_friedman_ranks", ".2f"))
     nem.to_csv(tables / "T4c_nemenyi_pvalues.csv")
-    plots.cd_diagram(ranks, nem, figs / "F5_critical_difference")
+    pd.DataFrame([{"chi2": chi2, "p": pf, "blocks": len(blocks), "methods": blocks.shape[1]}]).to_csv(
+        tables / "T4e_friedman_test.csv", index=False)
+    if ranks.notna().all():
+        plots.cd_diagram(ranks, nem, figs / "F5_critical_difference")
 
     # F3 recall curves at 2% budget, F4 coverage vs recall.
     curves_b = 0.02 if 0.02 in res.budget_frac.unique() else sorted(res.budget_frac.unique())[-1]
@@ -142,8 +162,8 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     pd.DataFrame([{"new_family_hit_evals": n, "with_top_decile_nb": k, "rate": k / n if n else np.nan,
                    "base_evals": nb, "base_top_decile": kb, "base_rate": p0, "p_binomial_greater": p_h3}]).to_csv(
         tables / "h3.csv", index=False)
-    out["H3"] = (f"Evaluations that found the first hit of a Leiden community and had a top-weighted neighbour: "
-                 f"{n}; of these, {k} ({k / max(n, 1):.1%}) had that neighbour in the top betweenness decile, vs "
+    out["H3"] = (f"Evaluations that found the first hit of a Leiden community and had a top-weighted neighbor: "
+                 f"{n}; of these, {k} ({k / max(n, 1):.1%}) had that neighbor in the top betweenness decile, vs "
                  f"a base rate of {p0:.1%} over all {nb} Graph-SOCIAL update evaluations (one-sided binomial "
                  f"p = {p_h3:.3g}).")
 
@@ -177,7 +197,7 @@ TOPOLOGY_PAIRS = [
     ("topology (b) +ρ=0.10", "topology (c) degree-preserving random"),
     ("topology (a) MOFGalaxyNet", "topology (d) Watts–Strogatz"),
     ("decoupled embedding, topology (a) MOFGalaxyNet", "decoupled embedding, topology (c) degree-preserving random"),
-    ("default", "no neighbour term (α=β=0)"),
+    ("default", "no neighbor term (α=β=0)"),
 ]
 PILOT_PAIRS = [("MOFGalaxyNet", "degree-preserving random"), ("MOFGalaxyNet+ρ=0.10", "degree-preserving random"),
                ("MOFGalaxyNet", "Watts–Strogatz")]
@@ -293,3 +313,21 @@ def _bb_recall(cfg: dict, specs) -> dict[str, str]:
                       "top_method_bb_recall": blk.loc[blk.bb_recall_mean.idxmax(), "method"]})
     out["bb_agreement"] = _write(pd.DataFrame(agree), tables, "bb_recall_rank_agreement", ".3f")
     return out
+
+
+def _completeness(cfg: dict, specs, tables) -> bool:
+    """Write completeness.csv (expected vs finished runs per method and budget); True if everything exists."""
+    runs_dir = C.PROJECT_ROOT / cfg["paths"]["runs"]
+    rows = [{"key": s.key, "method": s.method, "objective": s.objective, "budget_frac": s.budget_frac,
+             "done": s.paths(runs_dir)[1].exists()} for s in specs]
+    abl = [s for _, s in plan.ablation_specs(cfg)] + plan.phase7_sensitivity_specs(cfg)
+    rows += [{"key": s.key, "method": f"{s.method} (ablation/sensitivity)", "objective": s.objective,
+              "budget_frac": s.budget_frac, "done": s.paths(runs_dir)[1].exists()} for s in abl]
+    d = pd.DataFrame(rows).drop_duplicates("key")  # one row per unique run
+    summ = d.groupby(["method", "objective", "budget_frac"]).done.agg(expected="size", finished="sum").reset_index()
+    summ.to_csv(tables / "completeness.csv", index=False)
+    missing = summ[summ.finished < summ.expected]
+    if len(missing):
+        print(f"[completeness] {int((summ.expected - summ.finished).sum())} runs missing in {len(missing)} cells:")
+        print(missing.to_string(index=False))
+    return missing.empty

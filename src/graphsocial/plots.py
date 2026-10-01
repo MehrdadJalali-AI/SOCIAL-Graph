@@ -58,7 +58,7 @@ def homophily(obs: pd.DataFrame, null: dict[tuple, np.ndarray], stem: Path) -> N
         ax.hist(null[key], bins=20, color="#94a3b8", label="degree-preserving null")
         ax.axvline(o.pearson, color="#dc2626", lw=2, label="MOFGalaxyNet")
         ax.set_title(f"{target}, φ={phi}  (z={o.z_pearson:.1f})", fontsize=9)
-        ax.set_xlabel("Pearson r(node, neighbour mean)")
+        ax.set_xlabel("Pearson r(node, neighbor mean)")
     for ax in list(axes.flat)[len(keys):]:
         ax.axis("off")
     axes.flat[0].legend(frameon=False, fontsize=7)
@@ -113,8 +113,6 @@ def graph_overview(top, comm: np.ndarray, bc: np.ndarray, stem: Path, max_nodes:
         ax.plot(lay[list(e), 0], lay[list(e), 1], color="#e2e8f0", lw=0.3, zorder=1)
     ax.scatter(lay[:, 0], lay[:, 1], s=sizes, c=colors, linewidths=0, zorder=2)
     ax.set_axis_off()
-    ax.set_title(f"Giant component ({len(nodes)} of {len(giant)} nodes shown); colour = Leiden community "
-                 "(10 largest), size = betweenness", fontsize=8)
     save(fig, stem)
 
 
@@ -144,14 +142,14 @@ def cd_diagram(ranks: pd.Series, nemenyi: pd.DataFrame, stem: Path) -> None:
 
     fig, ax = plt.subplots(figsize=(8, 3))
     sp.critical_difference_diagram(ranks, nemenyi, ax=ax)
-    ax.set_title("Mean rank across objective × budget blocks (final recall; 1 = best)", fontsize=9)
     save(fig, stem)
 
 
 def ablation_bars(tab: pd.DataFrame, stem: Path) -> None:
     """F6: ``tab`` has columns label, objective, mean, ci (95% half-width)."""
     objs = sorted(tab.objective.unique())
-    labels = list(dict.fromkeys(tab.label))
+    # Runs shared by two labels are drawn once: "+ρ=0.10" is the default run, "φ = 0.7" is topology (a).
+    labels = [lb for lb in dict.fromkeys(tab.label) if lb not in ("topology (b) +ρ=0.10", "φ = 0.7")]
     fig, axes = plt.subplots(1, len(objs), figsize=(5 * len(objs), 0.32 * len(labels) + 1.5), sharey=True,
                              squeeze=False)
     for ax, obj in zip(axes[0], objs):
@@ -159,9 +157,8 @@ def ablation_bars(tab: pd.DataFrame, stem: Path) -> None:
         y = np.arange(len(labels))
         ax.barh(y, sub["mean"], xerr=sub["ci"], color=["#2563eb" if lb == "default" else "#94a3b8" for lb in labels])
         ax.set_yticks(y, labels, fontsize=7)
-        ax.invert_yaxis()
-        ax.set_title(obj, fontsize=9)
-        ax.set_xlabel("final top-1% recall")
+        ax.set_xlabel(f"final top-1% recall ({obj})")
+    axes[0][0].invert_yaxis()  # shared y axis: invert once so the default is at the top
     save(fig, stem)
 
 
@@ -186,8 +183,7 @@ def h3_bars(rate_new: float, n_new: int, rate_base: float, n_base: int, p: float
     ax.bar(["new-family hits", "all evaluations"], [rate_new, rate_base], color=["#dc2626", "#94a3b8"])
     for x, (r, n) in enumerate([(rate_new, n_new), (rate_base, n_base)]):
         ax.text(x, r, f"{r:.2f}\n(n={n})", ha="center", va="bottom", fontsize=8)
-    ax.set_ylabel("share with top-weighted neighbour\nin top betweenness decile")
-    ax.set_title(f"H3 bridge nodes (binomial p = {p:.3g})", fontsize=9)
+    ax.set_ylabel("share with top-weighted neighbor\nin top betweenness decile")
     ax.set_ylim(0, max(rate_new, rate_base, 0.1) * 1.3)
     save(fig, stem)
 

@@ -28,6 +28,62 @@ def counts(t4: pd.DataFrame) -> pd.DataFrame:
                          "GS worse": g.worse.sum()}).astype(int)
 
 
+def _norm(v):
+    """Numeric value of a cell ('0.063 ± 0.032' -> (0.063, 0.032)) for comparison; strings unchanged."""
+    if isinstance(v, str) and " ± " in v:
+        a, b = v.split(" ± ")
+        return (float(a), float(b))
+    return v
+
+
+def cell_diffs() -> list[str]:
+    """Every changed cell in every result table present in both versions (rows aligned on key columns)."""
+    lines = ["## Every changed number, by results table", "",
+             "Rows are aligned on their non-numeric key columns; each line gives `table | row key | column: old → new`. "
+             "Tables that are new in the revision are listed at the end.", ""]
+    new_only = []
+    for f in sorted(NEW.glob("*.csv")):
+        o = OLD / f.name
+        if not o.exists():
+            new_only.append(f.name)
+            continue
+        a, b = pd.read_csv(o), pd.read_csv(f)
+        keys = [c for c in a.columns if c in b.columns and a[c].dtype == object
+                and not a[c].astype(str).str.contains(" ± ").any()]
+        keys = [k for k in keys if not a[k].astype(str).str.match(r"^-?[\d.]+$").all()]
+        for k in ("budget_frac", "phi", "seed", "rho"):
+            if k in a.columns and k in b.columns and k not in keys:
+                keys.append(k)
+        if not keys:
+            keys = [a.columns[0]]
+        try:
+            m = a.merge(b, on=keys, how="outer", suffixes=("\x00old", "\x00new"), indicator=True)
+        except Exception as exc:  # noqa: BLE001
+            lines.append(f"- `{f.name}`: not comparable ({exc})")
+            continue
+        changes = []
+        for _, r in m.iterrows():
+            key = ", ".join(f"{k}={r[k]}" for k in keys)
+            if r["_merge"] != "both":
+                changes.append(f"{key}: row only in {'v0.2' if r['_merge'] == 'left_only' else 'revision'}")
+                continue
+            for c in a.columns:
+                if c in keys or c not in b.columns:
+                    continue
+                vo, vn = r[f"{c}\x00old"], r[f"{c}\x00new"]
+                no, nn = _norm(vo), _norm(vn)
+                same = (pd.isna(vo) and pd.isna(vn)) or no == nn
+                if not same and isinstance(no, float) and isinstance(nn, float):
+                    same = abs(no - nn) <= 1e-12 * max(1.0, abs(no))
+                if not same:
+                    changes.append(f"{key} | {c}: {vo} → {vn}")
+        lines.append(f"### {f.name}: {len(changes)} changed cells" if changes else f"### {f.name}: unchanged")
+        lines += [f"- {c}" for c in changes]
+        lines.append("")
+    lines += ["### New tables in the revision", "", *[f"- {n}" for n in new_only], ""]
+    return lines
+
+
 def main() -> int:
     if not OLD.exists():
         print("no v0.2 tables archived")
@@ -73,7 +129,7 @@ def main() -> int:
     import re
 
     old_txt = (ROOT / "results" / "v0.2" / "RESULTS.md").read_text()
-    mo = re.search(r"had a top-weighted neighbour: (\d+); of these, (\d+) \(([\d.]+)%\).*?base rate of ([\d.]+)% over all "
+    mo = re.search(r"had a top-weighted neighbou?r: (\d+); of these, (\d+) \(([\d.]+)%\).*?base rate of ([\d.]+)% over all "
                    r"(\d+).*?p = ([\d.e-]+)\)", old_txt, re.S)
     h3n = pd.read_csv(NEW / "h3.csv").iloc[0]
     out += ["## H3 (bridge nodes)", "", "| version | new-family hit evals | share top-decile nb | base rate | p |",
@@ -83,6 +139,7 @@ def main() -> int:
     out.append(f"| new | {int(h3n.new_family_hit_evals)} | {100 * h3n.rate:.1f}% | {100 * h3n.base_rate:.1f}% | "
                f"{h3n.p_binomial_greater:.3g} |")
     out.append("")
+    out += cell_diffs()
     (ROOT / "reports" / "REVISION_DIFF.md").write_text("\n".join(out) + "\n")
     print("wrote reports/REVISION_DIFF.md")
     return 0

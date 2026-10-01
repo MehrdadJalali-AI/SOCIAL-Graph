@@ -39,16 +39,32 @@ def cliffs_delta(a: np.ndarray, b: np.ndarray) -> float:
     return float((np.sum(diff > 0) - np.sum(diff < 0)) / diff.size)
 
 
-def friedman_nemenyi(block_scores: pd.DataFrame) -> tuple[float, float, pd.Series, pd.DataFrame]:
-    """``block_scores``: rows = blocks, columns = methods, higher = better.
+class IncompleteBlocks(ValueError):
+    """Raised when some (block, method) cells are missing: ranking must never silently drop blocks."""
 
-    Returns (chi2, p, mean ranks (1 = best), Nemenyi p-value matrix).
+
+def friedman_nemenyi(block_scores: pd.DataFrame, expected_blocks: int | None = None,
+                     expected_methods: int | None = None) -> tuple[float, float, pd.Series, pd.DataFrame]:
+    """Friedman test and Nemenyi post hoc over blocks (rows) x methods (columns), higher score = better.
+
+    Methods are ranked within each block on the score (rank 1 = best; ties get average ranks) and the ranks are
+    averaged over blocks. Any missing cell raises ``IncompleteBlocks``; the expected numbers of blocks and methods
+    can be enforced explicitly. Returns (chi2, p, mean ranks, Nemenyi p-value matrix).
     """
     import scikit_posthocs as sp
 
-    x = block_scores.dropna(axis=0)
+    x = block_scores
+    if x.isna().any().any():
+        missing = [(i, c) for i in x.index for c in x.columns if pd.isna(x.loc[i, c])]
+        raise IncompleteBlocks(f"{len(missing)} missing (block, method) cells, e.g. {missing[:3]}")
+    if expected_blocks is not None and len(x) != expected_blocks:
+        raise IncompleteBlocks(f"{len(x)} blocks, expected {expected_blocks}")
+    if expected_methods is not None and x.shape[1] != expected_methods:
+        raise IncompleteBlocks(f"{x.shape[1]} methods, expected {expected_methods}")
     chi2, p = stats.friedmanchisquare(*[x[c].to_numpy() for c in x.columns])
-    ranks = x.rank(axis=1, ascending=False).mean(axis=0)
+    ranks = x.rank(axis=1, ascending=False, method="average").mean(axis=0)
+    k = x.shape[1]
+    assert np.isclose(ranks.sum(), k * (k + 1) / 2), "mean ranks must sum to k(k+1)/2"
     nem = sp.posthoc_nemenyi_friedman(x.to_numpy())
     nem.index = nem.columns = x.columns
     return float(chi2), float(p), ranks, nem

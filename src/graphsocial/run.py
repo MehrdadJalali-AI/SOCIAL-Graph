@@ -70,6 +70,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--n-jobs", type=int, default=1)
     ap.add_argument("--force", action="store_true", help="continue past a failed gate")
     ap.add_argument("--status", action="store_true")
+    ap.add_argument("--provisional", action="store_true",
+                    help="stage 8 only: analyse incomplete runs as a clearly marked draft (manuscript checks fail)")
     ap.add_argument("--only-methods", default=None, help="comma list: run only these methods (stage 6/7)")
     ap.add_argument("--skip-methods", default=None, help="comma list: skip these methods (stage 6/7)")
     args = ap.parse_args(argv)
@@ -77,6 +79,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     cfg = C.load_config(args.config, smoke=args.smoke)
     cfg["n_jobs"] = args.n_jobs
+    cfg["provisional"] = args.provisional
     cfg["method_filter"] = {"only": args.only_methods.split(",") if args.only_methods else None,
                             "skip": args.skip_methods.split(",") if args.skip_methods else []}
     if args.status:

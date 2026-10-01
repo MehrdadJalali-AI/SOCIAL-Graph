@@ -99,8 +99,8 @@ def ablation_table(cfg: dict) -> list[dict]:
 
     rows = [
         row("default"),
-        row("uniform neighbour weights", params={"neighbor_weights": "uniform"}, tag="uniform_weights"),
-        row("no neighbour term (α=β=0)", params={"alpha": 0.0, "beta": 0.0}, tag="no_neighbor"),
+        row("uniform neighbor weights", params={"neighbor_weights": "uniform"}, tag="uniform_weights"),
+        row("no neighbor term (α=β=0)", params={"alpha": 0.0, "beta": 0.0}, tag="no_neighbor"),
         row("centrality = degree", params={"centrality": "degree"}, tag="cent=degree"),
         row("centrality = PageRank", params={"centrality": "pagerank"}, tag="cent=pagerank"),
         row("mutation off", params={"mutation": "off"}, tag="mutation=off"),
@@ -117,7 +117,7 @@ def ablation_table(cfg: dict) -> list[dict]:
                  ("(d) Watts–Strogatz", graph_name(ps, "ws"))]
     rows += [row(f"topology {lab}", topo=t) for lab, t in topo_rows]
     rows += [row(f"φ = {phi}", topo=graph_name(phi)) for phi in cfg["phase3"]["phis"]]
-    # Decoupled search space: geometric descriptors only, neighbourhoods from (a) or (c).
+    # Decoupled search space: geometric descriptors only, neighborhoods from (a) or (c).
     rows += [row("decoupled embedding, topology (a) MOFGalaxyNet", topo=graph_name(ps), embedding="geometric"),
              row("decoupled embedding, topology (c) degree-preserving random", topo=graph_name(ps, "degrand"),
                  embedding="geometric")]
