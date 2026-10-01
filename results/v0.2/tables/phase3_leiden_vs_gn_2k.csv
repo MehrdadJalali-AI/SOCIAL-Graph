@@ -1,0 +1,4 @@
+phi,edges,leiden_communities,gn_communities,ARI_leiden_vs_gn,gn_components_kept_whole,gn_seconds
+0.7,26249,469,484,0.39585867305071226,2,0.6
+0.8,16588,639,646,0.6045637973343457,2,0.5
+0.9,13196,717,794,0.8914859919816972,1,0.6

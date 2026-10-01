@@ -1,0 +1,66 @@
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{lineno}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{longtable}
+\usepackage{adjustbox}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\graphicspath{{../results/figures/}}
+\newcommand{\gs}{Graph-SOCIAL}
+\newcommand{\mgn}{MOFGalaxyNet}
+
+\journal{Applied Soft Computing}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Graph-SOCIAL: Centrality-guided search over metal--organic framework similarity networks for budget-limited discovery}
+
+\author[kit,srh]{Mehrdad Jalali\corref{cor1}}
+\ead{mehrdad.jalali@srh.de}
+\author[srh,hagen]{Binh Vu}
+\author[srh]{Swati Chandna}
+\author[yuntech]{Mohammad H. Nadimi-Shahraki}
+
+\cortext[cor1]{Corresponding author at: Applied Data Science and Artificial Intelligence, SRH University Heidelberg, Heidelberg, Germany.}
+
+\affiliation[kit]{organization={Institute of Functional Interfaces (IFG), Karlsruhe Institute of Technology (KIT)},
+  city={Karlsruhe}, state={Baden-W\"urttemberg}, country={Germany}}
+\affiliation[srh]{organization={Applied Data Science and Artificial Intelligence, SRH University Heidelberg},
+  city={Heidelberg}, state={Baden-W\"urttemberg}, country={Germany}}
+\affiliation[hagen]{organization={Faculty of Mathematics and Computer Science, University of Hagen},
+  city={Hagen}, country={Germany}}
+\affiliation[yuntech]{organization={International Graduate School of Artificial Intelligence, National Yunlin University of Science and Technology},
+  city={Douliu}, postcode={640301}, state={Yunlin}, country={Taiwan}}
+
+\input{sections/abstract}
+
+\end{frontmatter}
+
+\linenumbers
+
+\input{sections/introduction}
+\input{sections/related}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+\input{sections/backmatter}
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references}
+
+\appendix
+\input{sections/appendix}
+
+\end{document}

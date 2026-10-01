@@ -2,12 +2,15 @@
 
 O1 max PBE gap:      f = -gap
 O2 min PBE gap:      f = gap
-O3 window [1.5,2.5]: f = max(0, 1.5 - gap, gap - 2.5)
+O3 target value:     f = |gap - 2.0|   (eV)
 O4 max HSE06 gap:    f = -gap_HSE   (universe = MOFs with an HSE06 gap)
 
 f' = f - min_f over the universe (precomputed) is what SOCIAL's influence formula sees.
-Hits: the ceil(1%) MOFs with the lowest f (ties broken by index). For O3 the hit set is every MOF inside
-the window if that is fewer than 1% of the universe, otherwise the 1% closest to the window centre.
+Hits: the ceil(1%) MOFs with the lowest f (ties broken by index), for every objective.
+
+O3 was previously a window objective, max(0, 1.5 - gap, gap - 2.5). It is zero for every MOF inside the
+window, so the search signal could not tell the hits (the MOFs closest to 2.0 eV) from the other in-window
+MOFs. The target-value form keeps the same hit set and gives a non-flat signal (DEVIATIONS D9).
 """
 
 from __future__ import annotations
@@ -18,8 +21,8 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-WINDOW = (1.5, 2.5)
-NAMES = {"O1": "max PBE gap", "O2": "min PBE gap", "O3": "PBE gap in [1.5, 2.5] eV", "O4": "max HSE06 gap"}
+O3_TARGET = 2.0  # eV
+NAMES = {"O1": "max PBE gap", "O2": "min PBE gap", "O3": "PBE gap closest to 2.0 eV", "O4": "max HSE06 gap"}
 
 
 @dataclass
@@ -65,13 +68,8 @@ def make(name: str, df: pd.DataFrame, hit_frac: float = 0.01) -> Objective:
     elif name == "O2":
         f = gap.copy()
     elif name == "O3":
-        f = np.maximum(0.0, np.maximum(WINDOW[0] - gap, gap - WINDOW[1]))
+        f = np.abs(gap - O3_TARGET)
     else:
         raise ValueError(name)
-    if name == "O3":
-        inside = f == 0
-        k = max(1, math.ceil(hit_frac * len(f)))
-        hits = inside if inside.sum() < k else _top_fraction(np.abs(gap - sum(WINDOW) / 2), hit_frac)
-    else:
-        hits = _top_fraction(f, hit_frac)
+    hits = _top_fraction(f, hit_frac)
     return Objective(name, universe, f, float(f.min()), hits, gap)

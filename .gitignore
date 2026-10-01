@@ -19,3 +19,6 @@ manuscript/*.out
 manuscript/*.blg
 manuscript/*.bbl
 manuscript/*.spl
+manuscript/*.toc
+manuscript/build_*.log
+results/v0.2/runs_replaced/

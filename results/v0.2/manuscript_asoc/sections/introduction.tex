@@ -1,0 +1,17 @@
+\section{Introduction}
+\label{sec:intro}
+
+Metal--organic frameworks (MOFs) combine metal nodes and organic linkers into a combinatorially large design space \citep{furukawa2013mof}. Screening that space for an electronic property such as the band gap still depends on density functional theory (DFT), so in practice the number of candidates that can be evaluated is far smaller than the number available. High-throughput databases such as QMOF \citep{rosen2021qmof,rosen2022qmof} make it possible to study this setting retrospectively. One treats a database as a finite pool of candidates whose properties are hidden until ``evaluated'', and asks how many top candidates a search policy recovers within a fixed evaluation budget \citep{lookman2019active,moosavi2020ml}.
+
+Two lines of our previous work meet in this question. MOFGalaxyNet \citep{jalali2023mofgalaxynet} represents MOFs as nodes of a social-network-style similarity graph built from linker and metal similarity, and uses the graph for property prediction; a later study used the same network view for frugal sampling \citep{jalali2025blackhole}. SOCIAL \citep{jalali2026social} is a population-based optimiser whose agents exchange information over a small-world (Watts--Strogatz) communication graph, weighting neighbours by betweenness centrality and fitness-based influence. In SOCIAL the graph is synthetic: it encodes \emph{who talks to whom}, not \emph{what is similar to what}.
+
+This paper asks whether that graph should be chemically meaningful. We use SOCIAL as a model-free, structure-aware acquisition policy over a finite MOF pool. Agents move in a continuous descriptor embedding, snap to the nearest not-yet-evaluated MOF, and communicate through neighbourhoods defined by hop distance in a MOFGalaxyNet graph built over QMOF. We call this policy \gs{}. Our central hypothesis (H1) is that a chemically meaningful topology lets \gs{} find high-performing MOFs with fewer evaluations than the same algorithm on a topology with identical degrees but randomised connections. A secondary hypothesis (H3) is that hits in new chemical families are disproportionately reached through high-betweenness ``bridge'' MOFs.
+
+The study was run as a gated, pre-specified pipeline. Each phase had a stop-or-continue criterion fixed before its data were seen, and every departure from the plan is logged. Our contributions are:
+\begin{enumerate}
+  \item an audit of the MOFGalaxyNet construction that identifies which similarity recipe produced the published network, and why its reported edge count cannot be reproduced at the stated threshold (Section~\ref{sec:res-repro});
+  \item a QMOF-scale MOFGalaxyNet ($N=8{,}697$ single-linker, single-metal MOFs) and a test of band-gap homophily against degree-preserving null graphs (Section~\ref{sec:res-homophily});
+  \item \gs{}, a faithful port of SOCIAL's update equations to finite-pool acquisition, compared against nine baselines on four band-gap objectives, four budgets and 30 seeds, with ablations of every SOCIAL component and of the topology itself (Sections~\ref{sec:res-pilot}--\ref{sec:res-ablation});
+  \item an explicit test of H1 that keeps the gate outcome on record: at pilot scale the chemically meaningful topology did \emph{not} beat a degree-preserving random topology, and we report the 30-seed result, effect sizes and achieved power without reframing.
+\end{enumerate}
+All code, configurations, run logs and statistical outputs are released (Section~\ref{sec:availability}).

@@ -55,8 +55,9 @@ def test_snap_returns_unevaluated_nearest():
 def test_objectives_and_hits():
     df = pd.DataFrame({"pbe_gap": np.linspace(0, 5, 200), "hse_gap": np.nan})
     o3 = objectives.make("O3", df)
-    assert o3.f.min() == 0 and o3.f_shifted.min() == 0
-    assert o3.hits.sum() == 2  # window holds > 1% of MOFs -> the 1% closest to 2.0 eV
+    assert o3.f_shifted.min() == 0 and np.allclose(o3.f, np.abs(df.pbe_gap - 2.0))
+    closest = np.argsort(np.abs(df.pbe_gap.to_numpy() - 2.0))[:2]
+    assert o3.hits.sum() == 2 and set(np.flatnonzero(o3.hits)) == set(closest)
     o1 = objectives.make("O1", df)
     assert o1.hits.sum() == 2 and df.pbe_gap[o1.hits].min() >= 4.9
 
@@ -104,3 +105,14 @@ def test_topologies(prob):
     ws = topologies.watts_strogatz(base.n, base.degree().mean(), 0)
     assert abs(ws.degree().mean() - base.degree().mean()) <= 1.0
     assert prob.topology.within_hops(0, 1) == set(map(int, base.neighbors(0)))
+
+
+def test_expected_improvement_sign():
+    from graphsocial.methods.gp_ei import expected_improvement
+
+    # Minimisation: a candidate predicted below the incumbent must have higher EI than one above it.
+    ei = expected_improvement(np.array([0.0, 2.0]), np.array([0.5, 0.5]), best=1.0, xi=0.01)
+    assert ei[0] > ei[1] > 0
+    # More uncertainty at equal mean gives more EI.
+    ei2 = expected_improvement(np.array([1.5, 1.5]), np.array([0.1, 1.0]), best=1.0)
+    assert ei2[1] > ei2[0]

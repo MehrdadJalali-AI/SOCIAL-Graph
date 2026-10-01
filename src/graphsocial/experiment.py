@@ -120,8 +120,14 @@ def run_all(specs: list[RunSpec], cfg: dict, n_jobs: int = 1, desc: str = "runs"
     from joblib import Parallel, delayed
 
     log = logging.getLogger("graphsocial")
+    filt = cfg.get("method_filter") or {}
+    if filt.get("only"):
+        specs = [s for s in specs if s.method in filt["only"]]
+    specs = [s for s in specs if s.method not in (filt.get("skip") or [])]
     slow = cfg["experiments"].get("slow_methods", ["gp_ei", "ensemble_ts"])
-    specs = sorted(specs, key=lambda s: (s.method not in slow, slow.index(s.method) if s.method in slow else 0))
+    # Slow methods first; within them, smaller budgets first so partial results become usable early.
+    specs = sorted(specs, key=lambda s: (s.method not in slow, slow.index(s.method) if s.method in slow else 0,
+                                         s.budget_frac))
     runs_dir = C.PROJECT_ROOT / cfg["paths"]["runs"]
     todo = [s for s in specs if not s.paths(runs_dir)[1].exists()]
     log.info("%s: %d specs, %d cached, %d to run (n_jobs=%d)", desc, len(specs), len(specs) - len(todo), len(todo), n_jobs)

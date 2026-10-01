@@ -68,3 +68,21 @@ Stage logic lives in `src/graphsocial/stages/phaseN.py`; `run.py` dispatches to 
 ## D8 — Tie handling in the Wilcoxon test (Phase 8, 2026-10-01)
 
 Recall values are multiples of 1/K. Phase 6 computed the pilot tests from in-memory values, Phase 8 from CSV, and floating-point noise broke exact ties differently (pilot p = 0.195 / 0.087 in Phase 6 vs 0.166 / 0.076 in Phase 8). Paired differences are now rounded to 10 decimals before ranking. Phases 6 and 8 were re-run from the cached runs, which did not need recomputing. The Gate 6 outcome (FAIL) is unchanged.
+
+## D9 — O3 redefined as a target-value objective (revision, 2026-10-01)
+
+The window form f = max(0, 1.5 − gap, gap − 2.5) is zero for all 2,251 MOFs inside the window, while the hit set is the 87 MOFs closest to 2.0 eV. The search signal therefore could not separate hits from other in-window MOFs, and simple regret was 0 for every method. O3 is now f = |gap − 2.0 eV|. The hit set is the 1% lowest f (ties broken by index), which is verified to be the same 87 MOFs. All O3 runs were repeated: 10 methods × 4 budgets × 30 seeds, plus the O3 ablations, topology comparisons and φ×ρ grid. The v0.2 run files are archived in `results/v0.2/runs_replaced/`.
+
+## D10 — GP-EI strengthened (revision, 2026-10-01)
+
+- **Kernel:** Constant × Matérn(ν = 2.5, ARD with 32 length scales) + White, with normalised targets.
+- **Bounds:** constant 10⁻³–10³, length scales 10⁻²–10³, noise 10⁻⁸–1. Not specified in the brief; chosen so the bounds cover the standardised targets and the embedding scale.
+- **Optimiser:** 5 restarts. Each refit is warm-started from the previous step's fitted hyperparameters, which is the first optimiser start; the 5 random restarts follow.
+- **Acquisition:** EI for minimisation with ξ = 0.01. The incumbent is the best observed f in original units (sklearn returns de-normalised predictions).
+- **Checks:** a unit test of the EI sign was added.
+- **Scope:** all GP-EI runs were repeated for every objective, budget and seed. The v0.2 isotropic runs are archived.
+- **Cost:** estimated before starting at about 179 CPU-hours, ~22 h wall with 8 workers. 87% of this is the 5%-budget runs, because fit cost grows as about n^2.1 per refit over ~425 sequential refits.
+
+## D11 — Unique-building-block recall (revision, post hoc)
+
+This is computed from the existing evaluation logs, with no new runs. A hit counts once per distinct (linker, metal) group. Duplicate-group membership of hits is counted within each objective's pool.

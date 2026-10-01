@@ -1,0 +1,84 @@
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Study design and pre-specified gates}
+\label{sec:gates}
+The study was run as an eight-phase pipeline. Four phases end in a gate fixed before the data were seen (Table~\ref{tab:gates}). A failed gate stops the pipeline unless the authors explicitly override it. Overrides and every other departure from the plan are recorded in a deviation log that is released with the code. Two gates failed, Gate~1 (reproduction) and Gate~6 (pilot test of H1). Both outcomes are reported as observed. The later phases were run after documented overrides, without changing any hyperparameter.
+
+\begin{table}[t]
+\centering
+\caption{Pre-specified gates and outcomes.}
+\label{tab:gates}
+\small
+\begin{tabular}{@{}lp{6.2cm}p{4.6cm}@{}}
+\toprule
+Gate & Criterion & Outcome \\
+\midrule
+1 & Reproduce the published 2k MOFGalaxyNet: edges and mean degree at $\phi=0.9$ within $\pm5\%$ of 19{,}266 / 19.256 & FAIL (override; Section~\ref{sec:res-repro}) \\
+2 (soft) & $\geq 3{,}000$ QMOF MOFs after filtering & PASS (8{,}697) \\
+4 & PBE-gap homophily above degree-preserving nulls, $p<0.01$, for some $\phi$ & PASS (all $\phi$) \\
+6 & Some MOFGalaxyNet variant beats the degree-preserving random topology on final top-1\% recall, paired one-sided Wilcoxon $p<0.05$ (10 seeds) & FAIL (override; Section~\ref{sec:res-pilot}) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Data}
+\label{sec:data}
+We used QMOF version~18 \citep{rosen2021qmof,rosen2022qmof} (Figshare DOI 10.6084/m9.figshare.13147324, 20{,}372 entries; checksums in the repository). Linkers come from the MOFid decomposition \citep{bucior2019mofid} distributed with QMOF. The metal is identified from the composition after excluding non-metals and metalloids. Following MOFGalaxyNet, we kept MOFs with exactly one distinct organic linker (after RDKit canonicalisation) and exactly one metal element. Table~\ref{tab:filters} gives the exclusion counts. Targets are the PBE-D3(BJ) band gap \citep{perdew1996pbe} for all 8{,}697 retained MOFs and the HSE06 gap \citep{heyd2003hse} for the 5{,}359 that have one. MOFs with identical linker and metal (``building-block duplicates'') were kept and flagged: 1{,}134 groups cover 3{,}766 MOFs (43.3\%). The within-group standard deviation of the PBE gap is 0.28~eV, against a global standard deviation of 1.17~eV.
+
+\begin{table}[t]
+\centering
+\caption{QMOF filtering (Phase 2).}
+\label{tab:filters}
+\small
+\begin{adjustbox}{max width=\textwidth}\input{tables/filters}\end{adjustbox}
+\end{table}
+
+\subsection{MOFGalaxyNet construction}
+\label{sec:graph}
+For MOFs $a,b$ with linker Morgan fingerprints \citep{rogers2010ecfp} (radius 2, 2{,}048 bits) and min-max-normalised six-dimensional metal vectors $\mathbf{m}$ (atomic number, atomic weight, atomic radius, Mulliken electronegativity $(\mathrm{IE}_1+\mathrm{EA})/2$, polarisability, electron affinity; from \texttt{mendeleev} \citep{mendeleev}), the similarity is
+\begin{equation}
+\mathrm{SIM}(a,b) = 0.7\,T(\mathrm{fp}_a,\mathrm{fp}_b) + 0.3\,\cos(\mathbf{m}_a,\mathbf{m}_b),
+\label{eq:sim}
+\end{equation}
+where $T$ is the Tanimoto coefficient. An edge joins $a$ and $b$ when $\mathrm{SIM}(a,b)\geq\phi$, with $\phi\in\{0.7,0.8,0.9\}$. This is the recipe described in the MOFGalaxyNet paper \citep{jalali2023mofgalaxynet}. Section~\ref{sec:res-repro} shows that the released code used a different recipe, which we keep as a sensitivity graph. Missing electron affinities, for elements with an unbound anion, were set to 0~eV. Communities were found with Leiden \citep{traag2019leiden} (RB-configuration, resolution 1.0, fixed seed). Betweenness centrality was computed by sampled Brandes \citep{brandes2001faster} with 1{,}000 seeded sources, because $N>5{,}000$. Degree and PageRank were also computed, and every centrality was max-normalised to $[0,1]$.
+
+\paragraph{Comparison topologies}
+Over the same node set we built (a) MOFGalaxyNet($\phi$); (b) (a) plus $\rho|E|$ random ``long-range'' edges between nodes in different Leiden communities, $\rho\in\{0.05,0.10,0.20\}$; (c) a degree-preserving randomisation of (a) with $10|E|$ double-edge swaps \citep{maslov2002specificity}; and (d) a Watts--Strogatz graph \citep{watts1998small} with matched mean degree and rewiring probability 0.3.
+
+\subsection{Search space and oracle}
+\label{sec:oracle}
+\paragraph{Embedding}
+Every MOF is mapped to $\mathbb{R}^{32}$. The fingerprint block and the metal block are standardised column-wise, each block is scaled to unit total variance, the blocks are weighted 0.7 and 0.3, and PCA with a fixed seed reduces the result to 32 dimensions. All continuous updates of the population methods happen in this space.
+
+\paragraph{Snap operator and oracle}
+After a position update, an agent moves to the nearest MOF in the embedding (Euclidean distance; KD-tree with masking) that has not been evaluated yet. The oracle then reveals that MOF's objective value. One shared oracle wrapper counts evaluations, forbids re-evaluating a MOF and enforces the budget $B$ exactly. Every method receives the same $P=10$ initial MOFs for a given seed. These \emph{count as evaluations 1 to $P$} toward the budget and toward every metric.
+
+\subsection{Graph-SOCIAL}
+\label{sec:gs}
+\gs{} ports SOCIAL \citep{jalali2026social} (Eqs.~8--17 and Algorithm~1 of that paper, with its Table~2 defaults) to the finite pool. With $T=\lfloor B/P\rfloor$ iterations (the initial design is iteration 0) and $\tau=t/T$, the source weights follow
+\begin{equation}
+\alpha_t=\alpha(1-\tau),\quad \beta_t=\beta(1-\tau),\quad \gamma_t=\gamma\tau,\quad \delta_t=\delta\tau,
+\end{equation}
+with $\alpha=\beta=0.4$ and $\gamma=\delta=0.2$. Agent $j$ is a neighbour of agent $i$ when their current MOFs are within $h=2$ hops in the search topology. Its centrality $c_j$ is the precomputed centrality of its current MOF, betweenness by default. Its influence is
+\begin{equation}
+I_j = 1-\frac{\log(1+|f'_j|)}{\log(1+\max_k f'_k)+10^{-6}},
+\end{equation}
+computed on the shifted objective $f'=f-\min f$, so that $f'\geq0$ as SOCIAL assumes. The neighbour aggregate and the position update are
+\begin{align}
+\mathbf{x}^{t}_{\mathrm{neigh}} &= \sum_{j\in N(i)} w_{ij}\mathbf{x}_j^t, \qquad w_{ij}=\frac{\alpha_t c_j+\beta_t I_j}{\sum_{k\in N(i)}(\alpha_t c_k+\beta_t I_k)},\\
+\mathbf{x}_i^{t+1} &= (1-\alpha_t-\beta_t-\gamma_t-\delta_t)\mathbf{x}_i^t+(\alpha_t+\beta_t)\mathbf{x}^t_{\mathrm{neigh}}+\gamma_t\mathbf{x}^t_{\mathrm{gbest}}+\delta_t\mathbf{x}^t_{\mathrm{elite}},
+\end{align}
+followed by synchronisation with the population mean, $\mathbf{x}\leftarrow0.95\,\mathbf{x}+0.05\,\bar{\mathbf{x}}$, and clipping to the embedding's bounding box. An agent without neighbours uses only the global-best and elite terms. Agents worse than the median mutate with probability $p_m=0.1$. Instead of a continuous perturbation, a mutating agent jumps to a random unevaluated MOF in the Leiden community that has the fewest evaluated MOFs (community-aware mutation). The periodic perturbation of SOCIAL's Algorithm~1 is retained. Evaluations left over after $T$ iterations ($B-TP$) go to the unevaluated MOFs nearest the elite. For every evaluation we log the neighbour with the largest $w_{ij}$ and that neighbour's centrality.
+
+\subsection{Baselines}
+\label{sec:baselines}
+All baselines use the same oracle, budget and initial design: (1)~random search; (2)~a greedy best-first walk on MOFGalaxyNet, which evaluates a random unevaluated neighbour of the best evaluated MOF that still has one and restarts at random otherwise; (3)~GP-EI, a Gaussian process with a Mat\'ern-5/2 plus white-noise kernel and normalised targets, refitted every step, maximising expected improvement \citep{jones1998ego,rasmussen2006gp} over all unevaluated MOFs; (4)~ensemble Thompson sampling with ten bootstrap random forests \citep{breiman2001rf} of 100 trees, where at each step one member is drawn, fitted on its own bootstrap resample, and its predicted best MOF is evaluated (random forests replace a GNN ensemble for CPU feasibility); (5--7)~differential evolution \citep{storn1997de} (DE/rand/1/bin, $F=0.5$, $CR=0.9$), PSO with constriction coefficients \citep{kennedy1995pso,clerc2002pso} ($w=0.729$, $c_1=c_2=1.494$) and a genetic algorithm \citep{holland1975adaptation} (binary tournament, uniform crossover, Gaussian mutation), each with the snap operator and $P=10$; (8)~the original SOCIAL with a Watts--Strogatz agent graph ($K=4$, $p=0.3$), continuous mutation and the snap operator (\textsc{social\_ws}); and (9)~static diverse sampling, which selects the whole budget up front by $k$-centre greedy \citep{sener2018coreset} seeded with the initial design.
+
+\subsection{Objectives, budgets and metrics}
+\label{sec:metrics}
+All objectives are minimised. O1 maximises the PBE gap ($f=-\mathrm{gap}$) and O2 minimises it. O3 targets a window, $f=\max(0,1.5-\mathrm{gap},\mathrm{gap}-2.5)$~eV. O4 maximises the HSE06 gap on the HSE06 subset. The hit set is the 1\% of the pool with the lowest $f$ (ties broken by index). For O3, more than 1\% of MOFs lie inside the window, so the hit set is the 1\% closest to 2.0~eV. Budgets are 0.5, 1, 2 and 5\% of the pool. The metrics are top-1\% recall as a function of evaluations and its normalised area under the curve (AUC), the enrichment factor, simple regret, the evaluation index of the first hit, and \emph{family coverage}: the fraction of Leiden communities that contain a hit in which at least one hit was found. Wall-clock time excludes oracle look-ups.
+
+\subsection{Experimental protocol and statistics}
+\label{sec:stats}
+The pilot (Phase~6) used O2, a 2\% budget and seeds 0--9 on $\phi^\ast$, the threshold with the strongest homophily. The full benchmark used all objectives, budgets and methods with seeds 0--29 (4{,}800 runs). The ablations used O2 and O3 at a 2\% budget with seeds 0--29. Per objective and budget, \gs{} is compared with each baseline by a paired Wilcoxon signed-rank test over seeds \citep{wilcoxon1945}, with Holm correction across baselines \citep{holm1979} and Cliff's $\delta$ as the effect size \citep{cliff1993dominance}. Across the objective $\times$ budget blocks we use the Friedman test \citep{friedman1937} with a Nemenyi post-hoc test and a critical-difference diagram \citep{demsar2006statistical}. For the topology comparisons we also report achieved power, both analytically (paired $t$ at the observed $d_z$) and by bootstrap for the Wilcoxon test. Random-search recall is checked against its exact hypergeometric expectation $B/N$. All randomness is seeded, and repeating a run reproduces it exactly, which is tested.

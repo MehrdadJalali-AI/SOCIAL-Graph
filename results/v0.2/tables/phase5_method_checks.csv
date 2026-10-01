@@ -1,0 +1,11 @@
+method,budget,evaluations,unique,budget_exact,initial_design_first,deterministic,final_recall,seconds
+graph_social,174,174,True,True,True,True,0.05747126436781609,0.13
+random,174,174,True,True,True,True,0.011494252873563218,0.0
+greedy_walk,174,174,True,True,True,True,0.04597701149425287,0.01
+gp_ei,174,174,True,True,True,True,0.034482758620689655,5.85
+ensemble_ts,174,174,True,True,True,True,0.11494252873563218,15.94
+de,174,174,True,True,True,True,0.05747126436781609,0.02
+pso,174,174,True,True,True,True,0.011494252873563218,0.03
+ga,174,174,True,True,True,True,0.06896551724137931,0.03
+static_diverse,174,174,True,True,True,True,0.011494252873563218,0.07
+social_ws,174,174,True,True,True,True,0.08045977011494253,0.03

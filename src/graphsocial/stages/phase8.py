@@ -139,6 +139,9 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     p0 = kb / nb if nb else np.nan
     p_h3 = float(sps.binomtest(k, n, p0, alternative="greater").pvalue) if n and nb else np.nan
     plots.h3_bars(k / n if n else 0.0, n, p0 if nb else 0.0, nb, p_h3, figs / "F8_h3_bridge_nodes")
+    pd.DataFrame([{"new_family_hit_evals": n, "with_top_decile_nb": k, "rate": k / n if n else np.nan,
+                   "base_evals": nb, "base_top_decile": kb, "base_rate": p0, "p_binomial_greater": p_h3}]).to_csv(
+        tables / "h3.csv", index=False)
     out["H3"] = (f"Evaluations that found the first hit of a Leiden community and had a top-weighted neighbour: "
                  f"{n}; of these, {k} ({k / max(n, 1):.1%}) had that neighbour in the top betweenness decile, vs "
                  f"a base rate of {p0:.1%} over all {nb} Graph-SOCIAL update evaluations (one-sided binomial "
@@ -160,6 +163,7 @@ def run(cfg: dict, force: bool = False) -> GateResult:
             shutil.copy(src, figs / f"F2_homophily.{ext}")
 
     out.update(_checks_and_power(cfg, res, abl, figs))
+    out.update(_bb_recall(cfg, main_specs))
     report.build(cfg, out, {"phi_star": phi, "best_topology": best})
     wins = t4[(t4.metric == "final_recall") & (t4.mean_graph_social > t4.mean_baseline) & t4["significant_holm_0.05"]]
     summary = (f"Graph-SOCIAL significantly better (Holm p<0.05, final recall) in {len(wins)} of "
@@ -235,4 +239,57 @@ def _checks_and_power(cfg: dict, res: pd.DataFrame, abl: pd.DataFrame, figs) -> 
                 rows.append(_pair_row(f"ablation (seeds {cfg['seeds_full'][0]}–{cfg['seeds_full'][1]})", obj,
                                       a_lab, b_lab, w[a_lab], w[b_lab]))
     out["topology_power"] = _write(pd.DataFrame(rows), tables, "topology_effect_power", ".4g")
+    return out
+
+
+def _bb_recall(cfg: dict, specs) -> dict[str, str]:
+    """Unique-building-block recall (post hoc, from the evaluation logs).
+
+    Hits are grouped by building block (identical linker + metal). A run's unique-BB recall is the number of
+    distinct hit groups it found divided by the number of distinct hit groups; finding several duplicates of
+    one group counts once.
+    """
+    from .. import objectives as O
+    from ..experiment import RunSpec  # noqa: F401  (type of specs)
+
+    tables = C.path(cfg, "tables")
+    runs_dir = C.PROJECT_ROOT / cfg["paths"]["runs"]
+    df = Store(cfg).load_clean()
+    budgets = [b for b in (0.02, 0.05) if b in cfg["phase7"]["budgets"]] or cfg["phase7"]["budgets"][-1:]
+    comp, rows = [], []
+    for obj in plan.objectives_to_run(cfg):
+        o = O.make(obj, df, cfg["objectives"]["hit_fraction"])
+        bb = df["bb_group"].to_numpy()[o.universe]
+        size_in_pool = pd.Series(bb).map(pd.Series(bb).value_counts()).to_numpy()
+        hit_groups = np.unique(bb[o.hits])
+        comp.append({"objective": obj, "hits": int(o.hits.sum()), "distinct_hit_groups": len(hit_groups),
+                     "hits_in_duplicate_groups": int((size_in_pool[o.hits] > 1).sum()),
+                     "fraction_hits_in_duplicate_groups": float((size_in_pool[o.hits] > 1).mean()),
+                     "max_hits_in_one_group": int(pd.Series(bb[o.hits]).value_counts().max())})
+        for s in specs:
+            if s.objective != obj or s.budget_frac not in budgets:
+                continue
+            path = s.paths(runs_dir)[0]
+            if not path.exists():  # run not finished yet (e.g. provisional analysis)
+                continue
+            tr = pd.read_parquet(path, columns=["mof_idx", "is_hit"])
+            found = np.unique(bb[tr.mof_idx.to_numpy()[tr.is_hit.to_numpy()]])
+            rows.append({"objective": obj, "budget_frac": s.budget_frac, "method": s.method, "seed": s.seed,
+                         "bb_recall": len(found) / len(hit_groups),
+                         "final_recall": float(tr.is_hit.sum() / o.hits.sum())})
+    runs = pd.DataFrame(rows)
+    runs.to_csv(tables / "bb_recall_runs.csv", index=False)
+    g = runs.groupby(["objective", "budget_frac", "method"])
+    summ = pd.DataFrame({"bb_recall": g["bb_recall"].apply(S.mean_std), "final_recall": g["final_recall"].apply(S.mean_std),
+                         "bb_recall_mean": g["bb_recall"].mean(), "final_recall_mean": g["final_recall"].mean()}).reset_index()
+    out = {"bb_composition": _write(pd.DataFrame(comp), tables, "bb_hit_composition", ".3f"),
+           "bb_recall": _write(summ, tables, "bb_recall", ".4f")}
+    # Rank agreement between ordinary and unique-BB recall (per objective x budget, method means).
+    agree = []
+    for (obj, b), blk in summ.groupby(["objective", "budget_frac"]):
+        agree.append({"objective": obj, "budget_frac": b,
+                      "spearman_rank_corr": float(blk.bb_recall_mean.corr(blk.final_recall_mean, method="spearman")),
+                      "top_method_recall": blk.loc[blk.final_recall_mean.idxmax(), "method"],
+                      "top_method_bb_recall": blk.loc[blk.bb_recall_mean.idxmax(), "method"]})
+    out["bb_agreement"] = _write(pd.DataFrame(agree), tables, "bb_recall_rank_agreement", ".3f")
     return out

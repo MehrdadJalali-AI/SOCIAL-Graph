@@ -1,0 +1,5 @@
+objective,hits,distinct_hit_groups,hits_in_duplicate_groups,fraction_hits_in_duplicate_groups,max_hits_in_one_group
+O1,87,73,33,0.3793103448275862,5
+O2,87,83,43,0.4942528735632184,2
+O3,87,83,33,0.3793103448275862,3
+O4,54,50,14,0.25925925925925924,2

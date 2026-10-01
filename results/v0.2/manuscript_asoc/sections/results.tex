@@ -1,0 +1,172 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{The published MOFGalaxyNet edge count is not reproducible at the stated threshold (Gate 1)}
+\label{sec:res-repro}
+On the original 2{,}000-MOF table, the recipe described in the MOFGalaxyNet paper (Eq.~\ref{eq:sim}) gives 13{,}196 edges at $\phi=0.9$ (mean degree 13.2), against the published 19{,}266 edges and mean degree 19.256 ($-31.5\%$). The gate failed. Table~\ref{tab:repro} shows the twelve recipes we then tested (Morgan vs.\ RDKit path fingerprints, linker weight 0.7 vs.\ 0.9, and metal descriptors from \texttt{mendeleev}, \texttt{mordredcommunity} \citep{moriwaki2018mordred} or the original normalised vectors). At $\phi=0.9$ these give 13{,}034--14{,}757 edges, and \emph{the authors' released adjacency matrix itself gives 15{,}901}. The released matrix is reproduced almost exactly (mean absolute error 0.0008) by the recipe in the released code, which uses RDKit path fingerprints and $\mathrm{SIM}=0.9\,T+0.1\cos$ rather than the Morgan, 0.7/0.3 recipe stated in the paper. Every recipe reaches the published edge count at $\phi\approx0.68$--$0.76$, and the released matrix has 19{,}753 edges at $\phi=0.7$ ($+2.5\%$). The published figure is therefore most consistent with a threshold near 0.7. The choice of metal descriptor source changes edge counts by at most about 2\%. We kept the recipe as described in the paper and recorded the override (Appendix~\ref{app:impl}).
+
+\begin{table}[t]
+\centering
+\caption{Gate 1: edges of the original 2k MOFGalaxyNet under twelve similarity recipes and the released matrix. MAE is measured against the released weighted adjacency matrix. The last column gives the threshold at which each recipe yields the published 19{,}266 edges.}
+\label{tab:repro}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/repro}\end{adjustbox}
+\end{table}
+
+\subsection{QMOF-MOFGalaxyNet and band-gap homophily (Gate 4)}
+\label{sec:res-homophily}
+On the 8{,}697 QMOF MOFs the graph fragments quickly as $\phi$ rises (Table~\ref{tab:graphs}). At $\phi=0.7$ it has 205{,}328 edges (mean degree 47.2), 1{,}075 isolated MOFs, a giant component holding 42\% of the nodes, and 1{,}747 Leiden communities (modularity 0.75; Fig.~\ref{fig:graph}). At $\phi=0.9$ the giant component holds only 2.5\% of the nodes. The graph is dominated by near-cliques of MOFs that share linker and metal. Long-range edges reconnect it almost completely (99.9\% giant component at $\rho=0.10$). Degree-preserving randomisation keeps the degree sequence but lowers clustering from 0.65 to 0.09. On the 2k set, Leiden and Girvan--Newman partitions agree increasingly with $\phi$ (adjusted Rand index 0.40, 0.60 and 0.89 at $\phi=0.7$, 0.8 and 0.9).
+
+\begin{table}[t]
+\centering
+\caption{QMOF search topologies (Phase 3). $\bar C$: mean local clustering; $\ell_{\mathrm{giant}}$: mean shortest path in the giant component.}
+\label{tab:graphs}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/graphs}\end{adjustbox}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{F1_graph_overview.pdf}
+\caption{Giant component of QMOF-MOFGalaxyNet at $\phi^\ast=0.7$ (3{,}000 of 3{,}659 nodes shown), coloured by the ten largest Leiden communities, with node size proportional to betweenness.}
+\label{fig:graph}
+\end{figure}
+
+The band gap is strongly homophilous on every graph (Table~\ref{tab:homophily}, Fig.~\ref{fig:homophily}). At $\phi=0.7$, the correlation between a MOF's PBE gap and the mean gap of its neighbours is $r=0.515$, against $0.001\pm0.011$ in 100 degree-preserving randomisations ($z=45.6$). The value assortativity is 0.18 ($z=92$). The HSE06 gap is even more homophilous ($r=0.656$). All empirical $p$-values sit at their floor ($1/101$), so Gate 4 passed and $\phi^\ast=0.7$ was carried forward. Much of this homophily comes from building-block duplicates: within groups of identical linker and metal, the PBE-gap standard deviation is 0.28~eV, against 1.17~eV over the whole pool.
+
+\begin{table}[t]
+\centering
+\caption{Band-gap homophily against degree-preserving null graphs (100 per row). $r$: Pearson correlation between node value and neighbour mean; $\rho_s$: Spearman; Assort.: value assortativity.}
+\label{tab:homophily}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/homophily}\end{adjustbox}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{F2_homophily.pdf}
+\caption{Observed band-gap homophily (red) against degree-preserving null distributions (grey).}
+\label{fig:homophily}
+\end{figure}
+
+\subsection{Pilot test of H1: topology does not matter detectably (Gate 6)}
+\label{sec:res-pilot}
+In the pilot (O2, 174 evaluations, seeds 0--9), every \gs{} variant clearly beats random search (Table~\ref{tab:pilot}). For example, MOFGalaxyNet reaches a final recall of $0.063\pm0.027$ against $0.011\pm0.008$ (one-sided $p<0.001$, Cliff's $\delta=0.96$). The topology itself, however, makes no significant difference. MOFGalaxyNet improves on the degree-preserving random topology by $+0.014$ recall ($p=0.195$, $\delta=0.26$), the variant with long-range edges by $+0.015$ ($p=0.087$), and MOFGalaxyNet improves on Watts--Strogatz by only $+0.005$ ($p=0.30$). Gate~6 therefore failed, and \textbf{H1 is not supported at pilot scale}. The pre-specified sensitivity grid over $\phi\times\rho$ was flat (0.056--0.076 mean recall). Following the pre-specified rule, the MOFGalaxyNet variant with the highest pilot mean ($\rho=0.10$) was carried into the full benchmark.
+
+\begin{table}[t]
+\centering
+\caption{Pilot (O2, 2\% budget, 10 seeds): final top-1\% recall (mean $\pm$ std) and one-sided paired Wilcoxon tests.}
+\label{tab:pilot}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/pilot}\end{adjustbox}\\[4pt]
+\begin{adjustbox}{max width=\textwidth}\input{tables/pilot_tests}\end{adjustbox}
+\end{table}
+
+\subsection{Full benchmark}
+\label{sec:res-main}
+Table~\ref{tab:hits} gives the hit sets: 87 MOFs (1\%) for O1--O3 and 54 for O4. For O3, 2{,}251 MOFs (25.9\%) lie inside the 1.5--2.5~eV window, so its hits are the 87 MOFs closest to 2.0~eV. Random search matches its analytical expectation: across the 16 objective--budget cells its mean recall tracks $B/N$, and only one exact hypergeometric test has $p<0.05$ (O2 at 5\%, $p=0.038$), as expected by chance (Table~\ref{tab:random}). This is evidence that the oracle, the hit sets and the evaluation accounting are correct. Initial-design evaluations count toward both the budget and every metric. The 0.5\% budget for O4 is raised to the 40-evaluation minimum (0.75\% of its 5{,}359-MOF pool).
+
+\begin{table}[t]
+\centering
+\caption{Hit sets (top 1\% of each objective's pool).}
+\label{tab:hits}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/hits}\end{adjustbox}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Random search against its analytical expectation ($E[\text{recall}]=B/N$; exact two-sided test on the hit total over 30 seeds).}
+\label{tab:random}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/random_check}\end{adjustbox}
+\end{table}
+
+Table~\ref{tab:main} and Fig.~\ref{fig:curves} summarise the benchmark (all budgets in Appendix~\ref{app:full}). Ensemble Thompson sampling is the strongest method throughout, with a mean Friedman rank of 1.31 ($\chi^2=95.8$, $p<10^{-15}$ over 16 blocks; Fig.~\ref{fig:cd}). At a 5\% budget it recovers 60\% of the O1 hits and 52\% of the O4 hits. PSO (rank 3.16), DE (3.50) and GA (4.03) follow, all using the same snap operator as \gs{}. \gs{} ranks fifth (5.75), level with the original SOCIAL on a Watts--Strogatz agent graph (5.88). It is ahead of GP-EI (7.12), the greedy graph walk (7.41), random search (7.53) and static diverse sampling (9.31).
+
+\gs{}'s advantage is objective-specific (Table~\ref{tab:pairwise}). On O2 (minimum gap) it beats random search at all four budgets after Holm correction, for example $0.063$ vs.\ $0.022$ at 2\% and $0.150$ vs.\ $0.059$ at 5\%. On O1, O3 and O4 its recall is statistically indistinguishable from random search at every budget. Against the strongest baselines it is never significantly better and is significantly worse in 12 of 16 cells against ensemble TS and in 7--8 cells against DE and PSO.
+
+\begin{table}[t]
+\centering
+\caption{Final top-1\% recall (mean $\pm$ std over 30 seeds) at 2\% and 5\% budgets. Best mean per column in bold.}
+\label{tab:main}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{adjustbox}{max width=\textwidth}\input{tables/main_recall}\end{adjustbox}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{F3_recall_curves.pdf}
+\caption{Top-1\% recall against evaluations at a 2\% budget (mean and 95\% CI over 30 seeds).}
+\label{fig:curves}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\linewidth]{F5_critical_difference.pdf}
+\caption{Critical-difference diagram of mean ranks (final recall) over 16 objective $\times$ budget blocks. Bars connect methods that the Nemenyi test does not separate.}
+\label{fig:cd}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{\gs{} (GS) against each baseline: number of the 16 objective $\times$ budget cells in which GS is significantly better, not significantly different, or significantly worse (paired Wilcoxon, Holm-corrected, final recall), with Cliff's $\delta$.}
+\label{tab:pairwise}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/pairwise}\end{adjustbox}
+\end{table}
+
+\subsection{Ablations and the 30-seed topology comparison}
+\label{sec:res-ablation}
+Table~\ref{tab:ablations} lists every ablation (O2 and O3, 2\% budget, 30 seeds; two-sided paired tests against the default, uncorrected). Apart from the search space (next paragraph), no component changes recall significantly once the number of comparisons is taken into account. The smallest $p$ is for $P=20$ on O3 (0.029 vs.\ 0.018, $p=0.010$, one of 40 tests). Switching off the neighbour term entirely ($\alpha=\beta=0$) lowers O2 recall from 0.063 to 0.057 ($p=0.42$) and leaves O3 unchanged. The $\phi\times\rho$ grid is flat on both objectives (Fig.~\ref{fig:heatmap}).
+
+The one ablation with a large effect is the search space. Replacing the linker/metal embedding with a geometric one (PLD, LCD, density, volume, atom count) cuts O2 recall from 0.063 to 0.017--0.019 ($p<10^{-4}$, $\delta\approx-0.78$), slightly below random search. It leaves O3, where \gs{} is no better than random anyway, unchanged. Under the decoupled embedding, MOFGalaxyNet neighbourhoods are no better than randomised ones (O2: $-0.002$, $p=0.62$; O3: $+0.0004$, $p=0.42$).
+
+Table~\ref{tab:power} reports the 30-seed topology comparison as observed. On O2, MOFGalaxyNet beats the degree-preserving random topology by $+0.006$ recall ($p=0.19$, $\delta=0.15$, $d_z=0.15$). The achieved power for this effect is only 0.20, and about 280 seeds would be needed for 80\% power. With long-range edges the margin is $+0.009$ ($p=0.096$, power 0.40). On O3, MOFGalaxyNet beats the random topology by $+0.006$ ($p=0.027$, $\delta=0.22$, power 0.64), and the long-range variant by $+0.004$ ($p=0.036$). These nominal $p$-values are uncorrected and would not survive a Holm correction over the 13 topology comparisons in Table~\ref{tab:power}. On the same objective, the Watts--Strogatz topology does \emph{better} than MOFGalaxyNet ($0.025$ vs.\ $0.020$; $\delta=-0.17$). Taken together, the 30-seed results agree with the pilot. If a chemically meaningful topology helps at all, the effect is small (Cliff's $\delta\leq0.22$), objective-dependent and not robust across comparison topologies.
+
+\begin{table}[t]
+\centering
+\caption{Ablations (2\% budget, 30 seeds): final recall (mean $\pm$ std), two-sided paired Wilcoxon $p$ and Cliff's $\delta$ against the default (MOFGalaxyNet($\phi^\ast$) with $\rho=0.10$). Uncorrected.}
+\label{tab:ablations}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{adjustbox}{max width=\textwidth}\input{tables/ablations}\end{adjustbox}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Topology comparisons with effect sizes and achieved power (one-sided paired Wilcoxon, A $>$ B, uncorrected). Power$_t$: paired $t$ at the observed $d_z$; Power$_W$: bootstrap Wilcoxon (2{,}000 resamples); $n_{80}$: seeds for 80\% power at the observed $d_z$.}
+\label{tab:power}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{adjustbox}{max width=\textwidth}\input{tables/topology_power}\end{adjustbox}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.75\linewidth]{F7_phi_rho_heatmap.pdf}
+\caption{Mean final recall of \gs{} over threshold $\phi$ and long-range fraction $\rho$ (2\% budget, 30 seeds).}
+\label{fig:heatmap}
+\end{figure}
+
+\subsection{Bridge nodes (H3) and runtime}
+\label{sec:res-h3}
+Over all benchmark runs, 471 \gs{} evaluations found the first hit of a Leiden community and had a top-weighted neighbour. In 42.7\% of them that neighbour was in the top betweenness decile, against a base rate of 51.3\% over all 43{,}511 update evaluations (one-sided binomial $p\approx1$; Fig.~\ref{fig:h3}). \textbf{H3 is not supported}: new chemical families are not reached disproportionately through high-betweenness neighbours. The high base rate itself shows that the agents' top-weighted neighbours are usually high-centrality MOFs, as the weighting intends.
+
+\gs{} is cheap to run. Its median wall-clock time per run, excluding oracle look-ups, is 0.15~s (maximum 1.9~s), against 3.6~s for GP-EI and 8.2~s for ensemble TS (maxima 158--160~s at 5\% budgets; Table~\ref{tab:runtime}). With DFT as the oracle, all of these costs are negligible.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.48\linewidth]{F8_h3_bridge_nodes.pdf}
+\caption{H3: share of evaluations whose top-weighted neighbour lies in the top betweenness decile, for first hits in a community against all update evaluations.}
+\label{fig:h3}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Wall-clock time per run in seconds, excluding oracle look-ups (all objectives and budgets).}
+\label{tab:runtime}
+\scriptsize
+\begin{adjustbox}{max width=\textwidth}\input{tables/runtime}\end{adjustbox}
+\end{table}

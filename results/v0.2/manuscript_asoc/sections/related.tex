@@ -1,0 +1,11 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Budget-limited materials discovery}
+Sequential design under an evaluation budget is commonly framed as Bayesian optimisation. A surrogate model, typically a Gaussian process \citep{rasmussen2006gp}, is refitted after each evaluation, and an acquisition function such as expected improvement \citep{jones1998ego} chooses the next candidate. Ensemble surrogates with Thompson sampling \citep{thompson1933}, for example bootstrap random forests \citep{breiman2001rf}, are a common alternative when uncertainty estimates from GPs are unreliable. In materials science these approaches are usually evaluated on finite candidate pools \citep{lookman2019active}. Space-filling designs such as $k$-centre greedy selection \citep{sener2018coreset} provide a non-adaptive reference.
+
+\paragraph{Network views of MOF chemistry}
+MOFGalaxyNet \citep{jalali2023mofgalaxynet} connects two MOFs when a weighted combination of linker fingerprint similarity and metal-descriptor similarity exceeds a threshold $\phi$. It studies the resulting graph with centrality and community detection, and then uses it for graph-convolutional prediction of pore accessibility. The Black Hole Strategy \citep{jalali2025blackhole} uses the same network to select representative training sets. MOF identifiers such as MOFid \citep{bucior2019mofid} make it possible to decompose structures in large databases into building blocks and so to build such graphs at database scale.
+
+\paragraph{Topology in population-based optimisation}
+Communication topology is known to influence population-based metaheuristics, for example particle swarm optimisation \citep{kennedy1995pso,clerc2002pso}. SOCIAL \citep{jalali2026social} makes this explicit. Agents sit on a Watts--Strogatz graph \citep{watts1998small} and aggregate neighbour positions with weights that combine betweenness centrality \citep{brandes2001faster} and fitness-derived influence, under schedules that move from exploration to elite-guided exploitation. As far as we know, no previous work replaces the synthetic communication graph of such an optimiser with a domain similarity graph over the candidate pool and tests whether doing so matters.

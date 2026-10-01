@@ -1,0 +1,5 @@
+objective,name,universe_N,hit_set_size,rule,hit_gap_min_eV,hit_gap_max_eV
+O1,max PBE gap,8697,87,1% lowest f,4.883398,6.27072
+O2,min PBE gap,8697,87,1% lowest f,0.001607,0.089962
+O3,"PBE gap in [1.5, 2.5] eV",8697,87,1% closest to 2.0 eV (2251 MOFs lie inside the window),1.980634,2.01964
+O4,max HSE06 gap,5359,54,1% lowest f,6.754407,8.08925

@@ -65,6 +65,18 @@ Columns: one-sided paired Wilcoxon on final top-1% recall (A > B); Cliff's delta
 
 {sections['hits']}
 
+### Unique-building-block recall (post hoc)
+
+Hits are counted per distinct building block (identical linker + metal), so several duplicates of one group count once.
+
+{sections['bb_composition']}
+
+{sections['bb_recall']}
+
+Rank agreement between ordinary and unique-building-block recall (Spearman over method means):
+
+{sections['bb_agreement']}
+
 ### Random search vs its analytical expectation
 
 Without replacement, the expected recall of random search after B evaluations is B/N, and the number of hits found per run is hypergeometric(N, K, B). The p-value is exact for the sum over seeds.

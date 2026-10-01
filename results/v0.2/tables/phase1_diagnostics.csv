@@ -1,0 +1,53 @@
+recipe,fingerprint,morgan_radius,fp_bits,linker_weight,metal_source,phi,nodes,edges,mean_degree,isolated,non_isolated,mean_degree_non_isolated,max_degree
+morgan-r2-2048 | w_linker=0.7 | metal=mendeleev,morgan,2.0,2048.0,0.7,mendeleev,0.2,2000,1871873,1871.873,0,2000,1871.873,1999
+morgan-r2-2048 | w_linker=0.7 | metal=mendeleev,morgan,2.0,2048.0,0.7,mendeleev,0.7,2000,26249,26.249,282,1718,30.557625145518045,194
+morgan-r2-2048 | w_linker=0.7 | metal=mendeleev,morgan,2.0,2048.0,0.7,mendeleev,0.8,2000,16588,16.588,374,1626,20.403444034440344,105
+morgan-r2-2048 | w_linker=0.7 | metal=mendeleev,morgan,2.0,2048.0,0.7,mendeleev,0.9,2000,13196,13.196,439,1561,16.90711082639334,104
+morgan-r2-2048 | w_linker=0.7 | metal=mordred,morgan,2.0,2048.0,0.7,mordred,0.2,2000,1889371,1889.371,0,2000,1889.371,1999
+morgan-r2-2048 | w_linker=0.7 | metal=mordred,morgan,2.0,2048.0,0.7,mordred,0.7,2000,26470,26.47,282,1718,30.81490104772992,188
+morgan-r2-2048 | w_linker=0.7 | metal=mordred,morgan,2.0,2048.0,0.7,mordred,0.8,2000,16624,16.624,374,1626,20.447724477244773,105
+morgan-r2-2048 | w_linker=0.7 | metal=mordred,morgan,2.0,2048.0,0.7,mordred,0.9,2000,13416,13.416,436,1564,17.156010230179028,105
+morgan-r2-2048 | w_linker=0.7 | metal=original,morgan,2.0,2048.0,0.7,original,0.2,2000,1894926,1894.926,0,2000,1894.926,1999
+morgan-r2-2048 | w_linker=0.7 | metal=original,morgan,2.0,2048.0,0.7,original,0.7,2000,27458,27.458,276,1724,31.8538283062645,207
+morgan-r2-2048 | w_linker=0.7 | metal=original,morgan,2.0,2048.0,0.7,original,0.8,2000,16800,16.8,372,1628,20.63882063882064,105
+morgan-r2-2048 | w_linker=0.7 | metal=original,morgan,2.0,2048.0,0.7,original,0.9,2000,13359,13.359,436,1564,17.08312020460358,102
+morgan-r2-2048 | w_linker=0.9 | metal=mendeleev,morgan,2.0,2048.0,0.9,mendeleev,0.2,2000,896226,896.226,19,1981,904.8218071680969,1496
+morgan-r2-2048 | w_linker=0.9 | metal=mendeleev,morgan,2.0,2048.0,0.9,mendeleev,0.7,2000,19270,19.27,323,1677,22.981514609421588,137
+morgan-r2-2048 | w_linker=0.9 | metal=mendeleev,morgan,2.0,2048.0,0.9,mendeleev,0.8,2000,16236,16.236,394,1606,20.21917808219178,105
+morgan-r2-2048 | w_linker=0.9 | metal=mendeleev,morgan,2.0,2048.0,0.9,mendeleev,0.9,2000,14714,14.714,412,1588,18.53148614609572,105
+morgan-r2-2048 | w_linker=0.9 | metal=mordred,morgan,2.0,2048.0,0.9,mordred,0.2,2000,903002,903.002,19,1981,911.6627965673902,1501
+morgan-r2-2048 | w_linker=0.9 | metal=mordred,morgan,2.0,2048.0,0.9,mordred,0.7,2000,19327,19.327,323,1677,23.049493142516397,137
+morgan-r2-2048 | w_linker=0.9 | metal=mordred,morgan,2.0,2048.0,0.9,mordred,0.8,2000,16262,16.262,394,1606,20.251556662515565,105
+morgan-r2-2048 | w_linker=0.9 | metal=mordred,morgan,2.0,2048.0,0.9,mordred,0.9,2000,14714,14.714,412,1588,18.53148614609572,105
+morgan-r2-2048 | w_linker=0.9 | metal=original,morgan,2.0,2048.0,0.9,original,0.2,2000,919001,919.001,18,1982,927.3471241170535,1522
+morgan-r2-2048 | w_linker=0.9 | metal=original,morgan,2.0,2048.0,0.9,original,0.7,2000,19394,19.394,323,1677,23.129397734048897,137
+morgan-r2-2048 | w_linker=0.9 | metal=original,morgan,2.0,2048.0,0.9,original,0.8,2000,16205,16.205,393,1607,20.16801493466086,105
+morgan-r2-2048 | w_linker=0.9 | metal=original,morgan,2.0,2048.0,0.9,original,0.9,2000,14757,14.757,412,1588,18.58564231738035,105
+rdkit-2048 | w_linker=0.7 | metal=mendeleev,rdkit,2.0,2048.0,0.7,mendeleev,0.2,2000,1830722,1830.722,0,2000,1830.722,1999
+rdkit-2048 | w_linker=0.7 | metal=mendeleev,rdkit,2.0,2048.0,0.7,mendeleev,0.7,2000,20595,20.595,279,1721,23.933759442184776,105
+rdkit-2048 | w_linker=0.7 | metal=mendeleev,rdkit,2.0,2048.0,0.7,mendeleev,0.8,2000,15876,15.876,358,1642,19.3373934226553,105
+rdkit-2048 | w_linker=0.7 | metal=mendeleev,rdkit,2.0,2048.0,0.7,mendeleev,0.9,2000,13034,13.034,453,1547,16.850678733031675,104
+rdkit-2048 | w_linker=0.7 | metal=mordred,rdkit,2.0,2048.0,0.7,mordred,0.2,2000,1860572,1860.572,0,2000,1860.572,1999
+rdkit-2048 | w_linker=0.7 | metal=mordred,rdkit,2.0,2048.0,0.7,mordred,0.7,2000,20671,20.671,278,1722,24.008130081300813,105
+rdkit-2048 | w_linker=0.7 | metal=mordred,rdkit,2.0,2048.0,0.7,mordred,0.8,2000,15960,15.96,358,1642,19.43970767356882,105
+rdkit-2048 | w_linker=0.7 | metal=mordred,rdkit,2.0,2048.0,0.7,mordred,0.9,2000,13223,13.223,450,1550,17.06193548387097,105
+rdkit-2048 | w_linker=0.7 | metal=original,rdkit,2.0,2048.0,0.7,original,0.2,2000,1864982,1864.982,0,2000,1864.982,1999
+rdkit-2048 | w_linker=0.7 | metal=original,rdkit,2.0,2048.0,0.7,original,0.7,2000,21297,21.297,275,1725,24.69217391304348,105
+rdkit-2048 | w_linker=0.7 | metal=original,rdkit,2.0,2048.0,0.7,original,0.8,2000,16155,16.155,354,1646,19.62940461725395,105
+rdkit-2048 | w_linker=0.7 | metal=original,rdkit,2.0,2048.0,0.7,original,0.9,2000,13137,13.137,450,1550,16.950967741935482,102
+rdkit-2048 | w_linker=0.9 | metal=mendeleev,rdkit,2.0,2048.0,0.9,mendeleev,0.2,2000,620933,620.933,75,1925,645.1251948051948,1225
+rdkit-2048 | w_linker=0.9 | metal=mendeleev,rdkit,2.0,2048.0,0.9,mendeleev,0.7,2000,18025,18.025,320,1680,21.458333333333332,105
+rdkit-2048 | w_linker=0.9 | metal=mendeleev,rdkit,2.0,2048.0,0.9,mendeleev,0.8,2000,15650,15.65,371,1629,19.214241866175566,105
+rdkit-2048 | w_linker=0.9 | metal=mendeleev,rdkit,2.0,2048.0,0.9,mendeleev,0.9,2000,14349,14.349,434,1566,18.325670498084293,105
+rdkit-2048 | w_linker=0.9 | metal=mordred,rdkit,2.0,2048.0,0.9,mordred,0.2,2000,625102,625.102,75,1925,649.4566233766234,1229
+rdkit-2048 | w_linker=0.9 | metal=mordred,rdkit,2.0,2048.0,0.9,mordred,0.7,2000,18065,18.065,320,1680,21.50595238095238,105
+rdkit-2048 | w_linker=0.9 | metal=mordred,rdkit,2.0,2048.0,0.9,mordred,0.8,2000,15664,15.664,370,1630,19.21963190184049,105
+rdkit-2048 | w_linker=0.9 | metal=mordred,rdkit,2.0,2048.0,0.9,mordred,0.9,2000,14351,14.351,434,1566,18.32822477650064,105
+rdkit-2048 | w_linker=0.9 | metal=original,rdkit,2.0,2048.0,0.9,original,0.2,2000,640511,640.511,75,1925,665.465974025974,1245
+rdkit-2048 | w_linker=0.9 | metal=original,rdkit,2.0,2048.0,0.9,original,0.7,2000,18213,18.213,319,1681,21.66924449732302,105
+rdkit-2048 | w_linker=0.9 | metal=original,rdkit,2.0,2048.0,0.9,original,0.8,2000,15693,15.693,369,1631,19.24340895156346,105
+rdkit-2048 | w_linker=0.9 | metal=original,rdkit,2.0,2048.0,0.9,original,0.9,2000,14361,14.361,431,1569,18.305927342256215,105
+released adjacency matrix (authors),,,,,,0.2,2000,642051,642.051,19,1981,648.2089853609289,1245
+released adjacency matrix (authors),,,,,,0.7,2000,19753,19.753,263,1737,22.743811168681635,105
+released adjacency matrix (authors),,,,,,0.8,2000,17233,17.233,313,1687,20.430349733254296,105
+released adjacency matrix (authors),,,,,,0.9,2000,15901,15.901,375,1625,19.57046153846154,105

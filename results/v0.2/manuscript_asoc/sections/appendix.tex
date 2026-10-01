@@ -1,0 +1,37 @@
+\section{Implementation details and deviations}
+\label{app:impl}
+
+Table~\ref{tab:deviations} lists the implementation choices where the protocol left room, together with every departure from the pre-specified plan. The full log (\texttt{reports/DEVIATIONS.md}) is part of the released repository.
+
+\begin{table}[h]
+\centering
+\caption{Implementation choices and deviations.}
+\label{tab:deviations}
+\footnotesize
+\begin{tabular}{@{}p{3.2cm}p{10.3cm}@{}}
+\toprule
+Item & Choice \\
+\midrule
+Gate 1 & Not reproducible at the stated $\phi$; the specified recipe was kept and the gate overridden (Section~\ref{sec:res-repro}). \\
+Gate 6 & FAIL at pilot scale; Phases 7--8 run by author decision with unchanged hyperparameters; ablations \textit{no neighbour} and \textit{decoupled embedding} added. \\
+Metal descriptors & \texttt{mendeleev} instead of Mordred; missing electron affinities set to 0~eV (Cd, Er, Gd, Hg, Ho, Mg, Mn, Np, Pu, Sm, Th, U, Zn). \\
+Embedding & Each descriptor block scaled to unit total variance before the 0.7/0.3 weighting and PCA-32. \\
+Centralities & Max-normalised to $[0,1]$ so that $\alpha_t c_j$ and $\beta_t I_j$ are commensurate; betweenness from 1{,}000 sampled sources. \\
+Long-range edges & Uniform random pairs whose endpoints are in different Leiden communities. \\
+Communities & The Leiden partition of MOFGalaxyNet($\phi^\ast$) is used by every run, for both mutation and family coverage. \\
+Isolated agents & Update with global-best and elite terms only. \\
+Leftover budget & $B-\lfloor B/P\rfloor P$ evaluations go to the unevaluated MOFs nearest the elite (DE, PSO and GA alike). \\
+Greedy walk & Best-first over evaluated MOFs in order of objective value; random restart when no evaluated MOF has an unevaluated neighbour. \\
+Ensemble TS & Random forests instead of a GNN ensemble; only the sampled member is fitted at each step. \\
+GP-EI & Isotropic Mat\'ern-5/2 $\times$ constant + white noise; a single optimiser start per refit; $\xi=0$. \\
+H3 event & First hit found in a Leiden community during a run; base rate over all Graph-SOCIAL update evaluations. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Full benchmark results}
+\label{app:full}
+\begingroup\footnotesize
+\setlength{\tabcolsep}{2pt}\scriptsize
+\input{tables/main_full}
+\endgroup
