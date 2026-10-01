@@ -1,0 +1,90 @@
+# Graph-SOCIAL default configuration. smoke.yaml overrides a subset of keys.
+seeds_full: [0, 29]          # inclusive range
+seeds_pilot: [0, 9]
+smoke: false
+
+# Gates listed here are recorded but do not block later stages (user decision, see DEVIATIONS.md D1).
+gate_overrides: [1]
+
+paths:
+  raw: data/raw
+  processed: data/processed
+  runs: results/runs
+  tables: results/tables
+  figures: results/figures
+  reports: reports
+  state: results/state.json
+
+phase1:
+  table: data/raw/MOFGalaxyNet/Data/SMILES_METAL_2000_NoPLD.csv
+  released_matrix_zip: "data/raw/MOFGalaxyNet/Data/Adjacency Matrix.zip"
+  n_mofs: 2000                 # the published graph used the first 2000 rows
+  phis: [0.2, 0.7, 0.9]
+  gate_phi: 0.9
+  published_edges: 19266
+  published_mean_degree: 19.256
+  tolerance: 0.05
+  fingerprint: morgan          # primary (spec) recipe
+  morgan_radius: 2
+  fp_bits: 2048
+  linker_weight: 0.7
+  metal_source: mendeleev      # mendeleev | original | mordred
+
+similarity:                    # recipe for the QMOF graphs (Phase 3)
+  fingerprint: morgan
+  morgan_radius: 2
+  fp_bits: 2048
+  linker_weight: 0.7
+  metal_source: mendeleev
+  block_size: 2048
+  sensitivity_recipe:          # code-faithful MOFGalaxyNet recipe, stats only (D1)
+    fingerprint: rdkit
+    linker_weight: 0.9
+
+phase2:
+  qmof_csv: data/raw/qmof/qmof_database/qmof.csv
+  min_mofs: 3000               # soft gate
+  smoke_subsample: null
+
+embedding:
+  dim: 32
+  linker_weight: 0.7
+  seed: 0
+
+phase3:
+  phis: [0.7, 0.8, 0.9]
+  rhos: [0.05, 0.10, 0.20]
+  ws_p: 0.3
+  swaps_per_edge: 10
+  leiden_resolution: 1.0
+  seed: 0
+  betweenness_exact_max_n: 5000
+  betweenness_k: 1000
+  gn_max_component_edges: 3000
+  graphml: true
+
+phase4:
+  n_random: 100
+  alpha: 0.01
+
+objectives:
+  hit_fraction: 0.01
+  o4_min_mofs: 1500
+
+experiments:
+  min_budget: 40               # = 2 * max population size, so every method can run one update
+  slow_methods: [gp_ei, ensemble_ts]
+  default_P: 10
+
+phase6:
+  objective: O2
+  budget_frac: 0.02
+  rho: 0.10
+  alpha: 0.05
+
+phase7:
+  objectives: [O1, O2, O3, O4]
+  budgets: [0.005, 0.01, 0.02, 0.05]
+  methods: [graph_social, random, greedy_walk, gp_ei, ensemble_ts, de, pso, ga, social_ws, static_diverse]
+  ablation_objectives: [O2, O3]
+  ablation_budget: 0.02

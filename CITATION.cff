@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Graph-SOCIAL: Centrality-Guided Search over Metal–Organic Framework Similarity Networks for Budget-Limited Discovery"
+type: software
+version: 0.1.0
+date-released: 2026-10-01
+license: MIT
+repository-code: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
+authors:
+  - family-names: Jalali
+    given-names: Mehrdad
+references:
+  - type: article
+    title: "SOCIAL: Social network optimization algorithm via centrality and influence-aware learning"
+    authors: [{family-names: Jalali, given-names: Mehrdad}, {family-names: Vu, given-names: Binh}, {family-names: Chandna, given-names: Swati}, {family-names: Nadimi-Shahraki, given-names: Mohammad H.}]
+    journal: "Applied Soft Computing"
+    volume: 194
+    year: 2026
+  - type: article
+    title: "MOFGalaxyNet: a social network analysis for predicting guest accessibility in metal–organic frameworks utilizing graph convolutional networks"
+    authors: [{family-names: Jalali, given-names: Mehrdad}]
+    journal: "Journal of Cheminformatics"
+    year: 2023
+    doi: 10.1186/s13321-023-00764-2
+  - type: dataset
+    title: "QMOF Database"
+    doi: 10.6084/m9.figshare.13147324
+    version: "18"

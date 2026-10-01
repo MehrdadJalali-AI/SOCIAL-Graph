@@ -1,0 +1,11 @@
+filter / exclusion reason,excluded,remaining
+start (all QMOF entries),0,20372
+no MOFid linker information,2828,17544
+empty linker list,0,17544
+more than one distinct linker,7432,10112
+linker SMILES not parseable by RDKit,441,9671
+linker is not organic (no carbon),215,9456
+no metal in composition,0,9456
+more than one metal element,759,8697
+metal lacks mendeleev descriptors,0,8697
+missing PBE band gap,0,8697

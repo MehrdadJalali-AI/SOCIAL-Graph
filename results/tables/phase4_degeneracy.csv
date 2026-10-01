@@ -1,0 +1,2 @@
+groups,groups_size_gt1,mofs_in_dup_groups,largest_group,mean_within_group_std_pbe,median_within_group_std_pbe,global_std_pbe
+6065,1134,3766,82,0.2809518914090722,0.17927188590256576,1.1652964271852826

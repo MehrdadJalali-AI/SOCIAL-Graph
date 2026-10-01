@@ -1,0 +1,23 @@
+# Python 3.13 (verified on CPython 3.13 / macOS arm64; all packages ship binary wheels, no compilation).
+numpy==2.5.3
+scipy==1.18.1
+pandas==3.0.6
+pyarrow==25.0.1
+networkx==3.7
+python-igraph==1.0.0
+leidenalg==0.12.0
+rdkit==2026.3.6
+scikit-learn==1.9.1
+mendeleev==1.3.0
+mordredcommunity==2.0.7
+joblib==1.6.0
+pyyaml==6.0.3
+matplotlib==3.11.2
+seaborn==0.13.2
+scikit-posthocs==0.17.0
+tqdm==4.70.1
+pytest==9.1.1
+psutil==7.2.2
+requests==2.34.2
+tabulate==0.10.0
+-e .

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "graphsocial"
+version = "0.1.0"
+description = "Graph-SOCIAL: centrality-guided search over MOF similarity networks for budget-limited discovery"
+requires-python = ">=3.11"
+authors = [{ name = "Mehrdad Jalali" }]
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

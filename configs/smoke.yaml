@@ -1,0 +1,30 @@
+# Smoke-test overrides: tiny subsets so every stage finishes within ~10 minutes on a few CPUs.
+smoke: true
+seeds_full: [0, 1]
+seeds_pilot: [0, 2]
+
+paths:
+  processed: data/processed/smoke
+  runs: results/smoke/runs
+  tables: results/smoke/tables
+  figures: results/smoke/figures
+  reports: results/smoke/reports
+  state: results/smoke/state.json
+
+phase1:
+  n_mofs: 300
+
+phase2:
+  smoke_subsample: 600
+
+phase3:
+  rhos: [0.10]
+
+phase4:
+  n_random: 20
+
+objectives:
+  o4_min_mofs: 150
+
+phase7:
+  budgets: [0.02, 0.05]

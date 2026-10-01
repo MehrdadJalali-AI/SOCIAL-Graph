@@ -1,0 +1,41 @@
+# Phase 3 — QMOF-MOFGalaxyNet and comparison topologies
+
+N = 8697 MOFs. Similarity recipe: morgan-r2-2048 | w_linker=0.7 | metal=mendeleev. Betweenness: φ=0.7: sampled Brandes k=1000, φ=0.8: sampled Brandes k=1000, φ=0.9: sampled Brandes k=1000 (all centralities max-normalised to [0,1]).
+
+Topologies per φ: (a) `mgn_phi*`; (b) `*_rho*`, i.e. (a) plus ρ·|E| random edges between different Leiden communities; (c) `*_degrand`, degree-preserving rewiring with 10·|E| swaps; (d) `ws_phi*`, Watts–Strogatz with matched mean degree and p = 0.3. `rdkit_phi*` is the code-faithful sensitivity recipe (RDKit path fingerprint, 0.9/0.1); see DEVIATIONS D1.
+
+|   phi | graph               |   nodes |   edges |   mean_degree |   max_degree |   isolated |   components |   giant_size |   giant_frac |   clustering_avg_local |   transitivity_global |   avg_shortest_path_giant |   communities |   modularity |
+|------:|:--------------------|--------:|--------:|--------------:|-------------:|-----------:|-------------:|-------------:|-------------:|-----------------------:|----------------------:|--------------------------:|--------------:|-------------:|
+| 0.700 | mgn_phi0.70         |    8697 |  205328 |        47.218 |          539 |       1075 |         1715 |         3659 |        0.421 |                  0.651 |                 0.669 |                     6.685 |      1747.000 |        0.750 |
+| 0.700 | mgn_phi0.70_rho0.05 |    8697 |  215594 |        49.579 |          545 |        104 |          107 |         8589 |        0.988 |                  0.472 |                 0.655 |                     4.057 |       nan     |      nan     |
+| 0.700 | mgn_phi0.70_rho0.10 |    8697 |  225861 |        51.940 |          549 |          9 |           11 |         8686 |        0.999 |                  0.388 |                 0.640 |                     3.566 |       nan     |      nan     |
+| 0.700 | mgn_phi0.70_rho0.20 |    8697 |  246394 |        56.662 |          551 |          0 |            1 |         8697 |        1.000 |                  0.303 |                 0.612 |                     3.158 |       nan     |      nan     |
+| 0.700 | mgn_phi0.70_degrand |    8697 |  205328 |        47.218 |          539 |       1075 |         1076 |         7622 |        0.876 |                  0.091 |                 0.095 |                     2.764 |       nan     |      nan     |
+| 0.700 | ws_phi0.70          |    8697 |  208728 |        48.000 |           68 |          0 |            1 |         8697 |        1.000 |                  0.090 |                 0.089 |                     2.802 |       nan     |      nan     |
+| 0.700 | rdkit_phi0.70       |    8697 |  150663 |        34.647 |          230 |       1047 |         1890 |         1730 |        0.199 |                  0.726 |                 0.952 |                     8.663 |       nan     |      nan     |
+| 0.800 | mgn_phi0.80         |    8697 |  114983 |        26.442 |          272 |       1750 |         2817 |          779 |        0.090 |                  0.629 |                 0.950 |                     4.618 |      2823.000 |        0.894 |
+| 0.800 | mgn_phi0.80_rho0.05 |    8697 |  120732 |        27.764 |          274 |        473 |          538 |         8083 |        0.929 |                  0.491 |                 0.930 |                     5.340 |       nan     |      nan     |
+| 0.800 | mgn_phi0.80_rho0.10 |    8697 |  126481 |        29.086 |          277 |        121 |          126 |         8568 |        0.985 |                  0.413 |                 0.909 |                     4.497 |       nan     |      nan     |
+| 0.800 | mgn_phi0.80_rho0.20 |    8697 |  137980 |        31.730 |          280 |          8 |            9 |         8689 |        0.999 |                  0.326 |                 0.868 |                     3.826 |       nan     |      nan     |
+| 0.800 | mgn_phi0.80_degrand |    8697 |  114983 |        26.442 |          272 |       1750 |         1754 |         6941 |        0.798 |                  0.044 |                 0.062 |                     3.012 |       nan     |      nan     |
+| 0.800 | ws_phi0.80          |    8697 |  113061 |        26.000 |           41 |          0 |            1 |         8697 |        1.000 |                  0.088 |                 0.085 |                     3.183 |       nan     |      nan     |
+| 0.800 | rdkit_phi0.80       |    8697 |  122284 |        28.121 |          222 |       1413 |         2487 |          224 |        0.026 |                  0.705 |                 0.988 |                     1.043 |       nan     |      nan     |
+| 0.900 | mgn_phi0.90         |    8697 |   87188 |        20.050 |          214 |       2113 |         3323 |          215 |        0.025 |                  0.575 |                 0.943 |                     1.188 |      3323.000 |        0.904 |
+| 0.900 | mgn_phi0.90_rho0.05 |    8697 |   91547 |        21.053 |          218 |        781 |          933 |         7529 |        0.866 |                  0.461 |                 0.925 |                     6.211 |       nan     |      nan     |
+| 0.900 | mgn_phi0.90_rho0.10 |    8697 |   95907 |        22.055 |          217 |        283 |          309 |         8361 |        0.961 |                  0.391 |                 0.907 |                     5.153 |       nan     |      nan     |
+| 0.900 | mgn_phi0.90_rho0.20 |    8697 |  104626 |        24.060 |          221 |         36 |           38 |         8659 |        0.996 |                  0.309 |                 0.871 |                     4.277 |       nan     |      nan     |
+| 0.900 | mgn_phi0.90_degrand |    8697 |   87188 |        20.050 |          214 |       2113 |         2117 |         6578 |        0.756 |                  0.039 |                 0.060 |                     3.116 |       nan     |      nan     |
+| 0.900 | ws_phi0.90          |    8697 |   86970 |        20.000 |           33 |          0 |            1 |         8697 |        1.000 |                  0.087 |                 0.083 |                     3.479 |       nan     |      nan     |
+| 0.900 | rdkit_phi0.90       |    8697 |  113362 |        26.069 |          216 |       1746 |         2921 |          217 |        0.025 |                  0.672 |                 0.999 |                     1.000 |       nan     |      nan     |
+
+## Leiden vs Girvan–Newman on the original 2k MOFGalaxyNet
+
+|   phi |     edges |   leiden_communities |   gn_communities |   ARI_leiden_vs_gn |   gn_components_kept_whole |   gn_seconds |
+|------:|----------:|---------------------:|-----------------:|-------------------:|---------------------------:|-------------:|
+| 0.700 | 26249.000 |              469.000 |          484.000 |              0.396 |                      2.000 |        0.600 |
+| 0.800 | 16588.000 |              639.000 |          646.000 |              0.605 |                      2.000 |        0.500 |
+| 0.900 | 13196.000 |              717.000 |          794.000 |              0.891 |                      1.000 |        0.600 |
+
+Girvan–Newman is run per connected component and cut at maximum modularity. Components with more than 3000 edges are kept whole because of GN's O(m²n) cost.
+
+Figures: `phase3_degree_distribution.png`, `phase3_community_sizes.png`. Runtime 91 s.

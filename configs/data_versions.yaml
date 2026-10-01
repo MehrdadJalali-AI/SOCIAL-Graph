@@ -1,0 +1,18 @@
+# Pinned external data. Downloaded 2026-10-01.
+qmof:
+  doi: 10.6084/m9.figshare.13147324
+  figshare_version: 18
+  published: 2025-11-15T02:35:10Z
+  file: qmof_database.zip
+  url: https://ndownloader.figshare.com/files/59573735
+  size_bytes: 392088304
+  md5: 0d89aaf66f2c306e86e47fd91cb1346e
+  sha256: 97d23c0b4f9e5a30888e53dc16222b90443ad7167c3284d2258615d9f44eceef
+  extracted:
+    qmof_database/qmof.csv: {md5: 0154e0f4dd1fad926c175326bf8cb0c3, rows: 20372, columns: 94}
+mofgalaxynet:
+  repo: https://github.com/MehrdadJalali-KIT/MOFGalaxyNet
+  commit: f320754a2e7fbb48c8d07909dd99e726a74803a6
+social_optimization:
+  repo: https://github.com/MehrdadJalali-AI/SOCIAL-OPTIMIZATION
+  commit: c20de2356f9027d12f95caf74818872bf7baa0de

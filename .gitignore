@@ -1,0 +1,14 @@
+*.egg-info/
+.DS_Store
+.pytest_cache/
+.venv/
+__pycache__/
+data/processed/
+data/raw/
+docs/*.txt
+logs/
+results/runs/
+results/smoke/
+results/state.json
+results_bundle.zip
+docs/SOCIAL_ASOC_2026.pdf
