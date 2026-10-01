@@ -51,3 +51,16 @@ Stage logic lives in `src/graphsocial/stages/phaseN.py`; `run.py` dispatches to 
 | n | O3 hit set | 1% of MOFs closest to the window centre (2.0 eV) when more than 1% lie inside the window. | As specified. In QMOF the window holds far more than 1%. |
 | o | Smoke mode | Deterministic 600-MOF subsample, 2–3 seeds, 2 budgets, 20 null graphs. Gates are evaluated but not enforced. | Under 10 minutes. |
 | p | Run caching | Run files are keyed by (method, variant, objective, budget, P, community φ, seed), so configurations shared between the benchmark, ablations and φ×ρ grid run once. | Resumability and no duplicate work. |
+
+## D7 — Gate 6 FAIL; Phases 7–8 forced by user decision (2026-10-01)
+
+- Pilot (O2, 2% budget, seeds 0–9, φ* = 0.7): MOFGalaxyNet vs degree-preserving random topology gave +0.014 final recall (one-sided Wilcoxon p = 0.195). With +ρ = 0.10 the difference was +0.015 (p = 0.087). Gate 6 is **FAIL** and stays recorded as FAIL. **H1 is not supported at pilot scale.**
+- **Decision (user):** run Phases 7–8 with `--force`, with no change to any hyperparameter or default. The topology carried forward is still chosen by the pre-registered Phase 6 rule (highest mean pilot recall among MOFGalaxyNet variants): `mgn_phi0.70_rho0.10`.
+- **Ablations added at the user's request** (O2, O3, 2% budget, seeds 0–29):
+  1. `no_neighbor`: Graph-SOCIAL with α = β = 0 throughout, so the neighbour term is off.
+  2. Decoupled embedding: the snap/update space is built from geometric/structural descriptors only (PLD, LCD, density, log volume, log atom count from QMOF; standardised, 5-d, no PCA), with no linker fingerprints or metal descriptors. It is run with neighbourhoods from (a) MOFGalaxyNet(φ*) and (c) the degree-preserving random topology. Mutation still uses the reference Leiden communities. These descriptors were available for every MOF, so the random-projection fallback was not needed.
+- **Additional reporting** (RESULTS.md):
+  - random-search recall checked against its analytical expectation B/N (exact hypergeometric test);
+  - sizes of the top-1% hit sets;
+  - how initial-design evaluations are counted (they count toward the budget and all metrics);
+  - Cliff's delta and achieved power (paired t at the observed d_z, plus bootstrap Wilcoxon) for the topology comparisons.

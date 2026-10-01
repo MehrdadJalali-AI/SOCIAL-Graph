@@ -26,9 +26,9 @@ def best_topology(cfg: dict) -> str:
 
 
 def gs_spec(group: str, topo: str, obj: str, frac: float, seed: int, comm_phi: float, P: int = 10,
-            params: dict | None = None, tag: str = "") -> RunSpec:
+            params: dict | None = None, tag: str = "", embedding: str = "default") -> RunSpec:
     variant = f"topo={topo}" + (f"|{tag}" if tag else "")
-    return RunSpec(group, "graph_social", variant, obj, frac, seed, topo, comm_phi, P, params or {})
+    return RunSpec(group, "graph_social", variant, obj, frac, seed, topo, comm_phi, P, params or {}, embedding)
 
 
 # --- Phase 6 ---------------------------------------------------------------------------------------
@@ -89,29 +89,38 @@ def main_specs(cfg: dict) -> list[RunSpec]:
     return out
 
 
-def ablation_table(cfg: dict) -> list[tuple[str, str, dict, int, str]]:
-    """(label, topology, params, P, tag) for every ablation configuration."""
+def ablation_table(cfg: dict) -> list[dict]:
+    """Every ablation configuration: label, topology, params, P, tag, embedding."""
     ps, best = phi_star(cfg), best_topology(cfg)
     P = cfg["experiments"]["default_P"]
-    rows = [("default", best, {}, P, "")]
-    rows += [
-        ("uniform neighbour weights", best, {"neighbor_weights": "uniform"}, P, "uniform_weights"),
-        ("centrality = degree", best, {"centrality": "degree"}, P, "cent=degree"),
-        ("centrality = PageRank", best, {"centrality": "pagerank"}, P, "cent=pagerank"),
-        ("mutation off", best, {"mutation": "off"}, P, "mutation=off"),
-        ("uniform mutation", best, {"mutation": "uniform"}, P, "mutation=uniform"),
-        ("sync off", best, {"sync": False}, P, "sync=off"),
-        ("elite off", best, {"elite": False}, P, "elite=off"),
-        ("P = 5", best, {}, 5, ""),
-        ("P = 20", best, {}, 20, ""),
-        ("h = 1", best, {"h": 1}, P, "h=1"),
+
+    def row(label, topo=best, params=None, p=P, tag="", embedding="default"):
+        return {"label": label, "topo": topo, "params": params or {}, "P": p, "tag": tag, "embedding": embedding}
+
+    rows = [
+        row("default"),
+        row("uniform neighbour weights", params={"neighbor_weights": "uniform"}, tag="uniform_weights"),
+        row("no neighbour term (α=β=0)", params={"alpha": 0.0, "beta": 0.0}, tag="no_neighbor"),
+        row("centrality = degree", params={"centrality": "degree"}, tag="cent=degree"),
+        row("centrality = PageRank", params={"centrality": "pagerank"}, tag="cent=pagerank"),
+        row("mutation off", params={"mutation": "off"}, tag="mutation=off"),
+        row("uniform mutation", params={"mutation": "uniform"}, tag="mutation=uniform"),
+        row("sync off", params={"sync": False}, tag="sync=off"),
+        row("elite off", params={"elite": False}, tag="elite=off"),
+        row("P = 5", p=5),
+        row("P = 20", p=20),
+        row("h = 1", params={"h": 1}, tag="h=1"),
     ]
     topo_rows = [("(a) MOFGalaxyNet", graph_name(ps)),
                  *[(f"(b) +ρ={r:.2f}", graph_name(ps, "rho", r)) for r in cfg["phase3"]["rhos"]],
                  ("(c) degree-preserving random", graph_name(ps, "degrand")),
                  ("(d) Watts–Strogatz", graph_name(ps, "ws"))]
-    rows += [(f"topology {lab}", t, {}, P, "") for lab, t in topo_rows]
-    rows += [(f"φ = {phi}", graph_name(phi), {}, P, "") for phi in cfg["phase3"]["phis"]]
+    rows += [row(f"topology {lab}", topo=t) for lab, t in topo_rows]
+    rows += [row(f"φ = {phi}", topo=graph_name(phi)) for phi in cfg["phase3"]["phis"]]
+    # Decoupled search space: geometric descriptors only, neighbourhoods from (a) or (c).
+    rows += [row("decoupled embedding, topology (a) MOFGalaxyNet", topo=graph_name(ps), embedding="geometric"),
+             row("decoupled embedding, topology (c) degree-preserving random", topo=graph_name(ps, "degrand"),
+                 embedding="geometric")]
     return rows
 
 
@@ -119,10 +128,10 @@ def ablation_specs(cfg: dict) -> list[tuple[str, RunSpec]]:
     ps = phi_star(cfg)
     out = []
     for obj in cfg["phase7"]["ablation_objectives"]:
-        for label, topo, params, P, tag in ablation_table(cfg):
+        for r in ablation_table(cfg):
             for s in seeds(cfg, "seeds_full"):
-                out.append((label, gs_spec("phase7_ablation", topo, obj, cfg["phase7"]["ablation_budget"],
-                                           s, ps, P, params, tag)))
+                out.append((r["label"], gs_spec("phase7_ablation", r["topo"], obj, cfg["phase7"]["ablation_budget"],
+                                                s, ps, r["P"], r["params"], r["tag"], r["embedding"])))
     return out
 
 

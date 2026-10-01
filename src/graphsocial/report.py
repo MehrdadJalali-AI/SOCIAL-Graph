@@ -50,6 +50,27 @@ Every number is a mean ± std over seeds {cfg['seeds_full'][0]}–{cfg['seeds_fu
 
 Phase reports: {', '.join(f'[{p.name}]({_rel(p, out_md.parent)})' for p in sorted(reports.glob('PHASE*.md')))}.
 
+## Hypothesis H1 (topology)
+
+**H1 — a chemically meaningful MOFGalaxyNet topology beats a degree-preserving random topology — is not supported at pilot scale** (Gate 6 FAIL; `reports/PHASE6_PILOT.md`). By user decision, Phases 7–8 were run anyway with unchanged hyperparameters and defaults. The 30-seed topology comparison is reported below as observed.
+
+{sections['topology_power']}
+
+Columns: one-sided paired Wilcoxon on final top-1% recall (A > B); Cliff's delta (A vs B); d_z = mean/sd of the paired differences; achieved power of a one-sided paired t-test at α = 0.05 for the observed d_z (`power_t`), and the share of 2,000 bootstrap resamples in which the one-sided Wilcoxon test rejects (`power_wilcoxon_boot`); `n_for_80pct` = pairs needed for 80% t-test power at the observed d_z.
+
+## Evaluation accounting and hit sets
+
+- Every method spends exactly the budget B. The P initial-design MOFs (identical for all methods for a given seed) are evaluations 1…P. They **count toward the budget and toward every metric** (recall curves, AUC, final recall, enrichment, coverage, first-hit index). Non-population methods also start from the same P MOFs.
+- Hit sets (top 1% of each objective's universe):
+
+{sections['hits']}
+
+### Random search vs its analytical expectation
+
+Without replacement, the expected recall of random search after B evaluations is B/N, and the number of hits found per run is hypergeometric(N, K, B). The p-value is exact for the sum over seeds.
+
+{sections['random_check']}
+
 ## T1 — Dataset and graph statistics
 
 {sections['T1']}

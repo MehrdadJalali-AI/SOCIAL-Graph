@@ -34,11 +34,13 @@ class RunSpec:
     comm_phi: float       # phi of the reference Leiden communities
     P: int = 10
     params: dict = field(default_factory=dict)
+    embedding: str = "default"  # "default" | "geometric" (decoupled search space)
 
     @property
     def key(self) -> str:
+        emb = "" if self.embedding == "default" else f"__emb={self.embedding}"
         raw = (f"{self.method}__{self.variant}__{self.objective}__b{self.budget_frac:g}__P{self.P}"
-               f"__c{self.comm_phi:.2f}__s{self.seed}")
+               f"__c{self.comm_phi:.2f}{emb}__s{self.seed}")
         return re.sub(r"[^A-Za-z0-9_.=-]+", "-", raw)
 
     def paths(self, runs_dir: Path) -> tuple[Path, Path]:
@@ -57,7 +59,7 @@ def execute(spec: RunSpec, cfg: dict) -> dict:
     if json_path.exists():
         return json.loads(json_path.read_text())
     json_path.parent.mkdir(parents=True, exist_ok=True)
-    prob = store.problem(cfg, spec.objective, spec.topology, spec.comm_phi)
+    prob = store.problem(cfg, spec.objective, spec.topology, spec.comm_phi, spec.embedding)
     budget = budget_for(spec.budget_frac, prob.n, cfg["experiments"]["min_budget"])
     init = methods.initial_design(prob.n, spec.P, spec.seed)
     method = methods.make(spec.method, **spec.params)

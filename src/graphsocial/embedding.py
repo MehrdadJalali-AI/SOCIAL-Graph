@@ -59,3 +59,17 @@ class Snapper:
 
     def bounds(self) -> tuple[np.ndarray, np.ndarray]:
         return self.X.min(axis=0), self.X.max(axis=0)
+
+
+GEOMETRIC_COLUMNS = ("info.pld", "info.lcd", "info.density", "info.volume", "info.natoms")
+
+
+def build_geometric_embedding(geom) -> np.ndarray:
+    """Decoupled search space with no linker or metal information: standardised PLD, LCD, density,
+    log(volume) and log(atom count) from QMOF. Missing values are set to the column median."""
+    x = geom[list(GEOMETRIC_COLUMNS)].astype(float).copy()
+    for c in ("info.volume", "info.natoms"):
+        x[c] = np.log(x[c])
+    x = x.fillna(x.median())
+    sd = x.std(ddof=0).replace(0, 1.0)
+    return ((x - x.mean()) / sd).to_numpy(dtype=np.float64)

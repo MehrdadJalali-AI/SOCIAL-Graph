@@ -159,9 +159,80 @@ def run(cfg: dict, force: bool = False) -> GateResult:
         if src.exists():
             shutil.copy(src, figs / f"F2_homophily.{ext}")
 
+    out.update(_checks_and_power(cfg, res, abl, figs))
     report.build(cfg, out, {"phi_star": phi, "best_topology": best})
     wins = t4[(t4.metric == "final_recall") & (t4.mean_graph_social > t4.mean_baseline) & t4["significant_holm_0.05"]]
     summary = (f"Graph-SOCIAL significantly better (Holm p<0.05, final recall) in {len(wins)} of "
                f"{int((t4.metric == 'final_recall').sum())} comparisons; mean rank "
                f"{ranks.get('graph_social', np.nan):.2f} of {len(ranks)}")
     return GateResult(8, True, "n/a", summary)
+
+
+TOPOLOGY_PAIRS = [
+    ("topology (a) MOFGalaxyNet", "topology (c) degree-preserving random"),
+    ("topology (b) +ρ=0.10", "topology (c) degree-preserving random"),
+    ("topology (a) MOFGalaxyNet", "topology (d) Watts–Strogatz"),
+    ("decoupled embedding, topology (a) MOFGalaxyNet", "decoupled embedding, topology (c) degree-preserving random"),
+    ("default", "no neighbour term (α=β=0)"),
+]
+PILOT_PAIRS = [("MOFGalaxyNet", "degree-preserving random"), ("MOFGalaxyNet+ρ=0.10", "degree-preserving random"),
+               ("MOFGalaxyNet", "Watts–Strogatz")]
+
+
+def _pair_row(scope: str, obj: str, a_lab: str, b_lab: str, a: pd.Series, b: pd.Series) -> dict:
+    common = a.index.intersection(b.index)
+    a, b = a.loc[common], b.loc[common]
+    pw = S.power_paired((a - b).to_numpy())
+    return {"scope": scope, "objective": obj, "A": a_lab, "B": b_lab, "mean_A": a.mean(), "mean_B": b.mean(),
+            "mean_diff": (a - b).mean(), "p_wilcoxon_one_sided": S.wilcoxon_paired(a, b, "greater"),
+            "cliffs_delta": S.cliffs_delta(a, b), **pw}
+
+
+def _checks_and_power(cfg: dict, res: pd.DataFrame, abl: pd.DataFrame, figs) -> dict[str, str]:
+    from .. import objectives as O
+
+    tables = C.path(cfg, "tables")
+    st = Store(cfg)
+    df = st.load_clean()
+    out = {}
+
+    # Hit-set sizes.
+    rows = []
+    for obj in sorted(res.objective.unique()):
+        o = O.make(obj, df, cfg["objectives"]["hit_fraction"])
+        rule = "1% lowest f"
+        if obj == "O3":
+            inside, k = int((o.f == 0).sum()), int(np.ceil(cfg["objectives"]["hit_fraction"] * o.n))
+            rule = (f"all {inside} in-window MOFs" if inside < k
+                    else f"1% closest to 2.0 eV ({inside} MOFs lie inside the window)")
+        rows.append({"objective": obj, "name": O.NAMES[obj], "universe_N": o.n, "hit_set_size": int(o.hits.sum()),
+                     "rule": rule, "hit_gap_min_eV": float(o.gap[o.hits].min()),
+                     "hit_gap_max_eV": float(o.gap[o.hits].max())})
+    out["hits"] = _write(pd.DataFrame(rows), tables, "hit_sets", ".4g")
+
+    # Random search vs its analytical expectation (recall = B/N; hits ~ hypergeometric).
+    rows = []
+    for (obj, b), blk in res[res.method == "random"].groupby(["objective", "budget_frac"]):
+        N, K, B = int(blk.n_universe.iloc[0]), int(blk.n_hits_total.iloc[0]), int(blk.budget.iloc[0])
+        exp_total, p = S.hypergeom_sum_test(int(blk.hits_found.sum()), len(blk), N, K, B)
+        rows.append({"objective": obj, "budget_frac": b, "budget": B, "N": N, "hits_K": K, "seeds": len(blk),
+                     "expected_recall_B_over_N": B / N, "observed_recall_mean": blk.final_recall.mean(),
+                     "observed_recall_std": blk.final_recall.std(ddof=1), "expected_total_hits": exp_total,
+                     "observed_total_hits": int(blk.hits_found.sum()), "exact_p_two_sided": p})
+    out["random_check"] = _write(pd.DataFrame(rows), tables, "random_search_check", ".4g")
+
+    # Topology comparison: effect sizes and achieved power (pilot, n=10; ablation, n=30).
+    rows = []
+    pilot = pd.read_csv(tables / "phase6_pilot.csv")
+    for a_lab, b_lab in PILOT_PAIRS:
+        w = pilot.pivot_table(index="seed", columns="label", values="final_recall")
+        scope = f"pilot (seeds {cfg['seeds_pilot'][0]}–{cfg['seeds_pilot'][1]})"
+        rows.append(_pair_row(scope, cfg["phase6"]["objective"], a_lab, b_lab, w[a_lab], w[b_lab]))
+    for obj, blk in abl.groupby("objective"):
+        w = blk.pivot_table(index="seed", columns="label", values="final_recall")
+        for a_lab, b_lab in TOPOLOGY_PAIRS:
+            if a_lab in w and b_lab in w:
+                rows.append(_pair_row(f"ablation (seeds {cfg['seeds_full'][0]}–{cfg['seeds_full'][1]})", obj,
+                                      a_lab, b_lab, w[a_lab], w[b_lab]))
+    out["topology_power"] = _write(pd.DataFrame(rows), tables, "topology_effect_power", ".4g")
+    return out

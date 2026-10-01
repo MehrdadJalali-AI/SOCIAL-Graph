@@ -57,6 +57,20 @@ class Store:
     def embedding(self) -> Path:
         return self.root / "embedding.npy"
 
+    @property
+    def embedding_geometric(self) -> Path:
+        return self.root / "embedding_geometric.npy"
+
+    def ensure_geometric_embedding(self) -> Path:
+        """Build (once) the decoupled geometric embedding aligned with the clean table."""
+        if not self.embedding_geometric.exists():
+            from .embedding import GEOMETRIC_COLUMNS, build_geometric_embedding
+
+            raw = pd.read_csv(C.resolve(self.cfg["phase2"]["qmof_csv"]), usecols=["qmof_id", *GEOMETRIC_COLUMNS])
+            geom = self.load_clean()[["qmof_id"]].merge(raw, on="qmof_id", how="left")
+            np.save(self.embedding_geometric, build_geometric_embedding(geom))
+        return self.embedding_geometric
+
     def graph(self, name: str) -> Path:
         return self.root / "graphs" / f"{name}.npz"
 
@@ -120,12 +134,14 @@ class Problem:
 
 
 @functools.lru_cache(maxsize=64)
-def _cached_problem(cfg_key: str, objective: str, topology_name: str, comm_phi: float) -> Problem:
+def _cached_problem(cfg_key: str, objective: str, topology_name: str, comm_phi: float,
+                    embedding: str = "default") -> Problem:
     cfg = json.loads(cfg_key)
     st = Store(cfg)
     df = _cached_df(str(st.clean))
     obj = objectives.make(objective, df, cfg["objectives"]["hit_fraction"])
-    X = _cached_embedding(str(st.embedding))[obj.universe]
+    emb_path = st.embedding if embedding == "default" else st.ensure_geometric_embedding()
+    X = _cached_embedding(str(emb_path))[obj.universe]
     top = Topology.load(st.graph(topology_name))
     full = len(obj.universe) == len(df)
     uname = "all" if full else objective
@@ -146,6 +162,7 @@ def _cached_embedding(path: str) -> np.ndarray:
     return np.load(path)
 
 
-def problem(cfg: dict, objective: str, topology_name: str, comm_phi: float) -> Problem:
-    key = json.dumps({k: cfg[k] for k in ("paths", "phase3", "objectives")}, sort_keys=True)
-    return _cached_problem(key, objective, topology_name, float(comm_phi))
+def problem(cfg: dict, objective: str, topology_name: str, comm_phi: float, embedding: str = "default") -> Problem:
+    """``embedding``: "default" (linker + metal PCA-32) or "geometric" (decoupled, no linker/metal info)."""
+    key = json.dumps({k: cfg[k] for k in ("paths", "phase2", "phase3", "objectives")}, sort_keys=True)
+    return _cached_problem(key, objective, topology_name, float(comm_phi), embedding)

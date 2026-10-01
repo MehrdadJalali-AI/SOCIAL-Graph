@@ -13,7 +13,7 @@ SOCIAL is used as a model-free, structure-aware acquisition policy: it decides w
 | 5 — method invariants | **PASS**: all 10 methods |
 | 6 — H1 pilot | **FAIL**: Graph-SOCIAL beats random search (recall 0.063 vs 0.011, p ≈ 0.001), but MOFGalaxyNet does not significantly beat the degree-preserving random topology (p = 0.20; +ρ=0.10: p = 0.087). See `reports/PHASE6_PILOT.md` |
 
-Phases 7–8 wait on a decision about Gate 6. To run them anyway, add `--force`.
+Phases 7–8 were run with `--force` by user decision (DEVIATIONS D7). Hyperparameters are unchanged, and `no_neighbor` and decoupled-embedding ablations were added. H1 is reported as "not supported at pilot scale". Because gate 6 is FAIL, re-running stage 7 or 8 needs `--force`.
 The ASOC SOCIAL paper is not redistributed in `docs/`; place `SOCIAL_ASOC_2026.pdf` there yourself.
 
 ## Install (datalab: Python 3.13, CPU only)

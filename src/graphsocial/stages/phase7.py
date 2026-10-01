@@ -31,6 +31,11 @@ def run(cfg: dict, force: bool = False) -> GateResult:
         "",
         summary + ".",
         "",
+        "**Gate 6 was FAIL** (H1 not supported at pilot scale). By user decision this stage runs with `--force`; "
+        "hyperparameters and defaults are unchanged. Added ablations (O2, O3, 2% budget, all seeds): `no_neighbor` "
+        "(α = β = 0 throughout) and a decoupled geometric embedding (PLD, LCD, density, log volume, log atom count; "
+        "no linker or metal information) with neighbourhoods from topologies (a) and (c).",
+        "",
         f"- Graph-SOCIAL topology: `{plan.best_topology(cfg)}` (from Phase 6); reference communities at "
         f"φ* = {plan.phi_star(cfg)}.",
         f"- Budgets: {cfg['phase7']['budgets']} of N (minimum {cfg['experiments']['min_budget']} evaluations); "
