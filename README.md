@@ -3,35 +3,19 @@
 Centrality-guided search over metal–organic framework (MOF) similarity networks for budget-limited discovery.
 SOCIAL is used as a model-free, structure-aware acquisition policy: it decides which MOF to evaluate next under a fixed evaluation budget, and its communication topology is the MOFGalaxyNet similarity graph.
 
-**Status (2026-10-01):** all eight stages are implemented and tested: 24 unit tests, plus a smoke run of all stages in a few minutes.
+**Status (2026-10-03, tag `v0.3-revision`):** the JCIM revision is complete. `manuscript/main.pdf` and `manuscript/SI.pdf` are built from the results files, and `python manuscript/check_numbers.py` verifies every number. Submission documents are in `submission/`, and the change log against v0.2 is in `reports/REVISION_DIFF.md`.
 
-| Gate | Result |
-|---|---|
-| 1 — reproduce MOFGalaxyNet 2k | **FAIL**, overridden by decision: the published φ=0.9 edge count is not reproducible, even from the authors' released matrix (`reports/DEVIATIONS.md` D1) |
-| 2 — ≥3,000 QMOF MOFs | **PASS**: 8,697 MOFs; 5,359 have HSE06 gaps |
-| 4 — band-gap homophily | **PASS**: PBE r = 0.51 vs null 0.00 at φ = 0.7 (z ≈ 46); significant at every φ |
-| 5 — method invariants | **PASS**: all 10 methods |
-| 6 — H1 pilot | **FAIL**: Graph-SOCIAL beats random search (recall 0.063 vs 0.011, p ≈ 0.001), but MOFGalaxyNet does not significantly beat the degree-preserving random topology (p = 0.20; +ρ=0.10: p = 0.087). See `reports/PHASE6_PILOT.md` |
+Main findings:
+- Band gaps are strongly homophilous on the MOF similarity network, but the communication topology has only a small, objective-dependent effect.
+- Graph-SOCIAL's gains concentrate on the lowest band gaps (O2), whose top MOFs lie near the center of the chemistry-aware embedding. A centroid-only policy matches it there, and SOCIAL's population contracts toward the centroid.
+- Ensemble Thompson sampling ranks first (13 of 16 cells). The strengthened ARD GP-EI ranks third, and Graph-SOCIAL ranks sixth of ten.
+- Several analyses were added after the results were known; they are documented as deviations D9–D13 in `reports/DEVIATIONS.md`:
+  - O3 redefined as a target-value objective;
+  - ARD GP-EI with hyperparameter refits every 10 evaluations;
+  - unique-building-block recall;
+  - the post hoc center-bias analyses, including a shifted-optimum control on the classic benchmark functions.
 
-Phases 7–8 were run with `--force` by user decision (DEVIATIONS D7), with unchanged hyperparameters and two added ablations (`no_neighbor` and a decoupled geometric embedding). Because gate 6 is FAIL, re-running stage 7 or 8 needs `--force`.
-
-**Main findings** (full details in [RESULTS.md](RESULTS.md)):
-- H1 is **not supported at pilot scale**. In the 30-seed runs, MOFGalaxyNet's advantage over a degree-preserving random topology is small and objective-dependent (Cliff's δ ≤ 0.22, power ≤ 0.64, not significant after correction).
-- H3 (bridge nodes) is not supported: 42.7% of new-family hits had a top-decile-betweenness neighbour, against a base rate of 51.3%.
-- Graph-SOCIAL ranks 5th of 10 (Friedman). Ensemble Thompson sampling ranks 1st, followed by PSO, DE and GA. Graph-SOCIAL beats random search only on O2, and that advantage comes from its chemistry-aware embedding (the decoupled embedding removes it).
-
-Both reference papers in `docs/` are open access (CC BY 4.0).
-
-## Manuscript
-
-`manuscript/` holds the Applied Soft Computing (elsarticle) manuscript, with `main.pdf` and `highlights.pdf` included. Every table is generated from `results/tables/`, and the figures come from `results/figures/`:
-
-```bash
-python manuscript/make_tables.py
-cd manuscript && latexmk -pdf main.tex
-```
-
-Placeholders shown in red (CRediT, competing interests, funding, AI-use statement) must be completed by the authors.
+Re-running stage 7 or 8 requires `--force` because gate 6 is recorded as FAIL. Stage 8 refuses to run on incomplete results unless `--provisional` is given.
 
 ## Install (datalab: Python 3.13, CPU only)
 

@@ -117,6 +117,7 @@ def main() -> int:
         pv = [stats.wilcoxon(x.recall_every_10, x.recall_every_step).pvalue
               if not np.allclose(x.recall_every_10, x.recall_every_step) else 1.0 for _, x in g]
         cmp["p_wilcoxon_two_sided"] = pv
+        cmp.to_csv(ROOT / "results" / "tables" / "gp_refit_check.csv", index=False)
         lines += ["## 6. Hyperparameter refits every 10 evaluations vs every evaluation (same seeds)", "",
                   cmp.to_markdown(index=False, floatfmt=".4f"), ""]
     (ROOT / "reports" / "GP_EI_CHECKS.md").write_text("\n".join(lines) + "\n")
