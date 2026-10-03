@@ -95,3 +95,16 @@ The ARD GP-EI of D10 re-optimized all 34 hyperparameters (with 5 restarts) after
 - **Same-seed check:** that run found 16 hits; the every-step run with the same seed found 13.
 - **Rerun:** all 480 GP-EI runs are redone with this schedule for one consistent protocol.
 - **Archive:** the 360 completed every-step runs are kept in `results/archive/gp_ei_refit_every_step/` and are compared with the new runs for the 0.5–2% budgets in `reports/GP_EI_CHECKS.md`.
+
+## D13 — Post hoc center-bias analyses (revision, 2026-10-03)
+
+These analyses were not pre-specified. They were added after a separate pilot (SOCIAL on VSA process design, outside this repository's scope) showed that SOCIAL's population contracts toward the centroid of its search box. They are reported as exploratory.
+
+1. **Hit position:** where each objective's hits lie relative to the embedding centroid, in the chemistry-aware and geometry-only embeddings (`center_hits.csv`).
+2. **Centroid-only policy:** evaluate the B MOFs closest to the centroid, without using property values (`center_baseline.csv`).
+3. **Contraction:** the distance-to-centroid percentile of each method's evaluations, early versus late in each run, at the 2% budget (`center_contraction.csv`).
+4. **Synthetic control on classic benchmark functions:** the functions and bounds of the SOCIAL repository are evaluated with the optimum at its usual position and with the optimum shifted by ±0.6 of the half-range. Settings: D = 30, 30,000 evaluations, 10 seeds. Methods: the published SOCIAL implementation (default preset), SOCIAL Algorithm 1, CMA-ES, DE, PSO and random search. Code is in `analysis/center_bias_benchmarks/`; results are in `results/tables/bench23_runs.csv` and `reports/BENCH23_CENTER_BIAS.md`. Schwefel 2.26 is excluded from the error comparison because its reference optimum in the repository is 0 while its true minimum depends on D.
+
+**Consequences for the manuscript:**
+- The interpretation changed from "the chemistry-aware embedding drives efficiency" to "search-space geometry governs efficiency". The data underlying the earlier statement are unchanged.
+- The title and abstract were revised accordingly, and a Results subsection, Discussion paragraphs and SI tables were added.

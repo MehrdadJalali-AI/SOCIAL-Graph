@@ -23,3 +23,4 @@ manuscript/*.toc
 manuscript/build_*.log
 results/v0.2/runs_replaced/
 results/archive/
+results/runs_bench23/

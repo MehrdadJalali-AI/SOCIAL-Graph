@@ -65,6 +65,14 @@ Columns: one-sided paired Wilcoxon on final top-1% recall (A > B); Cliff's delta
 
 {sections['hits']}
 
+### Centre bias (post hoc; DEVIATIONS D13)
+
+Position of the hit sets relative to the embedding centroid; a centroid-only policy that evaluates the MOFs closest
+to the centroid; and the distance-to-centroid percentile of each method's evaluations (early and late thirds of the
+run, 2% budget). The benchmark-function shift test is in `reports/BENCH23_CENTER_BIAS.md`.
+
+{sections['center']}
+
 ### Unique-building-block recall (post hoc)
 
 Hits are counted per distinct building block (identical linker + metal), so several duplicates of one group count once.

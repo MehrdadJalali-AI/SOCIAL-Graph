@@ -184,6 +184,11 @@ def run(cfg: dict, force: bool = False) -> GateResult:
 
     out.update(_checks_and_power(cfg, res, abl, figs))
     out.update(_bb_recall(cfg, main_specs))
+    from .. import center_analysis
+    ca = center_analysis.run(cfg)
+    out["center"] = (ca["hits"].to_markdown(index=False, floatfmt=".3f") + "\n\n"
+                     + ca["baseline"].to_markdown(index=False, floatfmt=".4f") + "\n\n"
+                     + ca["contraction"].to_markdown(index=False, floatfmt=".3f"))
     report.build(cfg, out, {"phi_star": phi, "best_topology": best})
     wins = t4[(t4.metric == "final_recall") & (t4.mean_graph_social > t4.mean_baseline) & t4["significant_holm_0.05"]]
     summary = (f"Graph-SOCIAL significantly better (Holm p<0.05, final recall) in {len(wins)} of "
