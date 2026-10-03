@@ -45,17 +45,32 @@ def run(cfg: dict) -> dict[str, pd.DataFrame]:
     hits = pd.DataFrame(rows)
     hits.to_csv(tables / "center_hits.csv", index=False)
 
-    # 2. Centroid-only policy: evaluate the B MOFs closest to the centroid (no adaptation, no property values).
+    # 2. Centroid-only policy. Main variant (used in text and tables): the shared 10-MOF random initial design
+    #    (seeds as in the benchmark) followed by the B - 10 unevaluated MOFs closest to the centroid; the initial
+    #    MOFs count toward budget and recall. Also reported: the policy without the initial design.
+    from . import methods
+    from .experiment import budget_for
+
     rows = []
     X = embeds["chemistry-aware"]
+    P = cfg["experiments"]["default_P"]
     for o in objs:
         ob = O.make(o, df, cfg["objectives"]["hit_fraction"])
         d = _dist_to_centroid(X[ob.universe])
         order = np.argsort(d, kind="stable")
         for b in cfg["phase7"]["budgets"]:
-            B = max(int(np.ceil(b * len(order))), cfg["experiments"]["min_budget"])
+            B = budget_for(b, len(order), cfg["experiments"]["min_budget"])
+            rec = []
+            for seed in plan.seeds(cfg, "seeds_full"):
+                init = methods.initial_design(len(order), P, seed)
+                taken = np.zeros(len(order), dtype=bool)
+                taken[init] = True
+                ev = np.concatenate([init, order[~taken[order]][: B - P]])
+                rec.append(ob.hits[ev].sum() / ob.hits.sum())
             rows.append({"objective": o, "budget_frac": b, "budget": B,
-                         "centroid_policy_recall": float(ob.hits[order[:B]].sum() / ob.hits.sum())})
+                         "centroid_policy_recall": float(np.mean(rec)),
+                         "centroid_policy_recall_std": float(np.std(rec, ddof=1)),
+                         "centroid_policy_no_init_recall": float(ob.hits[order[:B]].sum() / ob.hits.sum())})
     base = pd.DataFrame(rows)
     base.to_csv(tables / "center_baseline.csv", index=False)
 
@@ -88,4 +103,31 @@ def run(cfg: dict) -> dict[str, pd.DataFrame]:
     if len(con):
         con = con.groupby("method")[["early_median_percentile", "late_median_percentile"]].mean().reset_index()
     con.to_csv(tables / "center_contraction.csv", index=False)
-    return {"hits": hits, "baseline": base, "contraction": con}
+
+    # 4. Mechanism check: contraction for the default Graph-SOCIAL and four ablations (O2, O3; 2% budget).
+    labels = ["default", "sync off", "no neighbor term (α=β=0)", "elite off", "mutation off"]
+    rows = []
+    for label, s in plan.ablation_specs(cfg):
+        if label not in labels:
+            continue
+        f = s.paths(runs_dir)[0]
+        if not f.exists():
+            continue
+        if s.objective not in cache:
+            ob = O.make(s.objective, df, cfg["objectives"]["hit_fraction"])
+            d = _dist_to_centroid(X[ob.universe])
+            cache[s.objective] = _percentile_rank(d, d)
+        pr = cache[s.objective]
+        tr = pd.read_parquet(f, columns=["eval", "mof_idx"])
+        tr = tr[tr["eval"] > cfg["experiments"]["default_P"]]
+        n = len(tr)
+        rows.append({"configuration": label, "objective": s.objective, "seed": s.seed,
+                     "early": float(np.median(pr[tr.iloc[: n // 3].mof_idx.to_numpy()])),
+                     "late": float(np.median(pr[tr.iloc[-(n // 3):].mof_idx.to_numpy()]))})
+    abl = pd.DataFrame(rows)
+    abl = (abl.groupby(["configuration", "objective"])[["early", "late"]].mean().reset_index()
+           .rename(columns={"early": "early_median_percentile", "late": "late_median_percentile"}))
+    abl["configuration"] = pd.Categorical(abl.configuration, labels, ordered=True)
+    abl = abl.sort_values(["objective", "configuration"])
+    abl.to_csv(tables / "center_contraction_ablations.csv", index=False)
+    return {"hits": hits, "baseline": base, "contraction": con, "ablations": abl}

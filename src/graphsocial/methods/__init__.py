@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .base import Method, initial_design
+from .cmaes_snap import CMAESSnap
 from .de_snap import DESnap
 from .ensemble_ts import EnsembleTS
 from .ga_snap import GASnap
@@ -23,6 +24,7 @@ REGISTRY: dict[str, type[Method]] = {
     "pso": PSOSnap,
     "ga": GASnap,
     "static_diverse": StaticDiverse,
+    "cmaes": CMAESSnap,
 }
 
 # SOCIAL with a Watts-Strogatz agent topology: the original algorithm plus the snap operator.

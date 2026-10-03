@@ -1,0 +1,16 @@
+{
+ "budget": 174,
+ "N": 8697,
+ "K": 87,
+ "pilot_mean": 0.011494252873563218,
+ "pilot_std": 0.007662835249042146,
+ "pilot_hits_total": 10,
+ "expected_hits_total": 17.4060020696792,
+ "exact_p_two_sided": 0.08641752816065398,
+ "expected_recall": 0.020006898930665748,
+ "benchmark_30_mean": 0.022222222222222216,
+ "benchmark_30_std": 0.016788430881384403,
+ "benchmark_seeds_10_29_mean": 0.027586206896551724,
+ "all_keys_identical": true,
+ "recomputed_equals_stored": true
+}

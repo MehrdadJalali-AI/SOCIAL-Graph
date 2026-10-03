@@ -118,8 +118,8 @@ def ablation_table(cfg: dict) -> list[dict]:
     rows += [row(f"topology {lab}", topo=t) for lab, t in topo_rows]
     rows += [row(f"φ = {phi}", topo=graph_name(phi)) for phi in cfg["phase3"]["phis"]]
     # Decoupled search space: geometric descriptors only, neighborhoods from (a) or (c).
-    rows += [row("decoupled embedding, topology (a) MOFGalaxyNet", topo=graph_name(ps), embedding="geometric"),
-             row("decoupled embedding, topology (c) degree-preserving random", topo=graph_name(ps, "degrand"),
+    rows += [row("geometry-only embedding, topology (a) MOFGalaxyNet", topo=graph_name(ps), embedding="geometric"),
+             row("geometry-only embedding, topology (c) degree-preserving random", topo=graph_name(ps, "degrand"),
                  embedding="geometric")]
     return rows
 

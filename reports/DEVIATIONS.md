@@ -108,3 +108,20 @@ These analyses were not pre-specified. They were added after a separate pilot (S
 **Consequences for the manuscript:**
 - The interpretation changed from "the chemistry-aware embedding drives efficiency" to "search-space geometry governs efficiency". The data underlying the earlier statement are unchanged.
 - The title and abstract were revised accordingly, and a Results subsection, Discussion paragraphs and SI tables were added.
+
+## D14 — v0.4 revision: CMA-ES baseline and verification analyses (2026-10-03)
+
+None of these were pre-specified. No pre-specified hyperparameter, seed set, hit definition or evaluation rule was changed, and no existing run was redone.
+
+1. **CMA-ES baseline (`methods/cmaes_snap.py`).** Settings:
+   - `cma` 4.5.0 with default settings, except popsize = 10 and sigma0 = 0.3 × the mean range of the embedding;
+   - the shared initial design is injected as the first generation;
+   - each point snaps to the nearest unevaluated MOF, and the remainder rule is the same as for DE, PSO and GA.
+
+   It ran on 4 objectives × 4 budgets × seeds 0–29 (480 runs), and none of them stopped early (`results/revision/cmaes_early_stop.csv`). Friedman ranks, pairwise tests and the CD diagram now use 11 methods.
+2. **Centroid-only policy.** The main variant now includes the shared ten-MOF initial design; the variant without it is still reported (`results/tables/center_baseline.csv`, `results/revision/centroid_policy_variants.csv`).
+3. **Contraction under ablations** (`results/tables/center_contraction_ablations.csv`): the default plus the sync off, no-neighbor, elite off and mutation off ablations, on O2 and O3 at 2%.
+4. **Verification outputs** in `results/revision/`:
+   - the pilot random-search check;
+   - the iteration accounting;
+   - the stage 4 rerun, whose homophily output is identical to the earlier one.

@@ -1,0 +1,253 @@
+%% Title alternatives (for the authors' choice):
+%%  (1) Where Do the Best Metal-Organic Frameworks Lie? Search-Space Geometry and Social-Network Optimization
+%%      for Budget-Limited Screening
+%%  (2) Representation Geometry, Not Communication Topology, Shapes Social-Network Optimization of
+%%      Metal-Organic Frameworks: An Open Benchmark on QMOF
+\documentclass[journal=jcisd8,manuscript=article]{achemso}
+
+\usepackage[version=4]{mhchem}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{adjustbox}
+\usepackage{xr}
+\externaldocument[SI-]{SI}
+\graphicspath{{../results/figures/}{toc/}}
+\input{numbers}
+\newcommand{\gs}{Graph-SOCIAL}
+\newcommand{\placeholder}[1]{\textcolor{red}{[#1]}}
+
+\author{Mehrdad Jalali}
+\email{mehrdad.jalali@srh.de}
+\affiliation{Institute of Functional Interfaces (IFG), Karlsruhe Institute of Technology (KIT), 76344 Eggenstein-Leopoldshafen, Germany}
+\alsoaffiliation{Applied Data Science and Artificial Intelligence, SRH University Heidelberg, 69123 Heidelberg, Germany}
+\author{Binh Vu}
+\affiliation{Applied Data Science and Artificial Intelligence, SRH University Heidelberg, 69123 Heidelberg, Germany}
+\alsoaffiliation{Faculty of Mathematics and Computer Science, University of Hagen, 58097 Hagen, Germany}
+\author{Swati Chandna}
+\affiliation{Applied Data Science and Artificial Intelligence, SRH University Heidelberg, 69123 Heidelberg, Germany}
+\author{Mohammad H. Nadimi-Shahraki}
+\affiliation{International Graduate School of Artificial Intelligence, National Yunlin University of Science and Technology, Douliu, Yunlin 640301, Taiwan}
+
+\title{Search-Space Geometry Governs Social-Network Optimization for Budget-Limited Discovery of Metal--Organic Frameworks: A Benchmark on QMOF}
+
+\keywords{metal--organic frameworks, band gap, active learning, acquisition, social network optimization, similarity networks, benchmark}
+
+\begin{document}
+\ifdefined\provisionalbuild\noindent\textcolor{red}{\textbf{PROVISIONAL BUILD: \provisionalbuild{} runs missing; numbers are not final.}}\fi
+
+\begin{tocentry}
+\includegraphics[width=3.25in,height=1.75in]{toc}
+\end{tocentry}
+
+\begin{abstract}
+Density functional theory budgets limit how many metal--organic frameworks (MOFs) can be screened. We adapt our recently introduced social-network optimizer SOCIAL to finite-pool acquisition over a chemically meaningful MOF similarity network built for \nPool{} QMOF structures, and benchmark it against nine acquisition strategies on four band-gap objectives, four budgets and 30 seeds under pre-specified decision criteria. Band gaps are strongly homophilous on the network ($r=\homR$ versus $\approx0$ for degree-preserving null graphs), yet the communication topology contributes a small, objective-dependent effect (largest Cliff's $\delta=\topDeltaMax$). \gs{}'s gains concentrate on the lowest band gaps (\gainOtwoTwo-fold over random search at a 2\% budget), whose top MOFs lie near the center of the chemistry-aware embedding: evaluating the most central MOFs alone reaches the same recall (\cbPolicyOtwoTwo{} versus \gsOtwoTwo{} for \gs{}), consistent with SOCIAL's contraction toward the population centroid. Ensemble Thompson sampling achieves the highest recall in \tsBestCells{} of 16 objective--budget cells. Search-space geometry, rather than the communication graph, therefore governs social-network optimization in MOF screening, and centroid-shift controls belong in its evaluation. The benchmark, data and code are openly released.
+\end{abstract}
+
+\section{Introduction}
+
+Metal--organic frameworks (MOFs) assemble metal nodes and organic linkers into a combinatorially large design space.\cite{furukawa2013mof} Electronic properties such as the band gap still require density functional theory (DFT), so the number of candidates that can be evaluated in a screening campaign is far smaller than the number available. Quantum-chemical databases such as QMOF\cite{rosen2021qmof,rosen2022qmof} make it possible to study this setting systematically. A database is treated as a finite pool whose properties are revealed only upon ``evaluation'', and acquisition strategies are compared by how many top candidates they recover within a fixed budget.\cite{lookman2019active,moosavi2020ml}
+
+This work continues a line of research in which MOF chemistry is analyzed as a social network. MOFSocialNet\cite{jalali2022mofsocialnet} and MOFGalaxyNet\cite{jalali2023mofgalaxynet} represent MOFs as nodes of similarity graphs built from linker and metal similarity and characterize them with centrality and community analysis; the same network view underlies representative sampling for frugal graph learning\cite{jalali2025blackhole} and has been combined with bio-inspired optimization for MOF discovery.\cite{jalali2025moflens}
+
+Building on this view, we recently introduced SOCIAL (Social Network Optimization Algorithm via Centrality and Influence-based Learning),\cite{jalali2026social} a population-based metaheuristic that turns the social-network perspective into a search mechanism. Each candidate solution is an agent on a small-world communication graph.\cite{watts1998small} An agent learns from its neighbors with weights that combine betweenness centrality\cite{brandes2001faster}---the ability to bridge regions of the search space---with fitness-based influence, and time-scheduled weights shift the search from network-driven exploration toward exploitation guided by the population best and an elite memory, while adaptive mutation and synchronization with the population mean preserve diversity. On 23 benchmark functions and six constrained engineering design problems, SOCIAL was competitive with or superior to 16 contemporary metaheuristics and provided interpretable search dynamics in terms of leaders, followers and bridges.\cite{jalali2026social} In SOCIAL the graph is synthetic: it encodes who communicates with whom, not what is chemically similar to what. The SOCIAL study concluded that its network-based architecture is particularly suited to cheminformatics and materials settings in which candidates are nodes of similarity graphs, and outlined its use as a selection policy within MOF similarity networks as future work.\cite{jalali2026social}
+
+The present study realizes and tests that direction. We adapt SOCIAL to budget-limited acquisition over a finite pool of MOFs (\gs{}): the update equations, schedules and default hyperparameters of SOCIAL are retained, and the synthetic communication graph is replaced by a MOFGalaxyNet similarity network built over QMOF. Agents move in a continuous chemistry-aware embedding, snap to the nearest MOF not yet evaluated, and communicate with agents whose MOFs are close in the network. This design isolates a question that the synthetic benchmarks of the original study could not address, and two research questions structure the work. RQ1: does a chemically meaningful communication topology improve acquisition relative to topologies with the same degrees but randomized connections? RQ2: do high-betweenness MOFs act as bridges through which new chemical families are reached?
+
+The study contributes (i) a reconstruction of MOFGalaxyNet at database scale for \nPool{} MOFs, with a recipe comparison and recommended parameters; (ii) a quantification of band-gap homophily on the network against degree-preserving null models; (iii) \gs{}, an adaptation of SOCIAL to finite-pool acquisition that preserves its learning rules, together with an open benchmark against nine acquisition strategies on four band-gap objectives, four budgets and 30 seeds, including ablations of every SOCIAL component, of the topology and of the representation; and (iv) direct answers to RQ1 and RQ2, together with an analysis of where the top MOFs lie in the search space, which together explain when social-network optimization is efficient for MOF screening and translate into practical guidance.
+
+\section{Methods}
+
+\subsection{Study design}
+The study followed a sequence of analyses whose decision criteria were fixed before the corresponding data were examined: reproduction of the published network statistics, a minimum dataset size, significant band-gap homophily, and a pilot comparison of topologies (criteria and outcomes in Table~\ref{SI-tab:decision}). Every analysis was carried forward to completion, and all outcomes are reported with their test statistics. Hyperparameters of SOCIAL, the embedding and the topologies were fixed in advance and were not tuned on the benchmark.
+
+\subsection{Data}
+We used QMOF\cite{rosen2021qmof,rosen2022qmof} (version 18, \nQmofAll{} entries). Linkers were taken from the MOFid decomposition\cite{bucior2019mofid} distributed with QMOF, and the metal was identified from the composition after excluding non-metals and metalloids. As in MOFGalaxyNet, we retained structures with exactly one distinct organic linker (after RDKit\cite{rdkit} canonicalization) and exactly one metal element, which gave \nPool{} MOFs with \nMetals{} distinct metals (filtering counts in Table~\ref{SI-tab:filters}). Targets are the PBE-D3(BJ) band gap\cite{perdew1996pbe} for all MOFs and the HSE06 band gap\cite{heyd2003hse} for the \nHse{} MOFs that have one. Structures sharing the same linker and metal (``building-block duplicates'') were retained: \nDupGroups{} such groups contain \nDupMofs{} MOFs (\pctDupMofs\%).
+
+\subsection{Similarity network}
+For MOFs $a$ and $b$, linker similarity is the Tanimoto coefficient $T$ of Morgan fingerprints\cite{rogers2010ecfp} (radius 2, 2048 bits), and metal similarity is the cosine of min--max-normalized six-dimensional metal descriptor vectors $\mathbf{m}$ (atomic number, atomic weight, atomic radius, Mulliken electronegativity $(\mathrm{IE}_1+\mathrm{EA})/2$, polarizability and electron affinity, from the \texttt{mendeleev} database\cite{mendeleev}). The combined similarity is
+\begin{equation}
+\mathrm{SIM}(a,b)=0.7\,T(\mathrm{fp}_a,\mathrm{fp}_b)+0.3\cos(\mathbf{m}_a,\mathbf{m}_b),
+\label{eq:sim}
+\end{equation}
+and an edge joins $a$ and $b$ when $\mathrm{SIM}(a,b)\geq\phi$, with $\phi\in\{0.7,0.8,0.9\}$. Elements with an unbound anion were assigned an electron affinity of 0~eV. Communities were detected with the Leiden algorithm\cite{traag2019leiden} (resolution 1.0). Betweenness centrality was estimated with Brandes' algorithm\cite{brandes2001faster} from 1000 sampled sources; betweenness, degree and PageRank were max-normalized to $[0,1]$.
+
+Four search topologies were compared over the same node set: (a) MOFGalaxyNet($\phi$); (b) (a) plus $\rho|E|$ random edges between different Leiden communities, $\rho\in\{0.05,0.10,0.20\}$; (c) a degree-preserving randomization of (a) by $10|E|$ double-edge swaps;\cite{maslov2002specificity} and (d) a Watts--Strogatz graph with matched mean degree and rewiring probability 0.3.\cite{watts1998small}
+
+\subsection{Search space and evaluation protocol}
+Each MOF is mapped to a 32-dimensional embedding. Linker fingerprint bits and metal descriptors are standardized, each block is scaled to unit total variance and weighted 0.7 and 0.3, respectively, and principal component analysis reduces the concatenation to 32 dimensions. After an agent's position update, a snap operator moves the agent to the nearest MOF (Euclidean distance) that has not yet been evaluated, and that MOF's property is revealed. Evaluations are counted against a budget $B$, each MOF can be evaluated at most once, and all methods share the same ten randomly drawn initial MOFs for a given seed; these initial evaluations count toward the budget and toward every metric.
+
+\subsection{The SOCIAL optimizer}
+SOCIAL\cite{jalali2026social} maintains a population of agents with positions $\mathbf{x}_i$ in a bounded continuous search space and arranges them on a Watts--Strogatz graph\cite{watts1998small} (each agent linked to $K=4$ neighbors, rewiring probability 0.3). With $T$ iterations and $\tau=t/T$, four learning sources are weighted by schedules that move the search from network-driven exploration to exploitation,
+\begin{equation}
+\alpha_t=\alpha(1-\tau),\quad \beta_t=\beta(1-\tau),\quad \gamma_t=\gamma\tau,\quad \delta_t=\delta\tau,
+\label{eq:schedule}
+\end{equation}
+with defaults $\alpha=\beta=0.4$ and $\gamma=\delta=0.2$. A neighbor $j$ of agent $i$ contributes through its betweenness centrality $c_j$ in the communication graph and its influence
+\begin{equation}
+I_j=1-\frac{\log(1+|f_j|)}{\log(1+\max_k f_k)+10^{-6}},
+\label{eq:influence}
+\end{equation}
+which favors neighbors with low (better) objective values. The neighbor aggregate and the position update are
+\begin{align}
+\mathbf{x}_{\mathrm{neigh}}&=\sum_{j\in N(i)}w_{ij}\mathbf{x}_j,\qquad w_{ij}=\frac{\alpha_tc_j+\beta_tI_j}{\sum_{k\in N(i)}(\alpha_tc_k+\beta_tI_k)},\label{eq:weights}\\
+\mathbf{x}_i&\leftarrow(1-\alpha_t-\beta_t-\gamma_t-\delta_t)\mathbf{x}_i+(\alpha_t+\beta_t)\mathbf{x}_{\mathrm{neigh}}+\gamma_t\mathbf{x}_{\mathrm{gbest}}+\delta_t\mathbf{x}_{\mathrm{elite}},\label{eq:update}
+\end{align}
+where $\mathbf{x}_{\mathrm{gbest}}$ is the best current agent and $\mathbf{x}_{\mathrm{elite}}$ the best solution found so far (elite memory). Each position is then synchronized with the population mean, $\mathbf{x}_i\leftarrow(1-\omega)\mathbf{x}_i+\omega\bar{\mathbf{x}}$ with $\omega=0.05$, and clipped to the search bounds. Agents worse than the population median mutate with probability $p_m=0.1$ by a uniform perturbation of strength $s_t=0.1(1-\tau)+0.01$ relative to the variable range, and every ten iterations each agent receives a perturbation drawn from $U(-0.5,0.5)^D$ with probability 0.05. Betweenness centralities of the agent graph are recomputed every ten iterations.
+
+\subsection{From SOCIAL to Graph-SOCIAL}
+\gs{} keeps the learning rules of SOCIAL---eqs~\ref{eq:schedule}--\ref{eq:update}, synchronization, elite memory, the periodic perturbation and all default weights---and changes only what is needed to act on a finite pool of real structures (Figure~\ref{fig:scheme} and Table~\ref{tab:adaptation}). Positions live in the 32-dimensional chemistry-aware embedding, and after each update an agent snaps to the nearest MOF not yet evaluated, whose property is then revealed; the agent's position becomes that MOF's embedding. The synthetic agent graph is replaced by the similarity network: agents $i$ and $j$ are neighbors when their current MOFs lie within $h=2$ hops in the search topology, so neighborhoods change as agents move through chemical space, and $c_j$ is the precomputed, max-normalized betweenness of agent $j$'s current MOF in that network. Influence (eq~\ref{eq:influence}) is computed on the shifted objective $f'=f-\min f\geq0$, as SOCIAL assumes non-negative objective values. Mutation becomes a jump: an agent worse than the median moves with probability $p_m=0.1$ to a random unevaluated MOF in the Leiden community with the fewest evaluated MOFs, which turns SOCIAL's diversity mechanism into exploration of under-sampled chemical families. Agents whose MOF has no neighbor within $h$ hops use only the global-best and elite terms. The population has $P=10$ agents and $T=\lfloor B/P\rfloor$ iterations, with the initial design as iteration 0, and evaluations remaining after $T$ iterations go to the unevaluated MOFs nearest the elite. For each evaluation, the neighbor with the largest weight $w_{ij}$ and its centrality are recorded for the bridge analysis. To separate the effect of the chemically meaningful topology from that of the adaptation itself, the benchmark also includes the original SOCIAL---Watts--Strogatz agent graph and continuous mutation---equipped with the same snap operator (SOCIAL-WS).
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{F0_graph_social_scheme.pdf}
+\caption{Use of the SOCIAL optimizer in this study. (a) SOCIAL\cite{jalali2026social} moves agents in a continuous search space and lets them learn from neighbors on a synthetic small-world graph. (b) In \gs{}, the same agents are seen in two views: the MOF similarity network defines who listens to whom (agents whose MOFs lie within $h$ hops are neighbors, and betweenness $c_j$ marks bridge MOFs), while the chemistry-aware embedding is where the SOCIAL update moves an agent, which then snaps to the nearest MOF not yet evaluated. (c) One \gs{} iteration; the learning rules of SOCIAL are unchanged, and each new property value updates influence, global best and elite memory.}
+\label{fig:scheme}
+\end{figure}
+
+\begin{table}
+\caption{Adaptation of SOCIAL to budget-limited acquisition over a finite pool of MOFs.}
+\label{tab:adaptation}
+\scriptsize
+\begin{tabular}{@{}p{2.3cm}p{4.0cm}p{4.6cm}p{4.2cm}@{}}
+\toprule
+Component & SOCIAL\cite{jalali2026social} & \gs{} & Rationale \\
+\midrule
+Candidate & point in a continuous box & MOF from the pool, reached by snapping a continuous position & properties exist only for real structures \\
+Search space & problem variables & 32-dimensional chemistry-aware embedding & gives continuous moves a chemical meaning \\
+Evaluation & every agent at every iteration & oracle reveals the snapped MOF; each MOF at most once; fixed budget $B$ & DFT budget is the limiting resource \\
+Communication graph & Watts--Strogatz graph among agents & agents within $h=2$ hops in the MOF similarity network & tests a chemically meaningful topology (RQ1) \\
+Centrality $c_j$ & betweenness in the agent graph & betweenness of the agent's current MOF in the MOF network & bridges between chemical regions (RQ2) \\
+Influence, weights, update & eqs~\ref{eq:schedule}--\ref{eq:update} & unchanged; influence on $f'=f-\min f$ & preserves SOCIAL's learning rules \\
+Synchronization, elite memory & $\omega=0.05$; best-so-far & unchanged & \\
+Mutation & uniform perturbation, decaying strength & jump to an unevaluated MOF in the least-explored community & diversity across chemical families \\
+Isolated agents & position unchanged & global-best and elite terms only & isolated MOFs are common \\
+Population, horizon & large population, fixed iterations & $P=10$, $T=\lfloor B/P\rfloor$; remainder near the elite & budgets of tens to hundreds of evaluations \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Baselines}
+All baselines use the same embedding, budget, initial design and evaluation rules: random search; a greedy best-first walk on MOFGalaxyNet; GP-EI, a Gaussian process\cite{rasmussen2006gp} with a constant $\times$ Mat\'ern-5/2 kernel with automatic relevance determination (one length scale per embedding dimension) plus white noise, normalized targets and five optimizer restarts, with hyperparameters re-optimized every ten evaluations and the model conditioned on all observations after every evaluation, maximizing expected improvement\cite{jones1998ego} ($\xi=0.01$) over all unevaluated MOFs; ensemble Thompson sampling\cite{thompson1933} with ten bootstrap random forests\cite{breiman2001rf} of 100 trees; differential evolution\cite{storn1997de} ($F=0.5$, $CR=0.9$), particle swarm optimization\cite{kennedy1995pso,clerc2002pso} ($w=0.729$, $c_1=c_2=1.494$) and a genetic algorithm\cite{holland1975adaptation}, each with the snap operator and ten agents; SOCIAL-WS (above); and static diverse sampling by $k$-center greedy selection.\cite{sener2018coreset} Implementation details are listed in the Supporting Information.
+
+\subsection{Objectives and metrics}
+All objectives are minimized: O1 maximizes the PBE gap ($f=-\mathrm{gap}$), O2 minimizes it ($f=\mathrm{gap}$), O3 targets a gap of 2.0~eV ($f=|\mathrm{gap}-2.0\ \mathrm{eV}|$; see the Supporting Information for the choice of this target-value form), and O4 maximizes the HSE06 gap on the HSE06 subset. Hits are the 1\% of the pool with the lowest $f$ (\nHits{} MOFs for O1--O3, \nHitsHse{} for O4). Budgets are 0.5, 1, 2 and 5\% of the pool. We report top-1\% recall as a function of evaluations and at the final budget, its normalized area under the curve, family coverage (the fraction of hit-containing Leiden communities in which a hit was found), simple regret, unique-building-block recall (hits counted once per distinct linker--metal combination) and wall-clock time excluding property look-ups.
+
+\subsection{Statistics}
+The pilot comparison of topologies used O2 at a 2\% budget with seeds 0--9 on the threshold with the strongest homophily, $\phi^\ast$; the MOFGalaxyNet variant with the highest pilot mean was carried into the full benchmark. The full benchmark comprises all methods, objectives and budgets with seeds 0--29, and the ablations use O2 and O3 at a 2\% budget with 30 seeds. Methods are compared with paired Wilcoxon signed-rank tests over seeds\cite{wilcoxon1945} with Holm correction\cite{holm1979} and Cliff's $\delta$;\cite{cliff1993dominance} rankings across objective--budget blocks use the Friedman test\cite{friedman1937} with Nemenyi post hoc comparisons.\cite{demsar2006statistical} For topology comparisons we report achieved power, analytically for a paired $t$-test at the observed standardized effect $d_z$ and by bootstrap for the Wilcoxon test. Random-search recall was compared with its exact hypergeometric expectation $B/N$.
+
+\section{Results and Discussion}
+
+\subsection{Reconstruction of MOFGalaxyNet at database scale}
+Before building the QMOF network, we reconstructed the original 2000-MOF MOFGalaxyNet. The recipe of eq~\ref{eq:sim} yields \reproSpecNine{} edges at $\phi=0.9$ (mean degree \reproSpecDeg{}), compared with the published \reproPub{} edges and mean degree \reproPubDeg{}. Across twelve recipes that vary the fingerprint, the linker weight and the source of metal descriptors, $\phi=0.9$ gives \reproRangeLo--\reproRangeHi{} edges, and the released weighted adjacency matrix gives \reproReleasedNine{} (Table~\ref{SI-tab:repro}). The released matrix corresponds to the released implementation, which uses RDKit path fingerprints and $\mathrm{SIM}=0.9\,T+0.1\cos$ (mean absolute deviation \reproMae{}). Under that implementation, the published network statistics correspond to a threshold near 0.7 (\reproReleasedSeven{} edges at $\phi=0.7$), and all recipes reach the published edge count at $\phi=\reproPhiLo$--\reproPhiHi{} (correction submitted). The choice of metal descriptor source changes edge counts by about 2\%. For future work we recommend Morgan fingerprints with eq~\ref{eq:sim} and reporting $\phi$ together with the resulting edge count and mean degree; $\phi=0.7$ gives a connected core with interpretable communities at database scale (below).
+
+\subsection{Network structure and band-gap homophily}
+At $\phi^\ast=\phiStar$, the QMOF network has \gEdges{} edges (mean degree \gDeg{}), a giant component containing \gGiantPct\% of the MOFs and \gComm{} Leiden communities (modularity \gMod{}; Figure~\ref{fig:graph}). Raising $\phi$ to 0.9 leaves a giant component of \gGiantNinePct\%. The network consists largely of near-cliques of MOFs that share linker and metal; long-range edges ($\rho=0.10$) connect \gGiantRhoPct\% of the MOFs into one component, and degree-preserving randomization lowers the mean clustering coefficient from \gClust{} to \gClustRand{}. On the original 2000-MOF set, Leiden and Girvan--Newman\cite{girvan2002community} partitions agree increasingly with $\phi$ (adjusted Rand index \ariSeven, \ariEight{} and \ariNine{} at $\phi=0.7$, 0.8 and 0.9).
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\linewidth]{F1_graph_overview.pdf}
+\caption{Giant component of the QMOF similarity network at $\phi^\ast=\phiStar$, colored by the ten largest Leiden communities; node size is proportional to betweenness centrality.}
+\label{fig:graph}
+\end{figure}
+
+Band gaps are strongly homophilous on the network (Figure~\ref{fig:homophily}). At $\phi^\ast$, the correlation between a MOF's PBE gap and the mean gap of its neighbors is $r=\homRthree$, compared with $\homNull\pm\homNullSd$ in \homNrand{} degree-preserving null graphs ($z=\homZ$); the value assortativity is \homAssort{} ($z=\homAssortZ$), and the HSE06 gap is even more homophilous ($r=\homRhse$). Homophily is significant at every threshold ($r=\homRmin$--\homRmax). Building-block duplicates contribute strongly: within groups of identical linker and metal, the PBE-gap standard deviation is \withinStd~eV, compared with \globalStd~eV across the pool.
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{F2_homophily.pdf}
+\caption{Band-gap homophily on the similarity network (red) compared with degree-preserving null graphs (gray), for PBE and HSE06 gaps at three thresholds.}
+\label{fig:homophily}
+\end{figure}
+
+\subsection{RQ1: contribution of the communication topology}
+In the pilot (O2, 2\% budget, ten seeds), every \gs{} variant recovered far more hits than random search; on MOFGalaxyNet the final recall was $\pilMgn\pm\pilMgnSd$ compared with $\pilRand\pm\pilRandSd$ (one-sided $p\pilPRand$, Cliff's $\delta=\pilDeltaRand$). Differences between topologies were small. MOFGalaxyNet exceeded the degree-preserving random topology by \pilDiffDeg{} ($p\pilPDeg$, $\delta=\pilDeltaDeg$), the variant with long-range edges by \pilDiffRho{} ($p\pilPRho$) and the Watts--Strogatz topology by \pilDiffWs{} ($p\pilPWs$); these differences did not reach the pre-specified threshold of $p<0.05$. The long-range variant ($\rho=0.10$) had the highest pilot mean and was carried into the full benchmark.
+
+With 30 seeds (Table~\ref{SI-tab:power}), MOFGalaxyNet exceeds the degree-preserving random topology by \topDiffTwo{} on O2 ($p\topPTwo$, $\delta=\topDeltaTwo$) and by \topDiffThree{} on O3 ($p\topPThree$, $\delta=\topDeltaThree$); relative to Watts--Strogatz the differences are \topWsDiffTwo{} and \topWsDiffThree{}. The answer to RQ1 is therefore that the topology contributes a small, objective-dependent effect; the largest Cliff's $\delta$ against the randomized topology is \topDeltaMax{} (\topDeltaMaxWhich). This locates the performance of \gs{} elsewhere, which the analyses below identify as the geometry of the search space.
+
+\subsection{Benchmark of acquisition strategies}
+Random search matches its analytical expectation in every objective--budget cell (Table~\ref{SI-tab:random}), which validates the evaluation protocol and hit sets. Figure~\ref{fig:curves} and Table~\ref{tab:main} summarize the benchmark (all budgets in Table~\ref{SI-tab:full}). Ensemble Thompson sampling achieves the highest recall in \tsBestCells{} of the 16 objective--budget cells (mean Friedman rank \rankTs{}; $\chi^2=\friedChi$, $p<10^{\friedPexp}$ over \friedBlocks{} blocks; Figure~\ref{fig:cd}); at a 5\% budget it recovers \tsOoneFivePct\% of the O1 hits and \tsOfourFivePct\% of the O4 hits. PSO (\rankPso{}), GP-EI (\rankGp{}), DE (\rankDe{}) and GA (\rankGa{}) follow; \gs{} ranks \posGS{} of \nMethods{} (\rankGS{}), SOCIAL-WS \posWs{} (\rankWs{}), and random search \posRand{} (\rankRand{}). Relative to random search, \gs{} achieves its largest gains on O2, the lowest band gaps: \gsOtwoTwo{} versus \rndOtwoTwo{} at 2\% (\gainOtwoTwo-fold) and \gsOtwoFive{} versus \rndOtwoFive{} at 5\%. Holm-corrected pairwise comparisons across the \nCells{} objective--budget cells are summarized in Table~\ref{SI-tab:pairwise}.
+
+\begin{table}
+\caption{Final top-1\% recall (mean $\pm$ standard deviation over 30 seeds) at 2\% and 5\% budgets; best mean per column in bold.}
+\label{tab:main}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/main_recall}\end{adjustbox}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{F3_recall_curves.pdf}
+\caption{Top-1\% recall versus number of evaluations at a 2\% budget (mean and 95\% confidence interval over 30 seeds).}
+\label{fig:curves}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\linewidth]{F5_critical_difference.pdf}
+\caption{Critical-difference diagram of mean Friedman ranks (final recall) over all objective--budget blocks.}
+\label{fig:cd}
+\end{figure}
+
+\subsection{What drives search efficiency: the geometry of the search space}
+The ablations (Figure~\ref{fig:ablations}, Table~\ref{SI-tab:ablations}) separate the representation from the communication structure. Replacing the chemistry-aware embedding with a geometry-only embedding (pore-limiting diameter, largest cavity diameter, density, volume and atom count) reduces O2 recall from \ablDefaultTwo{} to \decLoTwo--\decHiTwo{} ($p\decPTwo$, $\delta=\decDeltaTwo$). Within the geometry-only embedding, MOFGalaxyNet and randomized neighborhoods perform alike (difference \decTopDiffTwo{} on O2). Removing the neighbor term altogether ($\alpha=\beta=0$) changes O2 recall from \ablDefaultTwo{} to \ablNoNbTwo{} ($p\noNbPTwo$). Centrality type, mutation, synchronization, elite memory, population size, neighborhood radius, threshold $\phi$ and long-range fraction $\rho$ each shift recall by a few thousandths (smallest $p\ablMinP$ over \nAblTests{} ablation tests).
+
+Where the hits lie in the embedding explains this pattern (post hoc analysis; Tables~\ref{SI-tab:centerhits}--\ref{SI-tab:benchshift}). In the chemistry-aware embedding, \cbHitsOtwo\% of the O2 hits lie in the quarter of the pool closest to the embedding centroid, compared with \cbHitsOone\% for O1 and \cbHitsOfour\% for O4; in the geometry-only embedding the share for O2 is \cbHitsGeoOtwo\%, close to the 25\% expected by chance. A policy that uses no property values and simply evaluates the MOFs closest to the centroid recovers \cbPolicyOtwoTwo{} of the O2 hits at a 2\% budget and \cbPolicyOtwoFive{} at 5\%, matching \gs{} (\gsOtwoTwo{} and \gsOtwoFive{}), and recovers \cbPolicyOoneFive{} of the O1 and O4 hits. SOCIAL's own evaluations concentrate near the centroid: the median distance percentile of its evaluations in the last third of a run is \cbConLateGs{} for \gs{} and \cbConLateWs{} for SOCIAL-WS (0 = most central), compared with \cbConLateRand{} for random search and \cbConLateTs{} and \cbConLateGp{} for ensemble Thompson sampling and GP-EI. This follows from SOCIAL's update, a convex combination of current positions followed by synchronization with the population mean, which contracts the population toward its centroid. A synthetic control on the classic benchmark functions confirms the mechanism: moving the optimum away from the center of the box increases the final error more than tenfold on \benchWorseCode{} of \benchNfun{} scalable functions for the published SOCIAL implementation and on \benchWorseAlg{} for SOCIAL as specified in its algorithm, compared with \benchWorseDe{} for DE and \benchWorseCma{} for CMA-ES. The chemistry-aware embedding therefore matters for \gs{} because it places the lowest-gap MOFs near the center of the search space, toward which SOCIAL converges.
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{F6_ablations.pdf}
+\caption{Ablations of \gs{} on O2 and O3 at a 2\% budget (final recall, mean and 95\% confidence interval over 30 seeds); the default configuration is highlighted.}
+\label{fig:ablations}
+\end{figure}
+
+\subsection{Building-block duplicates}
+Between \bbDupFracLo\% and \bbDupFracHi\% of each objective's hits belong to duplicate groups, and the hit sets span \bbGroupsLo--\bbGroupsHi{} distinct building blocks (Tables~\ref{SI-tab:bbcomp} and \ref{SI-tab:bb}). Counting hits once per building block, evaluated at the 2\% and 5\% budgets, preserves the conclusions: the rank correlation between ordinary and unique-building-block recall across methods is at least \bbRankCorrMin{}, and the best method is the same under both metrics in \bbTopSame{} of \bbCells{} objective--budget cells.
+
+\subsection{RQ2: bridge MOFs}
+Over all benchmark runs, \hThreeN{} \gs{} evaluations found the first hit of a Leiden community while having a top-weighted neighbor. In \hThreeRate\% of them that neighbor was in the top betweenness decile, compared with a base rate of \hThreeBase\% over all \hThreeBaseN{} update evaluations (one-sided binomial $p\hThreeP$). The answer to RQ2 is that new chemical families are reached through high-betweenness neighbors at about the overall rate; centrality shapes whom agents listen to, as intended, without acting as a privileged route to new families.
+
+\subsection{Computational cost}
+The median wall-clock time per run, excluding property look-ups, is \rtGs~s for \gs{} (maximum \rtGsMax~s), compared with \rtGp~s for GP-EI and \rtTs~s for ensemble Thompson sampling (maxima \rtGpMax{} and \rtTsMax~s at 5\% budgets; Table~\ref{SI-tab:runtime}). \gs{} is slower than the snap-based DE, PSO and GA but needs \rtRatioLo--\rtRatioHi{} times less computation than the surrogate-based methods. With DFT as the oracle, these costs are small compared with a single property evaluation.
+
+\subsection{Discussion}
+
+\paragraph{What drives search efficiency.}
+For \gs{}, search efficiency follows from the geometry of the search space: the population contracts toward the centroid of the embedding, so the method is efficient when the target MOFs lie near that centroid (O2) and approaches random search when they lie at the periphery (O1, O4). Model-based acquisition (ensemble Thompson sampling, GP-EI), whose evaluations reach the periphery of the embedding, finds hits wherever they lie, and on the synthetic benchmark-function control CMA-ES is unaffected by the position of the optimum. The communication topology adds a small, objective-dependent increment, and because agents average embedding coordinates, a similarity graph largely re-expresses information that the embedding already contains.
+
+\paragraph{Implications for SOCIAL.}
+The study clarifies how SOCIAL is best used on chemical spaces. Its learning rules transfer directly to finite-pool acquisition, and its centrality weighting retains interpretive value: it makes explicit which MOFs agents learn from and where the network places bridges between chemical families, and community-aware mutation links SOCIAL's diversity mechanism to the family structure of the network. The convex-combination update and synchronization with the population mean give SOCIAL a strong pull toward the population centroid. This pull is an asset when good solutions lie near the center of the search space and a liability when they lie near its boundary; the classic benchmark functions place most optima at the center of a symmetric box. Evaluations of SOCIAL, and of related population methods, therefore benefit from centroid-shift controls and shifted, rotated benchmark suites, and applications benefit from checking where promising candidates lie relative to the center of the search space.
+
+\paragraph{Homophily as a design signal.}
+Strong homophily shows that the similarity network captures property-relevant structure and is a useful diagnostic before any search. For the network to add value beyond the embedding, it must also connect families that the embedding separates; much of the observed homophily stems from building-block duplicates within near-cliques. Networks built from complementary information, such as node chemistry, topology codes or pore geometry, are natural candidates.
+
+\paragraph{Practical guidance for budget-limited MOF screening.}
+Four recommendations follow. First, use a surrogate model when its cost is acceptable; ensemble Thompson sampling gives the highest recall here at a modest per-step cost. Second, check where promising candidates lie in the search space, for example with a centroid-only policy as a reference, before attributing gains to an optimizer. Third, when a model-free policy is preferred, choose methods whose behavior does not depend on where the optimum lies (CMA-ES was unaffected in the synthetic control), verify this with a centroid-shift control, and treat the choice of communication graph as a secondary design decision. Fourth, invest in the representation, since its geometry determines which candidates any search policy reaches easily. Reporting unique-building-block recall alongside ordinary recall guards against inflated counts from duplicates.
+
+\paragraph{Limitations.}
+The oracle is a database look-up, and the results transfer to DFT campaigns only to the extent that the single-linker, single-metal subset (\nPool{} of \nQmofAll{} QMOF entries) is representative. The topology was varied while the embedding and all SOCIAL defaults were held fixed; couplings that move agents along graph edges might use the topology differently. The ensemble Thompson sampler uses random forests rather than graph neural networks, which may understate model-based acquisition. The topology comparisons are underpowered for effects of the observed size: the pilot did not reach the pre-specified significance threshold, against the randomized topology, the 30-seed comparisons reach a power of \topPowTwo{} (O2) and \topPowThree{} (O3) for MOFGalaxyNet and of \topRhoPowTwo{} (O2) and \topRhoPowThree{} (O3) for the long-range variant; 80\% power would require about \topNeightyTwo{} seeds for MOFGalaxyNet on O2 (on O3 the required number is \topNeightyThree{}) and \topRhoNeightyTwo{} and \topRhoNeightyThree{} seeds for the long-range variant on O2 and O3; none of the topology comparisons survives correction for the \nTopTests{} topology tests, so small topology effects cannot be excluded. RQ2 did not show enrichment of bridge neighbors. The center-bias analyses were conceived after the benchmark results were known and are therefore exploratory, and the benchmark-function control used 30,000 evaluations per run rather than the larger budgets of the original SOCIAL study. The metal descriptors come from \texttt{mendeleev} with zero electron affinity for elements with an unbound anion, which differs from the descriptor source of the original MOFGalaxyNet.
+
+\section{Conclusions}
+Starting from our SOCIAL optimizer, we replaced its synthetic communication graph by a chemically meaningful MOF similarity network and benchmarked the resulting policy for budget-limited band-gap screening. The network is strongly band-gap homophilous, but the geometry of the search space, not the communication topology, governs the efficiency of social-network optimization: SOCIAL contracts toward the centroid of the embedding and is efficient when the target MOFs lie there. Ensemble Thompson sampling sets the bar for recall, and centroid-shift controls offer a simple test of whether an optimizer's gains generalize. Promising next steps are agents that move along graph edges, combinations of graph communication with surrogate models, and representations designed with the location of target candidates in mind. The open benchmark provides a common ground for testing such designs.
+
+\section{Data and Software Availability}
+QMOF version 18 is available from Figshare (DOI: 10.6084/m9.figshare.13147324). The original MOFGalaxyNet data are available at \url{https://github.com/MehrdadJalali-KIT/MOFGalaxyNet}. All code, configurations, evaluation logs and statistical outputs needed to reproduce this study are available at \url{https://github.com/MehrdadJalali-AI/SOCIAL-Graph} and archived at Zenodo (DOI: \placeholder{Zenodo DOI to be added}).
+
+\begin{suppinfo}
+The Supporting Information is available free of charge: decision criteria and outcomes; MOFGalaxyNet recipe comparison; QMOF filtering counts; full benchmark results; pairwise comparisons; ablations and topology comparisons with effect sizes and power; random search against its analytical expectation; unique-building-block recall; runtime; notes on the O3 and GP-EI formulations; implementation details (PDF).
+\end{suppinfo}
+
+\begin{acknowledgement}
+\placeholder{Funding and acknowledgments to be completed by the authors.}
+\end{acknowledgement}
+
+\section*{Author Information}
+\paragraph{Corresponding Author} Mehrdad Jalali, mehrdad.jalali@srh.de.
+\paragraph{Author Contributions} \placeholder{To be completed by the authors.}
+\paragraph{Notes} \placeholder{Conflicts of interest to be confirmed by the authors.}
+\paragraph{Use of AI-assisted technologies} \placeholder{To be completed by the authors in line with the journal's policy. Draft: The research software and the first draft of this manuscript were prepared with the assistance of an AI coding assistant (Claude, Anthropic); the authors reviewed and edited all content and take full responsibility for it.}
+
+\bibliography{references}
+
+\end{document}

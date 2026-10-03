@@ -16,7 +16,8 @@ from ..graph.topologies import Topology
 from ..store import Store, graph_name
 from . import GateResult
 
-BASELINE_ORDER = ["random", "greedy_walk", "gp_ei", "ensemble_ts", "de", "pso", "ga", "social_ws", "static_diverse"]
+BASELINE_ORDER = ["random", "greedy_walk", "gp_ei", "ensemble_ts", "de", "pso", "ga", "cmaes", "social_ws",
+                  "static_diverse"]
 
 
 def _write(tab: pd.DataFrame, tables, name: str, floatfmt: str = ".4g") -> str:
@@ -201,7 +202,7 @@ TOPOLOGY_PAIRS = [
     ("topology (a) MOFGalaxyNet", "topology (c) degree-preserving random"),
     ("topology (b) +ρ=0.10", "topology (c) degree-preserving random"),
     ("topology (a) MOFGalaxyNet", "topology (d) Watts–Strogatz"),
-    ("decoupled embedding, topology (a) MOFGalaxyNet", "decoupled embedding, topology (c) degree-preserving random"),
+    ("geometry-only embedding, topology (a) MOFGalaxyNet", "geometry-only embedding, topology (c) degree-preserving random"),
     ("default", "no neighbor term (α=β=0)"),
 ]
 PILOT_PAIRS = [("MOFGalaxyNet", "degree-preserving random"), ("MOFGalaxyNet+ρ=0.10", "degree-preserving random"),

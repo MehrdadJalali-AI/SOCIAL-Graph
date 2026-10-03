@@ -1,0 +1,262 @@
+\documentclass[journal=jcisd8,manuscript=suppinfo]{achemso}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{longtable}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\graphicspath{{../results/figures/}}
+\input{numbers}
+\newcommand{\gs}{Graph-SOCIAL}
+
+\author{Mehrdad Jalali}
+\email{mehrdad.jalali@srh.de}
+\affiliation{Institute of Functional Interfaces (IFG), Karlsruhe Institute of Technology (KIT), 76344 Eggenstein-Leopoldshafen, Germany}
+\alsoaffiliation{Applied Data Science and Artificial Intelligence, SRH University Heidelberg, 69123 Heidelberg, Germany}
+\author{Binh Vu}
+\affiliation{Applied Data Science and Artificial Intelligence, SRH University Heidelberg, 69123 Heidelberg, Germany}
+\alsoaffiliation{Faculty of Mathematics and Computer Science, University of Hagen, 58097 Hagen, Germany}
+\author{Swati Chandna}
+\affiliation{Applied Data Science and Artificial Intelligence, SRH University Heidelberg, 69123 Heidelberg, Germany}
+\author{Mohammad H. Nadimi-Shahraki}
+\affiliation{International Graduate School of Artificial Intelligence, National Yunlin University of Science and Technology, Douliu, Yunlin 640301, Taiwan}
+
+\title{Supporting Information for: Chemistry-Aware Embeddings Drive Budget-Limited Discovery of Metal--Organic Frameworks: A Benchmark of Social-Network Optimization on QMOF}
+
+\begin{document}
+\ifdefined\provisionalbuild\noindent\textcolor{red}{\textbf{PROVISIONAL BUILD: \provisionalbuild{} runs missing; numbers are not final.}}\fi
+
+\section{Study design and decision criteria}
+
+\begin{table}[h]
+\caption{Pre-specified decision criteria and outcomes. Every analysis was carried through to completion.}
+\label{tab:decision}
+\small
+\begin{tabular}{@{}p{5.2cm}p{9.3cm}@{}}
+\toprule
+Criterion & Outcome \\
+\midrule
+Reproduce the published MOFGalaxyNet statistics (\reproPub{} edges, mean degree \reproPubDeg{}) at $\phi=0.9$ within $\pm5\%$ & With the recipe of eq~1 of the main text: \reproSpecNine{} edges (\reproSpecPct\%); released matrix: \reproReleasedNine{} edges (\reproReleasedPct\%). The published statistics correspond to $\phi\approx0.7$ under the released implementation (\reproReleasedSeven{} edges, $+$\reproReleasedSevenPct\%). Criterion not met; the recipe of eq~1 was kept. \\
+At least 3000 MOFs after filtering & \nPool{} MOFs. Criterion met. \\
+PBE-gap homophily above degree-preserving nulls ($p<0.01$) at some $\phi$ & $r=\homRmin$--\homRmax{} at all three thresholds, empirical $p$ at its floor (1/101). Criterion met. \\
+In the pilot (O2, 2\% budget, 10 seeds), a MOFGalaxyNet variant exceeds the degree-preserving random topology in final recall (one-sided paired Wilcoxon $p<0.05$) & $p\pilPDeg$ (MOFGalaxyNet) and $p\pilPRho$ ($\rho=0.10$). Criterion not met; the full benchmark and the ablations were run with unchanged hyperparameters, and the $\rho=0.10$ variant (highest pilot mean) was used. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Reconstruction of MOFGalaxyNet}
+
+\begin{table}[h]
+\caption{Edges of the original 2000-MOF MOFGalaxyNet under twelve similarity recipes and the released adjacency matrix. MAE: mean absolute deviation from the released weighted adjacency matrix; last column: threshold at which each recipe yields \reproPub{} edges.}
+\label{tab:repro}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/repro}\end{adjustbox}
+\end{table}
+
+The released implementation computes linker similarity with RDKit path fingerprints and combines it as $\mathrm{SIM}=0.9\,T+0.1\cos$; this reproduces the released matrix with a mean absolute deviation of \reproMae{}. Metal descriptors from \texttt{mendeleev} and \texttt{mordredcommunity} change edge counts by about 2\%. Recommended parameters for database-scale work are Morgan fingerprints (radius 2, 2048 bits), eq~1 of the main text and $\phi=0.7$, reported together with the resulting edge count and mean degree.
+
+\section{Data}
+
+\begin{table}[h]
+\caption{QMOF filtering (version 18).}
+\label{tab:filters}
+\small
+\input{tables/filters}
+\end{table}
+
+\begin{table}[h]
+\caption{Search topologies over the \nPool{} QMOF MOFs. $\bar C$: mean local clustering coefficient; $\ell_{\mathrm{giant}}$: mean shortest path length in the giant component.}
+\label{tab:graphs}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/graphs}\end{adjustbox}
+\end{table}
+
+\begin{table}[h]
+\caption{Band-gap homophily against \homNrand{} degree-preserving null graphs per row.}
+\label{tab:homophily}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/homophily}\end{adjustbox}
+\end{table}
+
+\section{Objective O3 and GP-EI configuration}
+O3 is formulated as a target-value objective, $f=|\mathrm{gap}-2.0\ \mathrm{eV}|$; it replaced a window-based formulation, $f=\max(0,1.5-\mathrm{gap},\mathrm{gap}-2.5)$, which is flat inside the window and therefore could not distinguish the hits (the MOFs closest to 2.0~eV) from other in-window MOFs. The hit set is identical under both formulations.
+
+GP-EI uses a constant $\times$ Mat\'ern-5/2 kernel with automatic relevance determination (32 length scales) plus white noise, normalized targets, hyperparameters re-optimized every ten evaluations with five optimizer restarts (the first start initialized at the previous fit), conditioning on all observations after every evaluation, and expected improvement for minimization with $\xi=0.01$ and the best observed value as incumbent; it replaced a simpler configuration with an isotropic length scale and a single optimizer start. Re-optimizing hyperparameters every ten evaluations rather than after every evaluation reduced the cost per run by more than an order of magnitude; on the same seeds, it gave equal recall from the 2\% budget upward and slightly lower recall at the two smallest budgets for O1 and O4 (Table~\ref{tab:gprefit}).
+
+\begin{table}[h]
+\caption{GP-EI final recall with hyperparameters re-optimized after every evaluation versus every ten evaluations (same 30 seeds; two-sided paired Wilcoxon). Budgets of 0.5--2\%.}
+\label{tab:gprefit}
+\small
+\input{tables/gp_refit}
+\end{table}
+
+\section{Full benchmark}
+
+\begingroup\scriptsize\setlength{\tabcolsep}{2pt}
+\input{tables/main_full}
+\endgroup
+
+\begin{table}[h]
+\caption{Hit sets (1\% of each objective's pool with the lowest objective value).}
+\label{tab:hits}
+\small
+\input{tables/hits}
+\end{table}
+
+\begin{table}[h]
+\caption{\gs{} (GS) against each baseline: number of the \nCells{} objective--budget cells in which GS is significantly better, not significantly different or significantly worse (paired Wilcoxon, Holm-corrected, final recall), with Cliff's $\delta$; and mean Friedman ranks.}
+\label{tab:pairwise}
+\small
+\input{tables/pairwise}\qquad\input{tables/ranks}
+\end{table}
+
+\begin{table}[h]
+\caption{Random search against its analytical expectation ($E[\mathrm{recall}]=B/N$; exact two-sided test on the total number of hits over 30 seeds).}
+\label{tab:random}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/random_check}\end{adjustbox}
+\end{table}
+
+\section{Ablations and topology comparisons}
+
+\begin{table}[h]
+\caption{Ablations (2\% budget, 30 seeds): final recall, two-sided paired Wilcoxon $p$ and Cliff's $\delta$ against the default configuration (MOFGalaxyNet($\phi^\ast$) with $\rho=0.10$), uncorrected.}
+\label{tab:ablations}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/ablations}\end{adjustbox}
+\end{table}
+
+\begin{table}[h]
+\caption{Topology comparisons with effect sizes and achieved power (one-sided paired Wilcoxon, A $>$ B, uncorrected). Power$_t$: paired $t$-test at the observed $d_z$; Power$_W$: bootstrap Wilcoxon (2000 resamples); $n_{80}$: seeds needed for 80\% power at the observed $d_z$.}
+\label{tab:power}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/topology_power}\end{adjustbox}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\linewidth]{F7_phi_rho_heatmap.pdf}
+\caption{Mean final recall of \gs{} over threshold $\phi$ and long-range fraction $\rho$ (2\% budget, 30 seeds).}
+\end{figure}
+
+\section{Position of hits and center bias (post hoc)}
+
+These analyses were conceived after the benchmark results were known. Distances are measured to the centroid of the embedding; a MOF's distance percentile is the fraction of the pool at least as close to the centroid (0 = most central).
+
+\begin{table}[h]
+\caption{Share of each objective's hits in the quarter of the pool closest to the embedding centroid (25\% expected by chance) and median hit percentile, for the chemistry-aware and the geometry-only embedding.}
+\label{tab:centerhits}
+\small
+\input{tables/center_hits}
+\end{table}
+
+\begin{table}[h]
+\caption{Final top-1\% recall of a centroid-only policy, which evaluates the $B$ MOFs closest to the centroid of the chemistry-aware embedding without using any property values, compared with \gs{} and random search (means over 30 seeds).}
+\label{tab:centerbaseline}
+\small
+\input{tables/center_baseline}
+\end{table}
+
+\begin{table}[h]
+\caption{Median distance percentile of each method's evaluations in the first and last thirds of a run (after the initial design), averaged over objectives and seeds at a 2\% budget.}
+\label{tab:centercontraction}
+\small
+\input{tables/center_contraction}
+\end{table}
+
+\begin{table}[h]
+\caption{Synthetic control on the scalable classic benchmark functions ($D=30$, 30,000 evaluations, 10 seeds; definitions and bounds as used in the original SOCIAL study): median final error with the optimum at its usual position (centered) and with every coordinate of the optimum moved by $\pm0.6$ of the half-range (shifted). SOCIAL (code) is the published implementation with its default configuration; SOCIAL (Alg.~1) follows the published algorithm and default parameters. Schwefel 2.26 is excluded because its minimum depends on the dimension, so the error relative to a fixed reference value is not meaningful.}
+\label{tab:benchshift}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/bench_shift}\end{adjustbox}
+\end{table}
+
+\section{Unique-building-block recall}
+
+\begin{table}[h]
+\caption{Composition of the hit sets with respect to building blocks (identical linker and metal).}
+\label{tab:bbcomp}
+\small
+\input{tables/bb_composition}
+\end{table}
+
+\begin{table}[h]
+\caption{Unique-building-block recall (hits counted once per distinct building block) and ordinary final recall, mean $\pm$ standard deviation over 30 seeds.}
+\label{tab:bb}
+\scriptsize
+\begin{adjustbox}{max width=\linewidth}\input{tables/bb_recall}\end{adjustbox}
+\end{table}
+
+\section{Bridge MOFs and runtime}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.45\linewidth]{F8_h3_bridge_nodes.pdf}
+\caption{Share of evaluations whose top-weighted neighbor lies in the top betweenness decile: first hits in a Leiden community versus all \gs{} update evaluations.}
+\end{figure}
+
+\begin{table}[h]
+\caption{Wall-clock time per run in seconds, excluding property look-ups (all objectives and budgets).}
+\label{tab:runtime}
+\small
+\input{tables/runtime}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\linewidth]{F4_coverage_vs_recall.pdf}
+\caption{Family coverage versus final recall (method means per objective).}
+\end{figure}
+
+\section{SOCIAL hyperparameters}
+
+\begin{table}[h]
+\caption{Default hyperparameters of SOCIAL (Table~2 of Jalali et al., \textit{Appl. Soft Comput.} 2026, 194, 114914) and the settings of \gs{} and of the SOCIAL-WS baseline in this study.}
+\label{tab:socialparams}
+\footnotesize
+\begin{tabular}{@{}p{4.6cm}p{3.0cm}p{6.6cm}@{}}
+\toprule
+Parameter & SOCIAL default & This study \\
+\midrule
+Population size & 200 & $P=10$ (sensitivity: 5, 20) \\
+Iterations & 2500 & $T=\lfloor B/P\rfloor$ for the evaluation budget $B$ \\
+Communication graph & Watts--Strogatz, $K=4$, $p=0.3$ & \gs{}: MOF similarity network, $h=2$ hops; SOCIAL-WS: as in SOCIAL \\
+$\alpha$, $\beta$, $\gamma$, $\delta$ & 0.4, 0.4, 0.2, 0.2 & unchanged \\
+Mutation probability $p_m$ & 0.1 & unchanged \\
+Mutation strength & 0.1 (base), 0.01 (minimum) & SOCIAL-WS: unchanged; \gs{}: jump to the least-explored community \\
+Synchronization weight $\omega$ & 0.05 & unchanged \\
+Centrality & betweenness, recomputed every 10 iterations & betweenness of the MOF in the network, precomputed (degree and PageRank as ablations) \\
+Stopping & iteration limit and early stopping & fixed evaluation budget \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Implementation details}
+
+\begin{table}[h]
+\caption{Implementation choices.}
+\label{tab:impl}
+\footnotesize
+\begin{tabular}{@{}p{3.3cm}p{11.2cm}@{}}
+\toprule
+Item & Choice \\
+\midrule
+Metal descriptors & \texttt{mendeleev} database; elements with an unbound anion (Cd, Er, Gd, Hg, Ho, Mg, Mn, Np, Pu, Sm, Th, U, Zn) assigned an electron affinity of 0~eV. \\
+Embedding & Fingerprint and metal blocks standardized, each scaled to unit total variance, weighted 0.7/0.3, reduced to 32 dimensions by principal component analysis. \\
+Centralities & Max-normalized to $[0,1]$ so that $\alpha_tc_j$ and $\beta_tI_j$ are commensurate; betweenness from 1000 sampled sources. \\
+Long-range edges & Uniformly random pairs whose endpoints lie in different Leiden communities. \\
+Communities & The Leiden partition of MOFGalaxyNet($\phi^\ast$) is used in all runs, for community-aware mutation and for family coverage. \\
+Isolated agents & Updated with the global-best and elite terms only. \\
+Remaining budget & $B-\lfloor B/P\rfloor P$ evaluations go to the unevaluated MOFs nearest the elite (also for DE, PSO and GA). \\
+Minimum budget & $\max(\lceil bN\rceil,40)$ evaluations for budget fraction $b$; this raises the 0.5\% budget of O4 to 40 evaluations (0.75\% of its pool). \\
+Greedy walk & Random unevaluated neighbor of the best evaluated MOF that still has one; random restart otherwise. \\
+Ensemble TS & Ten bootstrap random forests (100 trees); at each step one member is drawn and fitted on its own bootstrap resample. \\
+GA & Binary tournament selection, uniform crossover, Gaussian mutation (per-gene probability $1/D$, $\sigma=0.1$ of the range), one elite. \\
+Bridge analysis & Event: first hit found in a Leiden community during a run; base rate over all \gs{} update evaluations; one-sided binomial test. \\
+Statistics & Wilcoxon tests on paired differences rounded to $10^{-10}$ so that tied recall values (multiples of $1/K$) are ranked identically. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

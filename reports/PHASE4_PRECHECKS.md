@@ -25,4 +25,4 @@ For each node with at least one neighbour: the correlation between its band gap 
 
 Within-group spread well below the global spread means that much of the graph homophily comes from building-block duplicates (near-cliques of identical linker and metal).
 
-Figure: `phase4_homophily.png`. Runtime 400 s.
+Figure: `phase4_homophily.png`. Runtime 280 s.

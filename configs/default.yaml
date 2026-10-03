@@ -85,6 +85,6 @@ phase6:
 phase7:
   objectives: [O1, O2, O3, O4]
   budgets: [0.005, 0.01, 0.02, 0.05]
-  methods: [graph_social, random, greedy_walk, gp_ei, ensemble_ts, de, pso, ga, social_ws, static_diverse]
+  methods: [graph_social, random, greedy_walk, gp_ei, ensemble_ts, de, pso, ga, social_ws, static_diverse, cmaes]
   ablation_objectives: [O2, O3]
   ablation_budget: 0.02

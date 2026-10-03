@@ -1,0 +1,11 @@
+seed,pilot_key,benchmark_key,same_key,stored_recall,recomputed_recall,hits_found
+0,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s0,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s0,True,0.011494252873563218,0.011494252873563218,1
+1,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s1,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s1,True,0.011494252873563218,0.011494252873563218,1
+2,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s2,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s2,True,0.0,0.0,0
+3,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s3,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s3,True,0.0,0.0,0
+4,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s4,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s4,True,0.022988505747126436,0.022988505747126436,2
+5,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s5,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s5,True,0.022988505747126436,0.022988505747126436,2
+6,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s6,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s6,True,0.011494252873563218,0.011494252873563218,1
+7,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s7,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s7,True,0.011494252873563218,0.011494252873563218,1
+8,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s8,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s8,True,0.011494252873563218,0.011494252873563218,1
+9,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s9,random__topo=mgn_phi0.70__O2__b0.02__P10__c0.70__s9,True,0.011494252873563218,0.011494252873563218,1

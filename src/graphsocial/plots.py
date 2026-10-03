@@ -11,8 +11,17 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
+DISPLAY = {"graph_social": "Graph-SOCIAL", "random": "Random", "greedy_walk": "Greedy walk", "gp_ei": "GP-EI",
+           "ensemble_ts": "Ensemble TS", "de": "DE", "pso": "PSO", "ga": "GA", "social_ws": "SOCIAL-WS",
+           "static_diverse": "Static diverse", "cmaes": "CMA-ES"}
+
+
+def display(name: str) -> str:
+    return DISPLAY.get(name, name)
+
+
 PALETTE = ["#2563eb", "#dc2626", "#059669", "#d97706", "#7c3aed", "#0891b2", "#db2777", "#65a30d",
-           "#475569", "#b45309", "#1e3a8a"]
+           "#475569", "#b45309", "#1e3a8a", "#be185d"]
 
 
 def save(fig: plt.Figure, stem: Path) -> None:
@@ -80,7 +89,7 @@ def recall_curves(curves: dict[str, np.ndarray], stem: Path, title: str = "", ax
         if arr.shape[0] > 1:
             h = stats.t.ppf(0.975, arr.shape[0] - 1) * arr.std(axis=0, ddof=1) / np.sqrt(arr.shape[0])
             ax.fill_between(x, np.clip(m - h, 0, 1), np.clip(m + h, 0, 1), color=c, alpha=0.15, lw=0)
-        ax.plot(x, m, color=c, label=label, lw=1.5)
+        ax.plot(x, m, color=c, label=display(label), lw=1.5)
     ax.set_xlabel("evaluations")
     ax.set_ylabel("top-1% recall")
     ax.set_title(title, fontsize=9)
@@ -127,7 +136,7 @@ def coverage_vs_recall(means: pd.DataFrame, stem: Path) -> None:
             ax.scatter(r.final_recall, r.family_coverage, color=PALETTE[methods.index(r.method) % len(PALETTE)],
                        marker=markers[oi % 4], s=40)
     for mi, m in enumerate(methods):
-        ax.scatter([], [], color=PALETTE[mi % len(PALETTE)], label=m)
+        ax.scatter([], [], color=PALETTE[mi % len(PALETTE)], label=display(m))
     for oi, obj in enumerate(sorted(means.objective.unique())):
         ax.scatter([], [], color="k", marker=markers[oi % 4], label=obj)
     ax.set_xlabel("final top-1% recall (mean)")
@@ -141,6 +150,8 @@ def cd_diagram(ranks: pd.Series, nemenyi: pd.DataFrame, stem: Path) -> None:
     import scikit_posthocs as sp
 
     fig, ax = plt.subplots(figsize=(8, 3))
+    ranks = ranks.rename(index=display)
+    nemenyi = nemenyi.rename(index=display, columns=display)
     sp.critical_difference_diagram(ranks, nemenyi, ax=ax)
     save(fig, stem)
 
@@ -164,7 +175,8 @@ def ablation_bars(tab: pd.DataFrame, stem: Path) -> None:
 
 def heatmap(grids: dict[str, pd.DataFrame], stem: Path) -> None:
     """F7: phi x rho heatmaps of mean final recall, one per objective."""
-    fig, axes = plt.subplots(1, len(grids), figsize=(4.2 * len(grids), 3.4), squeeze=False)
+    fig, axes = plt.subplots(1, len(grids), figsize=(4.8 * len(grids), 3.4), squeeze=False)
+    fig.subplots_adjust(wspace=0.55)
     for ax, (obj, g) in zip(axes[0], grids.items()):
         im = ax.imshow(g.to_numpy(), cmap="viridis", aspect="auto")
         ax.set_xticks(range(g.shape[1]), [f"{c:.2f}" for c in g.columns])
@@ -174,7 +186,8 @@ def heatmap(grids: dict[str, pd.DataFrame], stem: Path) -> None:
         for (i, j), v in np.ndenumerate(g.to_numpy()):
             ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=7, color="w")
         ax.set_title(obj, fontsize=9)
-        fig.colorbar(im, ax=ax, fraction=0.046)
+        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.06)
+        cb.set_label("mean final recall", fontsize=8)
     save(fig, stem)
 
 
@@ -191,7 +204,8 @@ def h3_bars(rate_new: float, n_new: int, rate_base: float, n_base: int, p: float
 def runtime_box(df: pd.DataFrame, stem: Path) -> None:
     order = df.groupby("method")["wall_time_s"].median().sort_values().index
     fig, ax = plt.subplots(figsize=(7, 4))
-    ax.boxplot([df[df.method == m]["wall_time_s"] for m in order], tick_labels=list(order), showfliers=False)
+    ax.boxplot([df[df.method == m]["wall_time_s"] for m in order], tick_labels=[display(m) for m in order],
+               showfliers=False)
     ax.set_yscale("log")
     ax.set_ylabel("wall-clock per run (s, excl. oracle)")
     ax.tick_params(axis="x", rotation=45, labelsize=8)

@@ -1,6 +1,6 @@
 # Graph-SOCIAL — Results
 
-Generated 2026-10-03T22:14:59.
+Generated 2026-10-03T22:41:27.
 φ* = 0.7; Graph-SOCIAL search topology = `mgn_phi0.70_rho0.10`.
 Every number is a mean ± std over seeds 0–29 unless stated otherwise.
 
@@ -14,7 +14,7 @@ Every number is a mean ± std over seeds 0–29 unless stated otherwise.
 | 4 | PASS | PBE homophily significant (p<0.01) at φ ∈ [0.7, 0.8, 0.9]; strongest at φ*=0.7 |
 | 5 | PASS | 10 methods; invariants hold (O2, budget 174, φ=0.7) |
 | 6 | FAIL | no MOFGalaxyNet variant beats the random topology at p<0.05 (p = 0.195, 0.0869) |
-| 7 | n/a | 4800 benchmark runs, 1380 ablation and 720 sensitivity specs (6360 unique runs); objectives ['O1', 'O2', 'O3', 'O4'] |
+| 7 | n/a | 5280 benchmark runs, 1380 ablation and 720 sensitivity specs (6840 unique runs); objectives ['O1', 'O2', 'O3', 'O4'] |
 | 8 | None |  |
 
 Phase reports: [PHASE1_REPRODUCTION.md](reports/PHASE1_REPRODUCTION.md), [PHASE2_DATA.md](reports/PHASE2_DATA.md), [PHASE3_GRAPHS.md](reports/PHASE3_GRAPHS.md), [PHASE4_PRECHECKS.md](reports/PHASE4_PRECHECKS.md), [PHASE5_METHODS.md](reports/PHASE5_METHODS.md), [PHASE6_PILOT.md](reports/PHASE6_PILOT.md), [PHASE7_BENCHMARK.md](reports/PHASE7_BENCHMARK.md).
@@ -23,21 +23,21 @@ Phase reports: [PHASE1_REPRODUCTION.md](reports/PHASE1_REPRODUCTION.md), [PHASE2
 
 **H1 — a chemically meaningful MOFGalaxyNet topology beats a degree-preserving random topology — is not supported at pilot scale** (Gate 6 FAIL; `reports/PHASE6_PILOT.md`). By user decision, Phases 7–8 were run anyway with unchanged hyperparameters and defaults. The 30-seed topology comparison is reported below as observed.
 
-| scope                 | objective   | A                                              | B                                                          |   mean_A |   mean_B |   mean_diff |   p_wilcoxon_one_sided |   cliffs_delta |   n_pairs |      d_z |   power_t |   power_wilcoxon_boot |   n_for_80pct |
-|:----------------------|:------------|:-----------------------------------------------|:-----------------------------------------------------------|---------:|---------:|------------:|-----------------------:|---------------:|----------:|---------:|----------:|----------------------:|--------------:|
-| pilot (seeds 0–9)     | O2          | MOFGalaxyNet                                   | degree-preserving random                                   |  0.06322 | 0.04943  |   0.01379   |                0.1953  |        0.26    |        10 |  0.3682  | 0.2852    |                0.1915 |         46.99 |
-| pilot (seeds 0–9)     | O2          | MOFGalaxyNet+ρ=0.10                            | degree-preserving random                                   |  0.06437 | 0.04943  |   0.01494   |                0.08691 |        0.22    |        10 |  0.4797  | 0.4042    |                0.3735 |         28.27 |
-| pilot (seeds 0–9)     | O2          | MOFGalaxyNet                                   | Watts–Strogatz                                             |  0.06322 | 0.05862  |   0.004598  |                0.2988  |        0.14    |        10 |  0.157   | 0.1181    |                0.1195 |        252.1  |
-| ablation (seeds 0–29) | O2          | topology (a) MOFGalaxyNet                      | topology (c) degree-preserving random                      |  0.06015 | 0.05402  |   0.00613   |                0.1902  |        0.1467  |        30 |  0.1494  | 0.1989    |                0.232  |        278.3  |
-| ablation (seeds 0–29) | O2          | topology (b) +ρ=0.10                           | topology (c) degree-preserving random                      |  0.06322 | 0.05402  |   0.009195  |                0.09558 |        0.1756  |        30 |  0.2608  | 0.4015    |                0.3645 |         92.24 |
-| ablation (seeds 0–29) | O2          | topology (a) MOFGalaxyNet                      | topology (d) Watts–Strogatz                                |  0.06015 | 0.05632  |   0.003831  |                0.2599  |        0.07333 |        30 |  0.1068  | 0.1415    |                0.164  |        543.7  |
-| ablation (seeds 0–29) | O2          | decoupled embedding, topology (a) MOFGalaxyNet | decoupled embedding, topology (c) degree-preserving random |  0.01686 | 0.01916  |  -0.002299  |                0.6214  |       -0.1133  |        30 | -0.1143  | 0.01202   |                0.024  |        nan    |
-| ablation (seeds 0–29) | O2          | default                                        | no neighbor term (α=β=0)                                   |  0.06322 | 0.0567   |   0.006513  |                0.2097  |        0.1244  |        30 |  0.1446  | 0.1918    |                0.199  |        297    |
-| ablation (seeds 0–29) | O3          | topology (a) MOFGalaxyNet                      | topology (c) degree-preserving random                      |  0.01877 | 0.01916  |  -0.0003831 |                0.402   |       -0.02889 |        30 | -0.02194 | 0.03902   |                0.0755 |        nan    |
-| ablation (seeds 0–29) | O3          | topology (b) +ρ=0.10                           | topology (c) degree-preserving random                      |  0.02567 | 0.01916  |   0.006513  |                0.01338 |        0.2511  |        30 |  0.4258  | 0.7364    |                0.7725 |         35.5  |
-| ablation (seeds 0–29) | O3          | topology (a) MOFGalaxyNet                      | topology (d) Watts–Strogatz                                |  0.01877 | 0.0249   |  -0.00613   |                0.9581  |       -0.2689  |        30 | -0.3351  | 0.0002924 |                0.0005 |        nan    |
-| ablation (seeds 0–29) | O3          | decoupled embedding, topology (a) MOFGalaxyNet | decoupled embedding, topology (c) degree-preserving random |  0.01456 | 0.009579 |   0.004981  |                0.04819 |        0.1678  |        30 |  0.3321  | 0.5524    |                0.5525 |         57.43 |
-| ablation (seeds 0–29) | O3          | default                                        | no neighbor term (α=β=0)                                   |  0.02567 | 0.02107  |   0.004598  |                0.1922  |        0.1433  |        30 |  0.2043  | 0.2904    |                0.2075 |        149.5  |
+| scope                 | objective   | A                                                  | B                                                              |   mean_A |   mean_B |   mean_diff |   p_wilcoxon_one_sided |   cliffs_delta |   n_pairs |      d_z |   power_t |   power_wilcoxon_boot |   n_for_80pct |
+|:----------------------|:------------|:---------------------------------------------------|:---------------------------------------------------------------|---------:|---------:|------------:|-----------------------:|---------------:|----------:|---------:|----------:|----------------------:|--------------:|
+| pilot (seeds 0–9)     | O2          | MOFGalaxyNet                                       | degree-preserving random                                       |  0.06322 | 0.04943  |   0.01379   |                0.1953  |        0.26    |        10 |  0.3682  | 0.2852    |                0.1915 |         46.99 |
+| pilot (seeds 0–9)     | O2          | MOFGalaxyNet+ρ=0.10                                | degree-preserving random                                       |  0.06437 | 0.04943  |   0.01494   |                0.08691 |        0.22    |        10 |  0.4797  | 0.4042    |                0.3735 |         28.27 |
+| pilot (seeds 0–9)     | O2          | MOFGalaxyNet                                       | Watts–Strogatz                                                 |  0.06322 | 0.05862  |   0.004598  |                0.2988  |        0.14    |        10 |  0.157   | 0.1181    |                0.1195 |        252.1  |
+| ablation (seeds 0–29) | O2          | topology (a) MOFGalaxyNet                          | topology (c) degree-preserving random                          |  0.06015 | 0.05402  |   0.00613   |                0.1902  |        0.1467  |        30 |  0.1494  | 0.1989    |                0.232  |        278.3  |
+| ablation (seeds 0–29) | O2          | topology (b) +ρ=0.10                               | topology (c) degree-preserving random                          |  0.06322 | 0.05402  |   0.009195  |                0.09558 |        0.1756  |        30 |  0.2608  | 0.4015    |                0.3645 |         92.24 |
+| ablation (seeds 0–29) | O2          | topology (a) MOFGalaxyNet                          | topology (d) Watts–Strogatz                                    |  0.06015 | 0.05632  |   0.003831  |                0.2599  |        0.07333 |        30 |  0.1068  | 0.1415    |                0.164  |        543.7  |
+| ablation (seeds 0–29) | O2          | geometry-only embedding, topology (a) MOFGalaxyNet | geometry-only embedding, topology (c) degree-preserving random |  0.01686 | 0.01916  |  -0.002299  |                0.6214  |       -0.1133  |        30 | -0.1143  | 0.01202   |                0.024  |        nan    |
+| ablation (seeds 0–29) | O2          | default                                            | no neighbor term (α=β=0)                                       |  0.06322 | 0.0567   |   0.006513  |                0.2097  |        0.1244  |        30 |  0.1446  | 0.1918    |                0.199  |        297    |
+| ablation (seeds 0–29) | O3          | topology (a) MOFGalaxyNet                          | topology (c) degree-preserving random                          |  0.01877 | 0.01916  |  -0.0003831 |                0.402   |       -0.02889 |        30 | -0.02194 | 0.03902   |                0.0755 |        nan    |
+| ablation (seeds 0–29) | O3          | topology (b) +ρ=0.10                               | topology (c) degree-preserving random                          |  0.02567 | 0.01916  |   0.006513  |                0.01338 |        0.2511  |        30 |  0.4258  | 0.7364    |                0.7725 |         35.5  |
+| ablation (seeds 0–29) | O3          | topology (a) MOFGalaxyNet                          | topology (d) Watts–Strogatz                                    |  0.01877 | 0.0249   |  -0.00613   |                0.9581  |       -0.2689  |        30 | -0.3351  | 0.0002924 |                0.0005 |        nan    |
+| ablation (seeds 0–29) | O3          | geometry-only embedding, topology (a) MOFGalaxyNet | geometry-only embedding, topology (c) degree-preserving random |  0.01456 | 0.009579 |   0.004981  |                0.04819 |        0.1678  |        30 |  0.3321  | 0.5524    |                0.5525 |         57.43 |
+| ablation (seeds 0–29) | O3          | default                                            | no neighbor term (α=β=0)                                       |  0.02567 | 0.02107  |   0.004598  |                0.1922  |        0.1433  |        30 |  0.2043  | 0.2904    |                0.2075 |        149.5  |
 
 Columns: one-sided paired Wilcoxon on final top-1% recall (A > B); Cliff's delta (A vs B); d_z = mean/sd of the paired differences; achieved power of a one-sided paired t-test at α = 0.05 for the observed d_z (`power_t`), and the share of 2,000 bootstrap resamples in which the one-sided Wilcoxon test rejects (`power_wilcoxon_boot`); `n_for_80pct` = pairs needed for 80% t-test power at the observed d_z.
 
@@ -70,27 +70,28 @@ run, 2% budget). The benchmark-function shift test is in `reports/BENCH23_CENTER
 | geometry-only   | O3          |     87 |                          0.218 |                   0.548 |
 | geometry-only   | O4          |     54 |                          0.093 |                   0.658 |
 
-| objective   |   budget_frac |   budget |   centroid_policy_recall |
-|:------------|--------------:|---------:|-------------------------:|
-| O1          |        0.0050 |       44 |                   0.0000 |
-| O1          |        0.0100 |       87 |                   0.0000 |
-| O1          |        0.0200 |      174 |                   0.0000 |
-| O1          |        0.0500 |      435 |                   0.0000 |
-| O2          |        0.0050 |       44 |                   0.0345 |
-| O2          |        0.0100 |       87 |                   0.0575 |
-| O2          |        0.0200 |      174 |                   0.0690 |
-| O2          |        0.0500 |      435 |                   0.1609 |
-| O3          |        0.0050 |       44 |                   0.0115 |
-| O3          |        0.0100 |       87 |                   0.0115 |
-| O3          |        0.0200 |      174 |                   0.0115 |
-| O3          |        0.0500 |      435 |                   0.0345 |
-| O4          |        0.0050 |       40 |                   0.0000 |
-| O4          |        0.0100 |       54 |                   0.0000 |
-| O4          |        0.0200 |      108 |                   0.0000 |
-| O4          |        0.0500 |      268 |                   0.0000 |
+| objective   |   budget_frac |   budget |   centroid_policy_recall |   centroid_policy_recall_std |   centroid_policy_no_init_recall |
+|:------------|--------------:|---------:|-------------------------:|-----------------------------:|---------------------------------:|
+| O1          |        0.0050 |       44 |                   0.0011 |                       0.0046 |                           0.0000 |
+| O1          |        0.0100 |       87 |                   0.0011 |                       0.0046 |                           0.0000 |
+| O1          |        0.0200 |      174 |                   0.0011 |                       0.0046 |                           0.0000 |
+| O1          |        0.0500 |      435 |                   0.0011 |                       0.0046 |                           0.0000 |
+| O2          |        0.0050 |       44 |                   0.0123 |                       0.0029 |                           0.0345 |
+| O2          |        0.0100 |       87 |                   0.0582 |                       0.0029 |                           0.0575 |
+| O2          |        0.0200 |      174 |                   0.0697 |                       0.0029 |                           0.0690 |
+| O2          |        0.0500 |      435 |                   0.1617 |                       0.0029 |                           0.1609 |
+| O3          |        0.0050 |       44 |                   0.0115 |                       0.0000 |                           0.0115 |
+| O3          |        0.0100 |       87 |                   0.0115 |                       0.0000 |                           0.0115 |
+| O3          |        0.0200 |      174 |                   0.0115 |                       0.0000 |                           0.0115 |
+| O3          |        0.0500 |      435 |                   0.0345 |                       0.0000 |                           0.0345 |
+| O4          |        0.0050 |       40 |                   0.0019 |                       0.0057 |                           0.0000 |
+| O4          |        0.0100 |       54 |                   0.0019 |                       0.0057 |                           0.0000 |
+| O4          |        0.0200 |      108 |                   0.0019 |                       0.0057 |                           0.0000 |
+| O4          |        0.0500 |      268 |                   0.0019 |                       0.0057 |                           0.0000 |
 
 | method         |   early_median_percentile |   late_median_percentile |
 |:---------------|--------------------------:|-------------------------:|
+| cmaes          |                     0.685 |                    0.486 |
 | de             |                     0.466 |                    0.430 |
 | ensemble_ts    |                     0.626 |                    0.580 |
 | ga             |                     0.388 |                    0.390 |
@@ -115,6 +116,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 
 | objective   |   budget_frac | method         | bb_recall     | final_recall   |   bb_recall_mean |   final_recall_mean |
 |:------------|--------------:|:---------------|:--------------|:---------------|-----------------:|--------------------:|
+| O1          |        0.0200 | cmaes          | 0.095 ± 0.075 | 0.083 ± 0.062  |           0.0945 |              0.0828 |
 | O1          |        0.0200 | de             | 0.107 ± 0.076 | 0.105 ± 0.075  |           0.1068 |              0.1054 |
 | O1          |        0.0200 | ensemble_ts    | 0.283 ± 0.113 | 0.249 ± 0.101  |           0.2826 |              0.2494 |
 | O1          |        0.0200 | ga             | 0.088 ± 0.083 | 0.088 ± 0.081  |           0.0881 |              0.0877 |
@@ -125,6 +127,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 | O1          |        0.0200 | random         | 0.026 ± 0.020 | 0.022 ± 0.017  |           0.0260 |              0.0218 |
 | O1          |        0.0200 | social_ws      | 0.016 ± 0.026 | 0.016 ± 0.025  |           0.0155 |              0.0161 |
 | O1          |        0.0200 | static_diverse | 0.038 ± 0.011 | 0.032 ± 0.009  |           0.0379 |              0.0318 |
+| O1          |        0.0500 | cmaes          | 0.194 ± 0.147 | 0.174 ± 0.128  |           0.1941 |              0.1743 |
 | O1          |        0.0500 | de             | 0.274 ± 0.155 | 0.260 ± 0.144  |           0.2735 |              0.2602 |
 | O1          |        0.0500 | ensemble_ts    | 0.638 ± 0.060 | 0.596 ± 0.064  |           0.6384 |              0.5962 |
 | O1          |        0.0500 | ga             | 0.186 ± 0.115 | 0.183 ± 0.114  |           0.1863 |              0.1828 |
@@ -135,6 +138,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 | O1          |        0.0500 | random         | 0.061 ± 0.028 | 0.052 ± 0.023  |           0.0612 |              0.0517 |
 | O1          |        0.0500 | social_ws      | 0.043 ± 0.066 | 0.043 ± 0.060  |           0.0429 |              0.0425 |
 | O1          |        0.0500 | static_diverse | 0.089 ± 0.015 | 0.075 ± 0.013  |           0.0890 |              0.0747 |
+| O2          |        0.0200 | cmaes          | 0.038 ± 0.024 | 0.039 ± 0.025  |           0.0382 |              0.0395 |
 | O2          |        0.0200 | de             | 0.076 ± 0.032 | 0.079 ± 0.032  |           0.0755 |              0.0793 |
 | O2          |        0.0200 | ensemble_ts    | 0.086 ± 0.035 | 0.091 ± 0.038  |           0.0863 |              0.0908 |
 | O2          |        0.0200 | ga             | 0.051 ± 0.035 | 0.054 ± 0.036  |           0.0514 |              0.0544 |
@@ -145,6 +149,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 | O2          |        0.0200 | random         | 0.023 ± 0.018 | 0.022 ± 0.017  |           0.0233 |              0.0222 |
 | O2          |        0.0200 | social_ws      | 0.056 ± 0.025 | 0.061 ± 0.028  |           0.0558 |              0.0605 |
 | O2          |        0.0200 | static_diverse | 0.010 ± 0.007 | 0.009 ± 0.007  |           0.0096 |              0.0092 |
+| O2          |        0.0500 | cmaes          | 0.139 ± 0.035 | 0.145 ± 0.035  |           0.1386 |              0.1448 |
 | O2          |        0.0500 | de             | 0.167 ± 0.039 | 0.175 ± 0.041  |           0.1675 |              0.1751 |
 | O2          |        0.0500 | ensemble_ts    | 0.204 ± 0.047 | 0.215 ± 0.050  |           0.2040 |              0.2149 |
 | O2          |        0.0500 | ga             | 0.149 ± 0.045 | 0.159 ± 0.048  |           0.1486 |              0.1586 |
@@ -155,6 +160,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 | O2          |        0.0500 | random         | 0.062 ± 0.024 | 0.059 ± 0.023  |           0.0618 |              0.0590 |
 | O2          |        0.0500 | social_ws      | 0.123 ± 0.052 | 0.132 ± 0.056  |           0.1233 |              0.1322 |
 | O2          |        0.0500 | static_diverse | 0.012 ± 0.008 | 0.012 ± 0.008  |           0.0124 |              0.0119 |
+| O3          |        0.0200 | cmaes          | 0.031 ± 0.021 | 0.030 ± 0.020  |           0.0313 |              0.0299 |
 | O3          |        0.0200 | de             | 0.029 ± 0.023 | 0.030 ± 0.023  |           0.0293 |              0.0295 |
 | O3          |        0.0200 | ensemble_ts    | 0.061 ± 0.032 | 0.059 ± 0.029  |           0.0606 |              0.0590 |
 | O3          |        0.0200 | ga             | 0.029 ± 0.019 | 0.031 ± 0.019  |           0.0289 |              0.0310 |
@@ -165,6 +171,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 | O3          |        0.0200 | random         | 0.019 ± 0.015 | 0.018 ± 0.014  |           0.0189 |              0.0180 |
 | O3          |        0.0200 | social_ws      | 0.018 ± 0.010 | 0.019 ± 0.013  |           0.0181 |              0.0188 |
 | O3          |        0.0200 | static_diverse | 0.016 ± 0.011 | 0.016 ± 0.010  |           0.0165 |              0.0157 |
+| O3          |        0.0500 | cmaes          | 0.070 ± 0.028 | 0.071 ± 0.026  |           0.0699 |              0.0713 |
 | O3          |        0.0500 | de             | 0.081 ± 0.042 | 0.081 ± 0.040  |           0.0811 |              0.0812 |
 | O3          |        0.0500 | ensemble_ts    | 0.145 ± 0.047 | 0.143 ± 0.042  |           0.1454 |              0.1425 |
 | O3          |        0.0500 | ga             | 0.062 ± 0.030 | 0.063 ± 0.028  |           0.0622 |              0.0632 |
@@ -175,6 +182,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 | O3          |        0.0500 | random         | 0.049 ± 0.020 | 0.047 ± 0.019  |           0.0494 |              0.0471 |
 | O3          |        0.0500 | social_ws      | 0.040 ± 0.023 | 0.041 ± 0.025  |           0.0402 |              0.0414 |
 | O3          |        0.0500 | static_diverse | 0.031 ± 0.016 | 0.029 ± 0.015  |           0.0305 |              0.0291 |
+| O4          |        0.0200 | cmaes          | 0.113 ± 0.049 | 0.105 ± 0.044  |           0.1127 |              0.1049 |
 | O4          |        0.0200 | de             | 0.079 ± 0.066 | 0.081 ± 0.065  |           0.0787 |              0.0815 |
 | O4          |        0.0200 | ensemble_ts    | 0.201 ± 0.112 | 0.190 ± 0.106  |           0.2007 |              0.1895 |
 | O4          |        0.0200 | ga             | 0.073 ± 0.063 | 0.070 ± 0.060  |           0.0733 |              0.0704 |
@@ -185,6 +193,7 @@ Hits are counted per distinct building block (identical linker + metal), so seve
 | O4          |        0.0200 | random         | 0.027 ± 0.023 | 0.025 ± 0.021  |           0.0273 |              0.0253 |
 | O4          |        0.0200 | social_ws      | 0.024 ± 0.038 | 0.023 ± 0.038  |           0.0240 |              0.0228 |
 | O4          |        0.0200 | static_diverse | 0.005 ± 0.009 | 0.005 ± 0.008  |           0.0053 |              0.0049 |
+| O4          |        0.0500 | cmaes          | 0.243 ± 0.089 | 0.226 ± 0.083  |           0.2427 |              0.2259 |
 | O4          |        0.0500 | de             | 0.233 ± 0.128 | 0.229 ± 0.124  |           0.2333 |              0.2290 |
 | O4          |        0.0500 | ensemble_ts    | 0.548 ± 0.108 | 0.523 ± 0.108  |           0.5480 |              0.5235 |
 | O4          |        0.0500 | ga             | 0.179 ± 0.092 | 0.170 ± 0.089  |           0.1793 |              0.1704 |
@@ -200,14 +209,14 @@ Rank agreement between ordinary and unique-building-block recall (Spearman over 
 
 | objective   |   budget_frac |   spearman_rank_corr | top_method_recall   | top_method_bb_recall   |
 |:------------|--------------:|---------------------:|:--------------------|:-----------------------|
-| O1          |         0.020 |                0.976 | ensemble_ts         | ensemble_ts            |
-| O1          |         0.050 |                0.988 | ensemble_ts         | ensemble_ts            |
-| O2          |         0.020 |                0.988 | ensemble_ts         | ensemble_ts            |
-| O2          |         0.050 |                1.000 | ensemble_ts         | ensemble_ts            |
-| O3          |         0.020 |                0.948 | ensemble_ts         | ensemble_ts            |
+| O1          |         0.020 |                0.973 | ensemble_ts         | ensemble_ts            |
+| O1          |         0.050 |                0.982 | ensemble_ts         | ensemble_ts            |
+| O2          |         0.020 |                0.989 | ensemble_ts         | ensemble_ts            |
+| O2          |         0.050 |                0.998 | ensemble_ts         | ensemble_ts            |
+| O3          |         0.020 |                0.925 | ensemble_ts         | ensemble_ts            |
 | O3          |         0.050 |                1.000 | ensemble_ts         | ensemble_ts            |
 | O4          |         0.020 |                1.000 | ensemble_ts         | ensemble_ts            |
-| O4          |         0.050 |                0.988 | ensemble_ts         | ensemble_ts            |
+| O4          |         0.050 |                0.982 | ensemble_ts         | ensemble_ts            |
 
 ### Random search vs its analytical expectation
 
@@ -273,6 +282,7 @@ Without replacement, the expected recall of random search after B evaluations is
 
 | objective   |   budget_frac | method         |   runs | recall_auc    | final_recall   | family_coverage   | simple_regret   | enrichment   |   first_hit_eval_median |
 |:------------|--------------:|:---------------|-------:|:--------------|:---------------|:------------------|:----------------|:-------------|------------------------:|
+| O1          |         0.005 | cmaes          |     30 | 0.004 ± 0.006 | 0.013 ± 0.019  | 0.019 ± 0.025     | 1.2500 ± 0.5968 | 2.57 ± 3.76  |                    25   |
 | O1          |         0.005 | de             |     30 | 0.003 ± 0.007 | 0.013 ± 0.022  | 0.013 ± 0.020     | 1.5399 ± 0.4992 | 2.50 ± 4.44  |                    27   |
 | O1          |         0.005 | ensemble_ts    |     30 | 0.010 ± 0.013 | 0.031 ± 0.036  | 0.035 ± 0.035     | 1.1825 ± 0.7221 | 6.21 ± 7.08  |                    24   |
 | O1          |         0.005 | ga             |     30 | 0.005 ± 0.009 | 0.014 ± 0.026  | 0.022 ± 0.037     | 1.4249 ± 0.4734 | 2.80 ± 5.05  |                    23   |
@@ -283,6 +293,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O1          |         0.005 | random         |     30 | 0.003 ± 0.005 | 0.004 ± 0.006  | 0.009 ± 0.013     | 1.5425 ± 0.4647 | 0.83 ± 1.26  |                    19   |
 | O1          |         0.005 | social_ws      |     30 | 0.003 ± 0.005 | 0.007 ± 0.011  | 0.010 ± 0.015     | 1.7681 ± 0.6664 | 1.44 ± 2.27  |                    28   |
 | O1          |         0.005 | static_diverse |     30 | 0.001 ± 0.005 | 0.001 ± 0.005  | 0.002 ± 0.009     | 1.5551 ± 0.1472 | 0.23 ± 0.91  |                     1   |
+| O1          |         0.01  | cmaes          |     30 | 0.011 ± 0.012 | 0.042 ± 0.034  | 0.053 ± 0.051     | 0.7348 ± 0.6488 | 4.17 ± 3.41  |                    43   |
 | O1          |         0.01  | de             |     30 | 0.013 ± 0.016 | 0.044 ± 0.049  | 0.049 ± 0.052     | 1.0529 ± 0.4427 | 4.37 ± 4.93  |                    41.5 |
 | O1          |         0.01  | ensemble_ts    |     30 | 0.036 ± 0.034 | 0.099 ± 0.076  | 0.106 ± 0.077     | 0.6501 ± 0.5531 | 9.92 ± 7.58  |                    31   |
 | O1          |         0.01  | ga             |     30 | 0.017 ± 0.024 | 0.046 ± 0.055  | 0.052 ± 0.062     | 1.1247 ± 0.4814 | 4.60 ± 5.53  |                    38.5 |
@@ -293,6 +304,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O1          |         0.01  | random         |     30 | 0.005 ± 0.005 | 0.009 ± 0.009  | 0.018 ± 0.017     | 1.2661 ± 0.5244 | 0.92 ± 0.87  |                    28.5 |
 | O1          |         0.01  | social_ws      |     30 | 0.004 ± 0.009 | 0.010 ± 0.017  | 0.011 ± 0.020     | 1.6637 ± 0.6223 | 1.00 ± 1.70  |                    22   |
 | O1          |         0.01  | static_diverse |     30 | 0.002 ± 0.005 | 0.009 ± 0.009  | 0.018 ± 0.019     | 1.3708 ± 0.2331 | 0.88 ± 0.94  |                    83   |
+| O1          |         0.02  | cmaes          |     30 | 0.034 ± 0.029 | 0.083 ± 0.062  | 0.116 ± 0.105     | 0.6020 ± 0.5798 | 4.14 ± 3.11  |                    46   |
 | O1          |         0.02  | de             |     30 | 0.044 ± 0.038 | 0.105 ± 0.075  | 0.113 ± 0.078     | 0.7403 ± 0.4851 | 5.27 ± 3.76  |                    52   |
 | O1          |         0.02  | ensemble_ts    |     30 | 0.107 ± 0.057 | 0.249 ± 0.101  | 0.257 ± 0.104     | 0.2015 ± 0.3190 | 12.47 ± 5.07 |                    34.5 |
 | O1          |         0.02  | ga             |     30 | 0.041 ± 0.043 | 0.088 ± 0.081  | 0.096 ± 0.088     | 0.8425 ± 0.5226 | 4.39 ± 4.07  |                    47.5 |
@@ -303,6 +315,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O1          |         0.02  | random         |     30 | 0.010 ± 0.008 | 0.022 ± 0.017  | 0.042 ± 0.033     | 1.0102 ± 0.4224 | 1.09 ± 0.86  |                    50   |
 | O1          |         0.02  | social_ws      |     30 | 0.007 ± 0.011 | 0.016 ± 0.025  | 0.021 ± 0.033     | 1.4850 ± 0.7888 | 0.80 ± 1.26  |                    29   |
 | O1          |         0.02  | static_diverse |     30 | 0.013 ± 0.005 | 0.032 ± 0.009  | 0.064 ± 0.018     | 1.1377 ± 0.2240 | 1.59 ± 0.44  |                    85   |
+| O1          |         0.05  | cmaes          |     30 | 0.084 ± 0.062 | 0.174 ± 0.128  | 0.233 ± 0.184     | 0.3901 ± 0.4864 | 3.49 ± 2.56  |                    55   |
 | O1          |         0.05  | de             |     30 | 0.133 ± 0.078 | 0.260 ± 0.144  | 0.264 ± 0.152     | 0.3699 ± 0.4214 | 5.20 ± 2.88  |                    52   |
 | O1          |         0.05  | ensemble_ts    |     30 | 0.313 ± 0.066 | 0.596 ± 0.064  | 0.609 ± 0.052     | 0.0000 ± 0.0000 | 11.92 ± 1.29 |                    34.5 |
 | O1          |         0.05  | ga             |     30 | 0.100 ± 0.072 | 0.183 ± 0.114  | 0.184 ± 0.114     | 0.5132 ± 0.4264 | 3.65 ± 2.28  |                    55.5 |
@@ -313,6 +326,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O1          |         0.05  | random         |     30 | 0.027 ± 0.015 | 0.052 ± 0.023  | 0.095 ± 0.037     | 0.6109 ± 0.4035 | 1.03 ± 0.47  |                    63.5 |
 | O1          |         0.05  | social_ws      |     30 | 0.015 ± 0.020 | 0.043 ± 0.060  | 0.053 ± 0.080     | 1.0948 ± 0.5689 | 0.85 ± 1.19  |                    96   |
 | O1          |         0.05  | static_diverse |     30 | 0.037 ± 0.008 | 0.075 ± 0.013  | 0.134 ± 0.025     | 0.5611 ± 0.1464 | 1.49 ± 0.25  |                    85   |
+| O2          |         0.005 | cmaes          |     30 | 0.002 ± 0.003 | 0.005 ± 0.009  | 0.006 ± 0.011     | 0.1742 ± 0.1438 | 1.06 ± 1.86  |                    28   |
 | O2          |         0.005 | de             |     30 | 0.004 ± 0.005 | 0.013 ± 0.013  | 0.015 ± 0.014     | 0.0937 ± 0.1215 | 2.57 ± 2.65  |                    21   |
 | O2          |         0.005 | ensemble_ts    |     30 | 0.006 ± 0.008 | 0.013 ± 0.017  | 0.015 ± 0.019     | 0.0906 ± 0.1048 | 2.65 ± 3.38  |                    21   |
 | O2          |         0.005 | ga             |     30 | 0.003 ± 0.005 | 0.010 ± 0.012  | 0.012 ± 0.015     | 0.1055 ± 0.0992 | 1.89 ± 2.39  |                    28   |
@@ -323,6 +337,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O2          |         0.005 | random         |     30 | 0.002 ± 0.004 | 0.005 ± 0.007  | 0.007 ± 0.010     | 0.1992 ± 0.1512 | 0.98 ± 1.42  |                    25   |
 | O2          |         0.005 | social_ws      |     30 | 0.008 ± 0.008 | 0.026 ± 0.019  | 0.033 ± 0.024     | 0.0647 ± 0.1497 | 5.07 ± 3.81  |                    22.5 |
 | O2          |         0.005 | static_diverse |     30 | 0.001 ± 0.003 | 0.002 ± 0.004  | 0.003 ± 0.006     | 0.3886 ± 0.2651 | 0.38 ± 0.86  |                    39   |
+| O2          |         0.01  | cmaes          |     30 | 0.004 ± 0.004 | 0.010 ± 0.010  | 0.013 ± 0.012     | 0.0911 ± 0.0842 | 1.03 ± 1.02  |                    55.5 |
 | O2          |         0.01  | de             |     30 | 0.011 ± 0.009 | 0.030 ± 0.021  | 0.032 ± 0.021     | 0.0207 ± 0.0350 | 2.95 ± 2.06  |                    35   |
 | O2          |         0.01  | ensemble_ts    |     30 | 0.015 ± 0.014 | 0.039 ± 0.027  | 0.043 ± 0.032     | 0.0250 ± 0.0385 | 3.94 ± 2.69  |                    35.5 |
 | O2          |         0.01  | ga             |     30 | 0.010 ± 0.011 | 0.026 ± 0.023  | 0.030 ± 0.025     | 0.0483 ± 0.0563 | 2.60 ± 2.32  |                    33   |
@@ -333,6 +348,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O2          |         0.01  | random         |     30 | 0.005 ± 0.006 | 0.010 ± 0.011  | 0.014 ± 0.015     | 0.1164 ± 0.1137 | 1.00 ± 1.12  |                    32   |
 | O2          |         0.01  | social_ws      |     30 | 0.016 ± 0.015 | 0.031 ± 0.025  | 0.034 ± 0.023     | 0.0860 ± 0.2871 | 3.10 ± 2.45  |                    26   |
 | O2          |         0.01  | static_diverse |     30 | 0.004 ± 0.004 | 0.009 ± 0.007  | 0.013 ± 0.009     | 0.1492 ± 0.1233 | 0.88 ± 0.65  |                    52   |
+| O2          |         0.02  | cmaes          |     30 | 0.012 ± 0.009 | 0.039 ± 0.025  | 0.050 ± 0.031     | 0.0217 ± 0.0301 | 1.97 ± 1.26  |                    73   |
 | O2          |         0.02  | de             |     30 | 0.032 ± 0.016 | 0.079 ± 0.032  | 0.075 ± 0.031     | 0.0080 ± 0.0245 | 3.96 ± 1.61  |                    36.5 |
 | O2          |         0.02  | ensemble_ts    |     30 | 0.040 ± 0.020 | 0.091 ± 0.038  | 0.089 ± 0.036     | 0.0059 ± 0.0168 | 4.54 ± 1.87  |                    37   |
 | O2          |         0.02  | ga             |     30 | 0.026 ± 0.019 | 0.054 ± 0.036  | 0.057 ± 0.032     | 0.0207 ± 0.0310 | 2.72 ± 1.78  |                    48.5 |
@@ -343,6 +359,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O2          |         0.02  | random         |     30 | 0.010 ± 0.009 | 0.022 ± 0.017  | 0.031 ± 0.023     | 0.0398 ± 0.0515 | 1.11 ± 0.84  |                    54   |
 | O2          |         0.02  | social_ws      |     30 | 0.029 ± 0.018 | 0.061 ± 0.028  | 0.062 ± 0.029     | 0.0687 ± 0.2653 | 3.03 ± 1.41  |                    26   |
 | O2          |         0.02  | static_diverse |     30 | 0.006 ± 0.005 | 0.009 ± 0.007  | 0.013 ± 0.010     | 0.0990 ± 0.0320 | 0.46 ± 0.35  |                    52   |
+| O2          |         0.05  | cmaes          |     30 | 0.060 ± 0.017 | 0.145 ± 0.035  | 0.147 ± 0.030     | 0.0015 ± 0.0016 | 2.90 ± 0.70  |                    75   |
 | O2          |         0.05  | de             |     30 | 0.091 ± 0.025 | 0.175 ± 0.041  | 0.145 ± 0.030     | 0.0011 ± 0.0026 | 3.50 ± 0.82  |                    39.5 |
 | O2          |         0.05  | ensemble_ts    |     30 | 0.109 ± 0.035 | 0.215 ± 0.050  | 0.201 ± 0.046     | 0.0011 ± 0.0015 | 4.30 ± 1.01  |                    40   |
 | O2          |         0.05  | ga             |     30 | 0.073 ± 0.027 | 0.159 ± 0.048  | 0.143 ± 0.037     | 0.0027 ± 0.0055 | 3.17 ± 0.96  |                    58.5 |
@@ -353,6 +370,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O2          |         0.05  | random         |     30 | 0.029 ± 0.016 | 0.059 ± 0.023  | 0.083 ± 0.032     | 0.0104 ± 0.0128 | 1.18 ± 0.46  |                    70.5 |
 | O2          |         0.05  | social_ws      |     30 | 0.066 ± 0.028 | 0.132 ± 0.056  | 0.116 ± 0.040     | 0.0205 ± 0.1032 | 2.64 ± 1.12  |                    26   |
 | O2          |         0.05  | static_diverse |     30 | 0.009 ± 0.006 | 0.012 ± 0.008  | 0.017 ± 0.011     | 0.0872 ± 0.0066 | 0.24 ± 0.15  |                    53   |
+| O3          |         0.005 | cmaes          |     30 | 0.002 ± 0.003 | 0.005 ± 0.007  | 0.008 ± 0.012     | 0.0403 ± 0.0408 | 0.91 ± 1.41  |                    27.5 |
 | O3          |         0.005 | de             |     30 | 0.002 ± 0.003 | 0.006 ± 0.009  | 0.008 ± 0.011     | 0.0383 ± 0.0369 | 1.21 ± 1.76  |                    24.5 |
 | O3          |         0.005 | ensemble_ts    |     30 | 0.003 ± 0.005 | 0.009 ± 0.012  | 0.011 ± 0.012     | 0.0226 ± 0.0194 | 1.74 ± 2.29  |                    28   |
 | O3          |         0.005 | ga             |     30 | 0.002 ± 0.003 | 0.005 ± 0.007  | 0.007 ± 0.011     | 0.0370 ± 0.0288 | 0.91 ± 1.41  |                    21   |
@@ -363,6 +381,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O3          |         0.005 | random         |     30 | 0.002 ± 0.003 | 0.004 ± 0.007  | 0.007 ± 0.012     | 0.0413 ± 0.0293 | 0.83 ± 1.40  |                    26   |
 | O3          |         0.005 | social_ws      |     30 | 0.003 ± 0.004 | 0.006 ± 0.007  | 0.010 ± 0.011     | 0.0455 ± 0.0601 | 1.14 ± 1.30  |                    21   |
 | O3          |         0.005 | static_diverse |     30 | 0.000 ± 0.001 | 0.000 ± 0.002  | 0.001 ± 0.004     | 0.0359 ± 0.0090 | 0.08 ± 0.41  |                    17   |
+| O3          |         0.01  | cmaes          |     30 | 0.005 ± 0.005 | 0.010 ± 0.009  | 0.017 ± 0.015     | 0.0138 ± 0.0102 | 1.03 ± 0.87  |                    50   |
 | O3          |         0.01  | de             |     30 | 0.007 ± 0.007 | 0.013 ± 0.014  | 0.018 ± 0.017     | 0.0202 ± 0.0224 | 1.34 ± 1.39  |                    29   |
 | O3          |         0.01  | ensemble_ts    |     30 | 0.010 ± 0.010 | 0.025 ± 0.019  | 0.033 ± 0.021     | 0.0086 ± 0.0075 | 2.49 ± 1.91  |                    40   |
 | O3          |         0.01  | ga             |     30 | 0.005 ± 0.007 | 0.013 ± 0.015  | 0.019 ± 0.019     | 0.0176 ± 0.0182 | 1.34 ± 1.48  |                    39   |
@@ -373,6 +392,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O3          |         0.01  | random         |     30 | 0.005 ± 0.006 | 0.011 ± 0.012  | 0.019 ± 0.020     | 0.0205 ± 0.0201 | 1.11 ± 1.19  |                    42   |
 | O3          |         0.01  | social_ws      |     30 | 0.004 ± 0.004 | 0.007 ± 0.007  | 0.010 ± 0.010     | 0.0362 ± 0.0456 | 0.69 ± 0.71  |                    27.5 |
 | O3          |         0.01  | static_diverse |     30 | 0.002 ± 0.003 | 0.005 ± 0.008  | 0.008 ± 0.013     | 0.0257 ± 0.0117 | 0.46 ± 0.78  |                    49   |
+| O3          |         0.02  | cmaes          |     30 | 0.013 ± 0.010 | 0.030 ± 0.020  | 0.046 ± 0.026     | 0.0094 ± 0.0090 | 1.49 ± 0.98  |                    58   |
 | O3          |         0.02  | de             |     30 | 0.015 ± 0.012 | 0.030 ± 0.023  | 0.037 ± 0.024     | 0.0088 ± 0.0065 | 1.47 ± 1.13  |                    42.5 |
 | O3          |         0.02  | ensemble_ts    |     30 | 0.026 ± 0.016 | 0.059 ± 0.029  | 0.074 ± 0.035     | 0.0048 ± 0.0052 | 2.95 ± 1.46  |                    42   |
 | O3          |         0.02  | ga             |     30 | 0.015 ± 0.012 | 0.031 ± 0.019  | 0.040 ± 0.023     | 0.0076 ± 0.0122 | 1.55 ± 0.93  |                    63   |
@@ -383,6 +403,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O3          |         0.02  | random         |     30 | 0.010 ± 0.009 | 0.018 ± 0.014  | 0.029 ± 0.023     | 0.0122 ± 0.0130 | 0.90 ± 0.70  |                    55   |
 | O3          |         0.02  | social_ws      |     30 | 0.009 ± 0.006 | 0.019 ± 0.013  | 0.028 ± 0.017     | 0.0137 ± 0.0160 | 0.94 ± 0.63  |                    38   |
 | O3          |         0.02  | static_diverse |     30 | 0.006 ± 0.006 | 0.016 ± 0.010  | 0.026 ± 0.017     | 0.0088 ± 0.0073 | 0.79 ± 0.51  |                   123   |
+| O3          |         0.05  | cmaes          |     30 | 0.037 ± 0.018 | 0.071 ± 0.026  | 0.095 ± 0.027     | 0.0029 ± 0.0030 | 1.42 ± 0.52  |                    63   |
 | O3          |         0.05  | de             |     30 | 0.040 ± 0.022 | 0.081 ± 0.040  | 0.098 ± 0.041     | 0.0037 ± 0.0027 | 1.62 ± 0.79  |                    48   |
 | O3          |         0.05  | ensemble_ts    |     30 | 0.073 ± 0.028 | 0.143 ± 0.042  | 0.172 ± 0.050     | 0.0016 ± 0.0011 | 2.85 ± 0.85  |                    45   |
 | O3          |         0.05  | ga             |     30 | 0.035 ± 0.017 | 0.063 ± 0.028  | 0.081 ± 0.032     | 0.0041 ± 0.0043 | 1.26 ± 0.57  |                    77   |
@@ -393,6 +414,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O3          |         0.05  | random         |     30 | 0.024 ± 0.012 | 0.047 ± 0.019  | 0.076 ± 0.030     | 0.0044 ± 0.0045 | 0.94 ± 0.38  |                    72.5 |
 | O3          |         0.05  | social_ws      |     30 | 0.021 ± 0.011 | 0.041 ± 0.025  | 0.060 ± 0.033     | 0.0091 ± 0.0140 | 0.83 ± 0.51  |                    35   |
 | O3          |         0.05  | static_diverse |     30 | 0.017 ± 0.009 | 0.029 ± 0.015  | 0.049 ± 0.025     | 0.0070 ± 0.0053 | 0.58 ± 0.30  |                   128   |
+| O4          |         0.005 | cmaes          |     30 | 0.009 ± 0.014 | 0.024 ± 0.030  | 0.035 ± 0.041     | 1.1238 ± 0.5464 | 3.23 ± 3.97  |                    26   |
 | O4          |         0.005 | de             |     30 | 0.004 ± 0.009 | 0.010 ± 0.023  | 0.013 ± 0.025     | 1.7291 ± 0.6739 | 1.41 ± 3.03  |                    15.5 |
 | O4          |         0.005 | ensemble_ts    |     30 | 0.016 ± 0.025 | 0.035 ± 0.055  | 0.031 ± 0.044     | 1.4347 ± 0.6258 | 4.71 ± 7.38  |                    17   |
 | O4          |         0.005 | ga             |     30 | 0.007 ± 0.012 | 0.017 ± 0.028  | 0.023 ± 0.035     | 1.4006 ± 0.7323 | 2.32 ± 3.80  |                    21   |
@@ -403,6 +425,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.005 | random         |     30 | 0.004 ± 0.009 | 0.008 ± 0.014  | 0.014 ± 0.025     | 1.5584 ± 0.5009 | 1.08 ± 1.92  |                    12   |
 | O4          |         0.005 | social_ws      |     30 | 0.002 ± 0.005 | 0.002 ± 0.006  | 0.003 ± 0.010     | 1.8147 ± 0.6635 | 0.25 ± 0.76  |                     8   |
 | O4          |         0.005 | static_diverse |     30 | 0.002 ± 0.005 | 0.002 ± 0.006  | 0.003 ± 0.010     | 1.7918 ± 0.3953 | 0.25 ± 0.76  |                     8   |
+| O4          |         0.01  | cmaes          |     30 | 0.015 ± 0.018 | 0.042 ± 0.040  | 0.056 ± 0.052     | 0.9747 ± 0.4651 | 4.17 ± 3.98  |                    28   |
 | O4          |         0.01  | de             |     30 | 0.007 ± 0.013 | 0.025 ± 0.036  | 0.024 ± 0.033     | 1.4417 ± 0.5078 | 2.51 ± 3.56  |                    32.5 |
 | O4          |         0.01  | ensemble_ts    |     30 | 0.023 ± 0.033 | 0.052 ± 0.065  | 0.052 ± 0.058     | 1.2340 ± 0.4873 | 5.21 ± 6.42  |                    18   |
 | O4          |         0.01  | ga             |     30 | 0.011 ± 0.017 | 0.027 ± 0.037  | 0.032 ± 0.043     | 1.2778 ± 0.6228 | 2.63 ± 3.70  |                    22.5 |
@@ -413,6 +436,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.01  | random         |     30 | 0.006 ± 0.010 | 0.011 ± 0.015  | 0.019 ± 0.026     | 1.4122 ± 0.4293 | 1.10 ± 1.50  |                    25   |
 | O4          |         0.01  | social_ws      |     30 | 0.002 ± 0.005 | 0.004 ± 0.014  | 0.004 ± 0.014     | 1.6916 ± 0.6115 | 0.43 ± 1.42  |                     8   |
 | O4          |         0.01  | static_diverse |     30 | 0.002 ± 0.005 | 0.002 ± 0.006  | 0.003 ± 0.010     | 1.6594 ± 0.3129 | 0.18 ± 0.56  |                     8   |
+| O4          |         0.02  | cmaes          |     30 | 0.043 ± 0.026 | 0.105 ± 0.044  | 0.145 ± 0.082     | 0.5974 ± 0.4409 | 5.21 ± 2.18  |                    36   |
 | O4          |         0.02  | de             |     30 | 0.028 ± 0.031 | 0.081 ± 0.065  | 0.076 ± 0.055     | 0.9516 ± 0.4102 | 4.04 ± 3.22  |                    48   |
 | O4          |         0.02  | ensemble_ts    |     30 | 0.073 ± 0.056 | 0.190 ± 0.106  | 0.175 ± 0.106     | 0.7101 ± 0.3973 | 9.40 ± 5.27  |                    33   |
 | O4          |         0.02  | ga             |     30 | 0.031 ± 0.030 | 0.070 ± 0.060  | 0.081 ± 0.065     | 0.7917 ± 0.5816 | 3.49 ± 2.99  |                    51   |
@@ -423,6 +447,7 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.02  | random         |     30 | 0.012 ± 0.013 | 0.025 ± 0.021  | 0.044 ± 0.036     | 1.0920 ± 0.3090 | 1.26 ± 1.04  |                    49   |
 | O4          |         0.02  | social_ws      |     30 | 0.006 ± 0.011 | 0.023 ± 0.038  | 0.026 ± 0.037     | 1.3100 ± 0.9317 | 1.13 ± 1.86  |                    67   |
 | O4          |         0.02  | static_diverse |     30 | 0.002 ± 0.005 | 0.005 ± 0.008  | 0.009 ± 0.015     | 1.3317 ± 0.2639 | 0.25 ± 0.41  |                    77   |
+| O4          |         0.05  | cmaes          |     30 | 0.118 ± 0.047 | 0.226 ± 0.083  | 0.272 ± 0.112     | 0.3319 ± 0.3500 | 4.52 ± 1.65  |                    37   |
 | O4          |         0.05  | de             |     30 | 0.105 ± 0.066 | 0.229 ± 0.124  | 0.211 ± 0.103     | 0.5099 ± 0.4683 | 4.58 ± 2.47  |                    58   |
 | O4          |         0.05  | ensemble_ts    |     30 | 0.248 ± 0.083 | 0.523 ± 0.108  | 0.489 ± 0.102     | 0.2691 ± 0.3400 | 10.47 ± 2.17 |                    37   |
 | O4          |         0.05  | ga             |     30 | 0.083 ± 0.054 | 0.170 ± 0.089  | 0.181 ± 0.090     | 0.5530 ± 0.5045 | 3.41 ± 1.78  |                    58.5 |
@@ -440,103 +465,114 @@ Without replacement, the expected recall of random search after B evaluations is
 |:------------|--------------:|:-------------|:---------------|--------------------:|----------------:|-------------:|----------:|---------------:|:------------------------|
 | O1          |         0.005 | final_recall | random         |            0.005747 |       0.004215  |    0.6058    | 1         |      -0.02889  | False                   |
 | O1          |         0.005 | final_recall | greedy_walk    |            0.005747 |       0.00613   |    0.7102    | 1         |       0.05111  | False                   |
-| O1          |         0.005 | final_recall | gp_ei          |            0.005747 |       0.01188   |    0.05793   | 0.2897    |      -0.1889   | False                   |
-| O1          |         0.005 | final_recall | ensemble_ts    |            0.005747 |       0.03142   |    0.0005752 | 0.004602  |      -0.46     | True                    |
-| O1          |         0.005 | final_recall | de             |            0.005747 |       0.01264   |    0.02779   | 0.1667    |      -0.1233   | False                   |
-| O1          |         0.005 | final_recall | pso            |            0.005747 |       0.03525   |    0.0002093 | 0.001883  |      -0.5522   | True                    |
+| O1          |         0.005 | final_recall | gp_ei          |            0.005747 |       0.01188   |    0.05793   | 0.3476    |      -0.1889   | False                   |
+| O1          |         0.005 | final_recall | ensemble_ts    |            0.005747 |       0.03142   |    0.0005752 | 0.005177  |      -0.46     | True                    |
+| O1          |         0.005 | final_recall | de             |            0.005747 |       0.01264   |    0.02779   | 0.1945    |      -0.1233   | False                   |
+| O1          |         0.005 | final_recall | pso            |            0.005747 |       0.03525   |    0.0002093 | 0.002093  |      -0.5522   | True                    |
 | O1          |         0.005 | final_recall | ga             |            0.005747 |       0.01418   |    0.1114    | 0.4456    |      -0.1311   | False                   |
+| O1          |         0.005 | final_recall | cmaes          |            0.005747 |       0.01303   |    0.07249   | 0.3625    |      -0.1989   | False                   |
 | O1          |         0.005 | final_recall | social_ws      |            0.005747 |       0.00728   |    0.5739    | 1         |      -0.09444  | False                   |
-| O1          |         0.005 | final_recall | static_diverse |            0.005747 |       0.001149  |    0.01576   | 0.1103    |       0.2022   | False                   |
+| O1          |         0.005 | final_recall | static_diverse |            0.005747 |       0.001149  |    0.01576   | 0.1261    |       0.2022   | False                   |
 | O1          |         0.005 | recall_auc   | random         |            0.002456 |       0.00276   |    0.4511    | 1         |      -0.06889  | False                   |
 | O1          |         0.005 | recall_auc   | greedy_walk    |            0.002456 |       0.002961  |    0.7221    | 1         |       0.04667  | False                   |
-| O1          |         0.005 | recall_auc   | gp_ei          |            0.002456 |       0.00458   |    0.09799   | 0.5879    |      -0.1689   | False                   |
-| O1          |         0.005 | recall_auc   | ensemble_ts    |            0.002456 |       0.009875  |    0.001557  | 0.01245   |      -0.42     | True                    |
-| O1          |         0.005 | recall_auc   | de             |            0.002456 |       0.003396  |    0.2393    | 0.9573    |      -0.1      | False                   |
-| O1          |         0.005 | recall_auc   | pso            |            0.002456 |       0.01204   |    0.0004189 | 0.00377   |      -0.4889   | True                    |
-| O1          |         0.005 | recall_auc   | ga             |            0.002456 |       0.004554  |    0.1819    | 0.9094    |      -0.1133   | False                   |
+| O1          |         0.005 | recall_auc   | gp_ei          |            0.002456 |       0.00458   |    0.09799   | 0.6859    |      -0.1689   | False                   |
+| O1          |         0.005 | recall_auc   | ensemble_ts    |            0.002456 |       0.009875  |    0.001557  | 0.01401   |      -0.42     | True                    |
+| O1          |         0.005 | recall_auc   | de             |            0.002456 |       0.003396  |    0.2393    | 1         |      -0.1      | False                   |
+| O1          |         0.005 | recall_auc   | pso            |            0.002456 |       0.01204   |    0.0004189 | 0.004189  |      -0.4889   | True                    |
+| O1          |         0.005 | recall_auc   | ga             |            0.002456 |       0.004554  |    0.1819    | 1         |      -0.1133   | False                   |
+| O1          |         0.005 | recall_auc   | cmaes          |            0.002456 |       0.00364   |    0.1958    | 1         |      -0.1611   | False                   |
 | O1          |         0.005 | recall_auc   | social_ws      |            0.002456 |       0.00256   |    0.9499    | 1         |      -0.07333  | False                   |
-| O1          |         0.005 | recall_auc   | static_diverse |            0.002456 |       0.001132  |    0.01776   | 0.1243    |       0.19     | False                   |
+| O1          |         0.005 | recall_auc   | static_diverse |            0.002456 |       0.001132  |    0.01776   | 0.142     |       0.19     | False                   |
 | O1          |         0.01  | final_recall | random         |            0.01188  |       0.009195  |    0.775     | 1         |      -0.1533   | False                   |
 | O1          |         0.01  | final_recall | greedy_walk    |            0.01188  |       0.008812  |    0.4204    | 1         |       0.1211   | False                   |
-| O1          |         0.01  | final_recall | gp_ei          |            0.01188  |       0.05096   |    0.0001621 | 0.001135  |      -0.6256   | True                    |
-| O1          |         0.01  | final_recall | ensemble_ts    |            0.01188  |       0.09923   |    2.575e-05 | 0.0002318 |      -0.7233   | True                    |
-| O1          |         0.01  | final_recall | de             |            0.01188  |       0.04368   |    0.000756  | 0.004536  |      -0.4578   | True                    |
-| O1          |         0.01  | final_recall | pso            |            0.01188  |       0.08199   |    2.606e-05 | 0.0002318 |      -0.8167   | True                    |
+| O1          |         0.01  | final_recall | gp_ei          |            0.01188  |       0.05096   |    0.0001621 | 0.001297  |      -0.6256   | True                    |
+| O1          |         0.01  | final_recall | ensemble_ts    |            0.01188  |       0.09923   |    2.575e-05 | 0.0002575 |      -0.7233   | True                    |
+| O1          |         0.01  | final_recall | de             |            0.01188  |       0.04368   |    0.000756  | 0.005274  |      -0.4578   | True                    |
+| O1          |         0.01  | final_recall | pso            |            0.01188  |       0.08199   |    2.606e-05 | 0.0002575 |      -0.8167   | True                    |
 | O1          |         0.01  | final_recall | ga             |            0.01188  |       0.04598   |    0.005321  | 0.0266    |      -0.3578   | True                    |
+| O1          |         0.01  | final_recall | cmaes          |            0.01188  |       0.04176   |    0.0007534 | 0.005274  |      -0.5389   | True                    |
 | O1          |         0.01  | final_recall | social_ws      |            0.01188  |       0.009962  |    0.6907    | 1         |       0.03889  | False                   |
 | O1          |         0.01  | final_recall | static_diverse |            0.01188  |       0.008812  |    0.852     | 1         |      -0.1256   | False                   |
 | O1          |         0.01  | recall_auc   | random         |            0.004285 |       0.004673  |    0.3703    | 1         |      -0.1689   | False                   |
 | O1          |         0.01  | recall_auc   | greedy_walk    |            0.004285 |       0.005589  |    0.8753    | 1         |       0.08444  | False                   |
-| O1          |         0.01  | recall_auc   | gp_ei          |            0.004285 |       0.01857   |    0.0001469 | 0.001028  |      -0.5944   | True                    |
-| O1          |         0.01  | recall_auc   | ensemble_ts    |            0.004285 |       0.03634   |    3.673e-05 | 0.0002938 |      -0.6822   | True                    |
-| O1          |         0.01  | recall_auc   | de             |            0.004285 |       0.0126    |    0.001197  | 0.007183  |      -0.3922   | True                    |
-| O1          |         0.01  | recall_auc   | pso            |            0.004285 |       0.03535   |    1.454e-05 | 0.0001308 |      -0.8122   | True                    |
-| O1          |         0.01  | recall_auc   | ga             |            0.004285 |       0.01697   |    0.005723  | 0.02862   |      -0.3267   | True                    |
+| O1          |         0.01  | recall_auc   | gp_ei          |            0.004285 |       0.01857   |    0.0001469 | 0.001175  |      -0.5944   | True                    |
+| O1          |         0.01  | recall_auc   | ensemble_ts    |            0.004285 |       0.03634   |    3.673e-05 | 0.0003305 |      -0.6822   | True                    |
+| O1          |         0.01  | recall_auc   | de             |            0.004285 |       0.0126    |    0.001197  | 0.00838   |      -0.3922   | True                    |
+| O1          |         0.01  | recall_auc   | pso            |            0.004285 |       0.03535   |    1.454e-05 | 0.0001454 |      -0.8122   | True                    |
+| O1          |         0.01  | recall_auc   | ga             |            0.004285 |       0.01697   |    0.005723  | 0.03434   |      -0.3267   | True                    |
+| O1          |         0.01  | recall_auc   | cmaes          |            0.004285 |       0.01127   |    0.01055   | 0.05273   |      -0.4256   | False                   |
 | O1          |         0.01  | recall_auc   | social_ws      |            0.004285 |       0.004241  |    0.8753    | 1         |       0.02889  | False                   |
 | O1          |         0.01  | recall_auc   | static_diverse |            0.004285 |       0.00177   |    0.3693    | 1         |      -0.08     | False                   |
 | O1          |         0.02  | final_recall | random         |            0.0272   |       0.02184   |    0.3778    | 0.4335    |       0.1011   | False                   |
 | O1          |         0.02  | final_recall | greedy_walk    |            0.0272   |       0.01264   |    0.009017  | 0.03607   |       0.5089   | True                    |
-| O1          |         0.02  | final_recall | gp_ei          |            0.0272   |       0.1456    |    6.18e-06  | 4.944e-05 |      -0.8778   | True                    |
-| O1          |         0.02  | final_recall | ensemble_ts    |            0.0272   |       0.2494    |    1.7e-06   | 1.53e-05  |      -0.9589   | True                    |
+| O1          |         0.02  | final_recall | gp_ei          |            0.0272   |       0.1456    |    6.18e-06  | 5.562e-05 |      -0.8778   | True                    |
+| O1          |         0.02  | final_recall | ensemble_ts    |            0.0272   |       0.2494    |    1.7e-06   | 1.7e-05   |      -0.9589   | True                    |
 | O1          |         0.02  | final_recall | de             |            0.0272   |       0.1054    |    0.0001452 | 0.000871  |      -0.6033   | True                    |
-| O1          |         0.02  | final_recall | pso            |            0.0272   |       0.1617    |    8.282e-06 | 5.797e-05 |      -0.8078   | True                    |
+| O1          |         0.02  | final_recall | pso            |            0.0272   |       0.1617    |    8.282e-06 | 6.626e-05 |      -0.8078   | True                    |
 | O1          |         0.02  | final_recall | ga             |            0.0272   |       0.08774   |    0.001921  | 0.009605  |      -0.4211   | True                    |
+| O1          |         0.02  | final_recall | cmaes          |            0.0272   |       0.08276   |    9.74e-05  | 0.0006818 |      -0.5267   | True                    |
 | O1          |         0.02  | final_recall | social_ws      |            0.0272   |       0.01609   |    0.03107   | 0.0932    |       0.3433   | False                   |
 | O1          |         0.02  | final_recall | static_diverse |            0.0272   |       0.0318    |    0.2168    | 0.4335    |      -0.1289   | False                   |
 | O1          |         0.02  | recall_auc   | random         |            0.009596 |       0.01027   |    0.6576    | 0.6576    |      -0.09556  | False                   |
 | O1          |         0.02  | recall_auc   | greedy_walk    |            0.009596 |       0.008216  |    0.07272   | 0.2182    |       0.4244   | False                   |
-| O1          |         0.02  | recall_auc   | gp_ei          |            0.009596 |       0.05966   |    3.165e-06 | 2.216e-05 |      -0.8689   | True                    |
-| O1          |         0.02  | recall_auc   | ensemble_ts    |            0.009596 |       0.1071    |    5.588e-09 | 5.029e-08 |      -0.9178   | True                    |
-| O1          |         0.02  | recall_auc   | de             |            0.009596 |       0.04388   |    1.824e-05 | 0.0001095 |      -0.6067   | True                    |
-| O1          |         0.02  | recall_auc   | pso            |            0.009596 |       0.08168   |    2.608e-08 | 2.086e-07 |      -0.9156   | True                    |
+| O1          |         0.02  | recall_auc   | gp_ei          |            0.009596 |       0.05966   |    3.165e-06 | 2.532e-05 |      -0.8689   | True                    |
+| O1          |         0.02  | recall_auc   | ensemble_ts    |            0.009596 |       0.1071    |    5.588e-09 | 5.588e-08 |      -0.9178   | True                    |
+| O1          |         0.02  | recall_auc   | de             |            0.009596 |       0.04388   |    1.824e-05 | 0.0001277 |      -0.6067   | True                    |
+| O1          |         0.02  | recall_auc   | pso            |            0.009596 |       0.08168   |    2.608e-08 | 2.347e-07 |      -0.9156   | True                    |
 | O1          |         0.02  | recall_auc   | ga             |            0.009596 |       0.04145   |    0.0009026 | 0.004513  |      -0.4511   | True                    |
+| O1          |         0.02  | recall_auc   | cmaes          |            0.009596 |       0.03381   |    0.0003499 | 0.0021    |      -0.4711   | True                    |
 | O1          |         0.02  | recall_auc   | social_ws      |            0.009596 |       0.006751  |    0.1572    | 0.3145    |       0.2533   | False                   |
 | O1          |         0.02  | recall_auc   | static_diverse |            0.009596 |       0.0134    |    0.04831   | 0.1932    |      -0.3111   | False                   |
 | O1          |         0.05  | final_recall | random         |            0.07548  |       0.05172   |    0.07386   | 0.1477    |       0.1922   | False                   |
-| O1          |         0.05  | final_recall | greedy_walk    |            0.07548  |       0.01609   |    0.0005457 | 0.002183  |       0.7522   | True                    |
-| O1          |         0.05  | final_recall | gp_ei          |            0.07548  |       0.4651    |    1.718e-06 | 1.512e-05 |      -1        | True                    |
-| O1          |         0.05  | final_recall | ensemble_ts    |            0.07548  |       0.5962    |    1.681e-06 | 1.512e-05 |      -1        | True                    |
-| O1          |         0.05  | final_recall | de             |            0.07548  |       0.2602    |    1.947e-05 | 0.0001168 |      -0.71     | True                    |
-| O1          |         0.05  | final_recall | pso            |            0.07548  |       0.3222    |    1.901e-06 | 1.512e-05 |      -0.9333   | True                    |
-| O1          |         0.05  | final_recall | ga             |            0.07548  |       0.1828    |    9.851e-05 | 0.0004926 |      -0.57     | True                    |
+| O1          |         0.05  | final_recall | greedy_walk    |            0.07548  |       0.01609   |    0.0005457 | 0.002728  |       0.7522   | True                    |
+| O1          |         0.05  | final_recall | gp_ei          |            0.07548  |       0.4651    |    1.718e-06 | 1.681e-05 |      -1        | True                    |
+| O1          |         0.05  | final_recall | ensemble_ts    |            0.07548  |       0.5962    |    1.681e-06 | 1.681e-05 |      -1        | True                    |
+| O1          |         0.05  | final_recall | de             |            0.07548  |       0.2602    |    1.947e-05 | 0.0001363 |      -0.71     | True                    |
+| O1          |         0.05  | final_recall | pso            |            0.07548  |       0.3222    |    1.901e-06 | 1.681e-05 |      -0.9333   | True                    |
+| O1          |         0.05  | final_recall | ga             |            0.07548  |       0.1828    |    9.851e-05 | 0.0005911 |      -0.57     | True                    |
+| O1          |         0.05  | final_recall | cmaes          |            0.07548  |       0.1743    |    0.001411  | 0.005644  |      -0.4889   | True                    |
 | O1          |         0.05  | final_recall | social_ws      |            0.07548  |       0.04253   |    0.04366   | 0.131     |       0.44     | False                   |
 | O1          |         0.05  | final_recall | static_diverse |            0.07548  |       0.07471   |    0.9827    | 0.9827    |      -0.1267   | False                   |
 | O1          |         0.05  | recall_auc   | random         |            0.02988  |       0.0275    |    0.8553    | 0.8553    |      -0.02667  | False                   |
 | O1          |         0.05  | recall_auc   | greedy_walk    |            0.02988  |       0.01283   |    0.001433  | 0.00573   |       0.6689   | True                    |
-| O1          |         0.05  | recall_auc   | gp_ei          |            0.02988  |       0.2077    |    1.863e-09 | 1.676e-08 |      -0.9956   | True                    |
-| O1          |         0.05  | recall_auc   | ensemble_ts    |            0.02988  |       0.3128    |    1.863e-09 | 1.676e-08 |      -1        | True                    |
-| O1          |         0.05  | recall_auc   | de             |            0.02988  |       0.1332    |    3.856e-07 | 2.313e-06 |      -0.7689   | True                    |
-| O1          |         0.05  | recall_auc   | pso            |            0.02988  |       0.1841    |    1.863e-09 | 1.676e-08 |      -0.9622   | True                    |
-| O1          |         0.05  | recall_auc   | ga             |            0.02988  |       0.1005    |    2.349e-06 | 1.174e-05 |      -0.6356   | True                    |
+| O1          |         0.05  | recall_auc   | gp_ei          |            0.02988  |       0.2077    |    1.863e-09 | 1.863e-08 |      -0.9956   | True                    |
+| O1          |         0.05  | recall_auc   | ensemble_ts    |            0.02988  |       0.3128    |    1.863e-09 | 1.863e-08 |      -1        | True                    |
+| O1          |         0.05  | recall_auc   | de             |            0.02988  |       0.1332    |    3.856e-07 | 2.699e-06 |      -0.7689   | True                    |
+| O1          |         0.05  | recall_auc   | pso            |            0.02988  |       0.1841    |    1.863e-09 | 1.863e-08 |      -0.9622   | True                    |
+| O1          |         0.05  | recall_auc   | ga             |            0.02988  |       0.1005    |    2.349e-06 | 1.409e-05 |      -0.6356   | True                    |
+| O1          |         0.05  | recall_auc   | cmaes          |            0.02988  |       0.08443   |    4.408e-05 | 0.0002204 |      -0.5578   | True                    |
 | O1          |         0.05  | recall_auc   | social_ws      |            0.02988  |       0.0155    |    0.02085   | 0.06255   |       0.3956   | False                   |
 | O1          |         0.05  | recall_auc   | static_diverse |            0.02988  |       0.03716   |    0.06563   | 0.1313    |      -0.3433   | False                   |
-| O2          |         0.005 | final_recall | random         |            0.01303  |       0.004981  |    0.004307  | 0.02584   |       0.4444   | True                    |
+| O2          |         0.005 | final_recall | random         |            0.01303  |       0.004981  |    0.004307  | 0.03015   |       0.4444   | True                    |
 | O2          |         0.005 | final_recall | greedy_walk    |            0.01303  |       0.009579  |    0.2839    | 0.8518    |       0.2311   | False                   |
-| O2          |         0.005 | final_recall | gp_ei          |            0.01303  |       0.003448  |    0.000363  | 0.002904  |       0.5333   | True                    |
+| O2          |         0.005 | final_recall | gp_ei          |            0.01303  |       0.003448  |    0.000363  | 0.003267  |       0.5333   | True                    |
 | O2          |         0.005 | final_recall | ensemble_ts    |            0.01303  |       0.01341   |    0.8862    | 1         |       0.1156   | False                   |
 | O2          |         0.005 | final_recall | de             |            0.01303  |       0.01303   |    0.9858    | 1         |       0.05111  | False                   |
 | O2          |         0.005 | final_recall | pso            |            0.01303  |       0.01839   |    0.08576   | 0.4288    |      -0.08667  | False                   |
 | O2          |         0.005 | final_recall | ga             |            0.01303  |       0.009579  |    0.1543    | 0.6172    |       0.22     | False                   |
-| O2          |         0.005 | final_recall | social_ws      |            0.01303  |       0.02567   |    0.0008215 | 0.005751  |      -0.3711   | True                    |
-| O2          |         0.005 | final_recall | static_diverse |            0.01303  |       0.001916  |    8.027e-05 | 0.0007224 |       0.6222   | True                    |
+| O2          |         0.005 | final_recall | cmaes          |            0.01303  |       0.005364  |    0.004964  | 0.03015   |       0.4333   | True                    |
+| O2          |         0.005 | final_recall | social_ws      |            0.01303  |       0.02567   |    0.0008215 | 0.006572  |      -0.3711   | True                    |
+| O2          |         0.005 | final_recall | static_diverse |            0.01303  |       0.001916  |    8.027e-05 | 0.0008027 |       0.6222   | True                    |
 | O2          |         0.005 | recall_auc   | random         |            0.003788 |       0.002151  |    0.03959   | 0.2376    |       0.3633   | False                   |
 | O2          |         0.005 | recall_auc   | greedy_walk    |            0.003788 |       0.003579  |    0.8086    | 1         |       0.2267   | False                   |
-| O2          |         0.005 | recall_auc   | gp_ei          |            0.003788 |       0.001263  |    0.0002612 | 0.002089  |       0.4778   | True                    |
+| O2          |         0.005 | recall_auc   | gp_ei          |            0.003788 |       0.001263  |    0.0002612 | 0.00235   |       0.4778   | True                    |
 | O2          |         0.005 | recall_auc   | ensemble_ts    |            0.003788 |       0.005556  |    0.443     | 1         |       0.03778  | False                   |
 | O2          |         0.005 | recall_auc   | de             |            0.003788 |       0.004249  |    0.7455    | 1         |       0.03333  | False                   |
 | O2          |         0.005 | recall_auc   | pso            |            0.003788 |       0.006461  |    0.08641   | 0.4321    |      -0.09556  | False                   |
 | O2          |         0.005 | recall_auc   | ga             |            0.003788 |       0.003248  |    0.4661    | 1         |       0.22     | False                   |
-| O2          |         0.005 | recall_auc   | social_ws      |            0.003788 |       0.008455  |    0.000395  | 0.002765  |      -0.3378   | True                    |
-| O2          |         0.005 | recall_auc   | static_diverse |            0.003788 |       0.0007924 |    7.521e-05 | 0.0006769 |       0.58     | True                    |
-| O2          |         0.01  | final_recall | random         |            0.03142  |       0.009962  |    0.000158  | 0.001264  |       0.5778   | True                    |
+| O2          |         0.005 | recall_auc   | cmaes          |            0.003788 |       0.001594  |    0.004514  | 0.0316    |       0.4344   | True                    |
+| O2          |         0.005 | recall_auc   | social_ws      |            0.003788 |       0.008455  |    0.000395  | 0.00316   |      -0.3378   | True                    |
+| O2          |         0.005 | recall_auc   | static_diverse |            0.003788 |       0.0007924 |    7.521e-05 | 0.0007521 |       0.58     | True                    |
+| O2          |         0.01  | final_recall | random         |            0.03142  |       0.009962  |    0.000158  | 0.001422  |       0.5778   | True                    |
 | O2          |         0.01  | final_recall | greedy_walk    |            0.03142  |       0.01877   |    0.0143    | 0.08579   |       0.3378   | False                   |
 | O2          |         0.01  | final_recall | gp_ei          |            0.03142  |       0.01303   |    0.003904  | 0.02733   |       0.4933   | True                    |
 | O2          |         0.01  | final_recall | ensemble_ts    |            0.03142  |       0.03946   |    0.1608    | 0.804     |      -0.1633   | False                   |
 | O2          |         0.01  | final_recall | de             |            0.03142  |       0.0295    |    0.7654    | 1         |       0.04111  | False                   |
 | O2          |         0.01  | final_recall | pso            |            0.03142  |       0.03372   |    0.8183    | 1         |       0.02333  | False                   |
 | O2          |         0.01  | final_recall | ga             |            0.03142  |       0.02605   |    0.3888    | 1         |       0.1433   | False                   |
+| O2          |         0.01  | final_recall | cmaes          |            0.03142  |       0.01034   |    0.0003086 | 0.002469  |       0.5667   | True                    |
 | O2          |         0.01  | final_recall | social_ws      |            0.03142  |       0.03103   |    0.9795    | 1         |       0.02556  | False                   |
-| O2          |         0.01  | final_recall | static_diverse |            0.03142  |       0.008812  |    6.892e-05 | 0.0006203 |       0.6111   | True                    |
+| O2          |         0.01  | final_recall | static_diverse |            0.03142  |       0.008812  |    6.892e-05 | 0.0006892 |       0.6111   | True                    |
 | O2          |         0.01  | recall_auc   | random         |            0.01079  |       0.00488   |    0.001861  | 0.01489   |       0.4      | True                    |
 | O2          |         0.01  | recall_auc   | greedy_walk    |            0.01079  |       0.009248  |    0.2796    | 0.8389    |       0.1733   | False                   |
 | O2          |         0.01  | recall_auc   | gp_ei          |            0.01079  |       0.004849  |    0.005465  | 0.03825   |       0.4311   | True                    |
@@ -544,44 +580,49 @@ Without replacement, the expected recall of random search after B evaluations is
 | O2          |         0.01  | recall_auc   | de             |            0.01079  |       0.01123   |    0.6583    | 1         |      -0.05778  | False                   |
 | O2          |         0.01  | recall_auc   | pso            |            0.01079  |       0.01613   |    0.1357    | 0.6783    |      -0.1144   | False                   |
 | O2          |         0.01  | recall_auc   | ga             |            0.01079  |       0.01027   |    0.5847    | 1         |       0.09667  | False                   |
+| O2          |         0.01  | recall_auc   | cmaes          |            0.01079  |       0.003501  |    0.000498  | 0.00498   |       0.5111   | True                    |
 | O2          |         0.01  | recall_auc   | social_ws      |            0.01079  |       0.016     |    0.02814   | 0.1688    |      -0.1989   | False                   |
 | O2          |         0.01  | recall_auc   | static_diverse |            0.01079  |       0.003977  |    0.0007692 | 0.006923  |       0.49     | True                    |
-| O2          |         0.02  | final_recall | random         |            0.06322  |       0.02222   |    3.717e-05 | 0.0002602 |       0.7111   | True                    |
-| O2          |         0.02  | final_recall | greedy_walk    |            0.06322  |       0.02529   |    2.763e-05 | 0.000221  |       0.6578   | True                    |
+| O2          |         0.02  | final_recall | random         |            0.06322  |       0.02222   |    3.717e-05 | 0.0002973 |       0.7111   | True                    |
+| O2          |         0.02  | final_recall | greedy_walk    |            0.06322  |       0.02529   |    2.763e-05 | 0.0002486 |       0.6578   | True                    |
 | O2          |         0.02  | final_recall | gp_ei          |            0.06322  |       0.03946   |    0.007375  | 0.03688   |       0.4178   | True                    |
-| O2          |         0.02  | final_recall | ensemble_ts    |            0.06322  |       0.0908    |    0.003289  | 0.01974   |      -0.4422   | True                    |
+| O2          |         0.02  | final_recall | ensemble_ts    |            0.06322  |       0.0908    |    0.003289  | 0.02302   |      -0.4422   | True                    |
 | O2          |         0.02  | final_recall | de             |            0.06322  |       0.07931   |    0.03171   | 0.1268    |      -0.2811   | False                   |
 | O2          |         0.02  | final_recall | pso            |            0.06322  |       0.0613    |    0.7928    | 1         |       0.04444  | False                   |
 | O2          |         0.02  | final_recall | ga             |            0.06322  |       0.05441   |    0.2943    | 0.883     |       0.1878   | False                   |
+| O2          |         0.02  | final_recall | cmaes          |            0.06322  |       0.03946   |    0.004022  | 0.02413   |       0.4178   | True                    |
 | O2          |         0.02  | final_recall | social_ws      |            0.06322  |       0.06054   |    0.7447    | 1         |       0.02444  | False                   |
-| O2          |         0.02  | final_recall | static_diverse |            0.06322  |       0.009195  |    5.417e-06 | 4.875e-05 |       0.8933   | True                    |
-| O2          |         0.02  | recall_auc   | random         |            0.02628  |       0.0101    |    5.974e-06 | 5.376e-05 |       0.6356   | True                    |
+| O2          |         0.02  | final_recall | static_diverse |            0.06322  |       0.009195  |    5.417e-06 | 5.417e-05 |       0.8933   | True                    |
+| O2          |         0.02  | recall_auc   | random         |            0.02628  |       0.0101    |    5.974e-06 | 5.974e-05 |       0.6356   | True                    |
 | O2          |         0.02  | recall_auc   | greedy_walk    |            0.02628  |       0.01567   |    0.006623  | 0.04093   |       0.3978   | True                    |
 | O2          |         0.02  | recall_auc   | gp_ei          |            0.02628  |       0.01478   |    0.005847  | 0.04093   |       0.4533   | True                    |
 | O2          |         0.02  | recall_auc   | ensemble_ts    |            0.02628  |       0.0398    |    0.009171  | 0.04586   |      -0.4411   | True                    |
 | O2          |         0.02  | recall_auc   | de             |            0.02628  |       0.03185   |    0.1588    | 0.6354    |      -0.1978   | False                   |
 | O2          |         0.02  | recall_auc   | pso            |            0.02628  |       0.03178   |    0.5857    | 1         |      -0.06444  | False                   |
 | O2          |         0.02  | recall_auc   | ga             |            0.02628  |       0.02554   |    0.5425    | 1         |       0.06111  | False                   |
+| O2          |         0.02  | recall_auc   | cmaes          |            0.02628  |       0.01237   |    0.000373  | 0.002984  |       0.5533   | True                    |
 | O2          |         0.02  | recall_auc   | social_ws      |            0.02628  |       0.02871   |    0.3709    | 1         |      -0.1      | False                   |
-| O2          |         0.02  | recall_auc   | static_diverse |            0.02628  |       0.006423  |    7.687e-06 | 6.149e-05 |       0.7822   | True                    |
-| O2          |         0.05  | final_recall | random         |            0.1502   |       0.059     |    1.884e-06 | 1.531e-05 |       0.9322   | True                    |
-| O2          |         0.05  | final_recall | greedy_walk    |            0.1502   |       0.05172   |    2.485e-06 | 1.739e-05 |       0.9678   | True                    |
-| O2          |         0.05  | final_recall | gp_ei          |            0.1502   |       0.1632    |    0.2989    | 0.5979    |      -0.1667   | False                   |
-| O2          |         0.05  | final_recall | ensemble_ts    |            0.1502   |       0.2149    |    4.057e-05 | 0.0002434 |      -0.6578   | True                    |
-| O2          |         0.05  | final_recall | de             |            0.1502   |       0.1751    |    0.02885   | 0.1154    |      -0.3356   | False                   |
-| O2          |         0.05  | final_recall | pso            |            0.1502   |       0.1146    |    0.005552  | 0.02776   |       0.3444   | True                    |
-| O2          |         0.05  | final_recall | ga             |            0.1502   |       0.1586    |    0.6504    | 0.6504    |      -0.1189   | False                   |
-| O2          |         0.05  | final_recall | social_ws      |            0.1502   |       0.1322    |    0.1557    | 0.4671    |       0.1667   | False                   |
-| O2          |         0.05  | final_recall | static_diverse |            0.1502   |       0.01188   |    1.701e-06 | 1.531e-05 |       1        | True                    |
-| O2          |         0.05  | recall_auc   | random         |            0.06455  |       0.02926   |    1.972e-05 | 0.0001183 |       0.7378   | True                    |
-| O2          |         0.05  | recall_auc   | greedy_walk    |            0.06455  |       0.03018   |    1.991e-06 | 1.394e-05 |       0.6756   | True                    |
+| O2          |         0.02  | recall_auc   | static_diverse |            0.02628  |       0.006423  |    7.687e-06 | 6.918e-05 |       0.7822   | True                    |
+| O2          |         0.05  | final_recall | random         |            0.1502   |       0.059     |    1.884e-06 | 1.701e-05 |       0.9322   | True                    |
+| O2          |         0.05  | final_recall | greedy_walk    |            0.1502   |       0.05172   |    2.485e-06 | 1.988e-05 |       0.9678   | True                    |
+| O2          |         0.05  | final_recall | gp_ei          |            0.1502   |       0.1632    |    0.2989    | 0.8968    |      -0.1667   | False                   |
+| O2          |         0.05  | final_recall | ensemble_ts    |            0.1502   |       0.2149    |    4.057e-05 | 0.000284  |      -0.6578   | True                    |
+| O2          |         0.05  | final_recall | de             |            0.1502   |       0.1751    |    0.02885   | 0.1443    |      -0.3356   | False                   |
+| O2          |         0.05  | final_recall | pso            |            0.1502   |       0.1146    |    0.005552  | 0.03331   |       0.3444   | True                    |
+| O2          |         0.05  | final_recall | ga             |            0.1502   |       0.1586    |    0.6504    | 1         |      -0.1189   | False                   |
+| O2          |         0.05  | final_recall | cmaes          |            0.1502   |       0.1448    |    0.5603    | 1         |       0.06111  | False                   |
+| O2          |         0.05  | final_recall | social_ws      |            0.1502   |       0.1322    |    0.1557    | 0.6228    |       0.1667   | False                   |
+| O2          |         0.05  | final_recall | static_diverse |            0.1502   |       0.01188   |    1.701e-06 | 1.701e-05 |       1        | True                    |
+| O2          |         0.05  | recall_auc   | random         |            0.06455  |       0.02926   |    1.972e-05 | 0.000138  |       0.7378   | True                    |
+| O2          |         0.05  | recall_auc   | greedy_walk    |            0.06455  |       0.03018   |    1.991e-06 | 1.593e-05 |       0.6756   | True                    |
 | O2          |         0.05  | recall_auc   | gp_ei          |            0.06455  |       0.06633   |    0.9354    | 1         |      -0.01333  | False                   |
-| O2          |         0.05  | recall_auc   | ensemble_ts    |            0.06455  |       0.1087    |    9.984e-07 | 8.985e-06 |      -0.7044   | True                    |
-| O2          |         0.05  | recall_auc   | de             |            0.06455  |       0.09081   |    0.0002833 | 0.001416  |      -0.5611   | True                    |
+| O2          |         0.05  | recall_auc   | ensemble_ts    |            0.06455  |       0.1087    |    9.984e-07 | 9.984e-06 |      -0.7044   | True                    |
+| O2          |         0.05  | recall_auc   | de             |            0.06455  |       0.09081   |    0.0002833 | 0.0017    |      -0.5611   | True                    |
 | O2          |         0.05  | recall_auc   | pso            |            0.06455  |       0.06563   |    0.9918    | 1         |       0.004444 | False                   |
 | O2          |         0.05  | recall_auc   | ga             |            0.06455  |       0.07308   |    0.4161    | 1         |      -0.1467   | False                   |
+| O2          |         0.05  | recall_auc   | cmaes          |            0.06455  |       0.05961   |    0.5425    | 1         |       0.1044   | False                   |
 | O2          |         0.05  | recall_auc   | social_ws      |            0.06455  |       0.06625   |    0.7       | 1         |      -0.06222  | False                   |
-| O2          |         0.05  | recall_auc   | static_diverse |            0.06455  |       0.008833  |    1.733e-06 | 1.387e-05 |       0.9911   | True                    |
+| O2          |         0.05  | recall_auc   | static_diverse |            0.06455  |       0.008833  |    1.733e-06 | 1.56e-05  |       0.9911   | True                    |
 | O3          |         0.005 | final_recall | random         |            0.004981 |       0.004215  |    0.6579    | 1         |       0.06222  | False                   |
 | O3          |         0.005 | final_recall | greedy_walk    |            0.004981 |       0.004598  |    0.8296    | 1         |       0.03111  | False                   |
 | O3          |         0.005 | final_recall | gp_ei          |            0.004981 |       0.005364  |    0.8217    | 1         |      -0.03111  | False                   |
@@ -589,8 +630,9 @@ Without replacement, the expected recall of random search after B evaluations is
 | O3          |         0.005 | final_recall | de             |            0.004981 |       0.00613   |    0.6666    | 1         |      -0.04556  | False                   |
 | O3          |         0.005 | final_recall | pso            |            0.004981 |       0.004598  |    0.6845    | 1         |       0.06     | False                   |
 | O3          |         0.005 | final_recall | ga             |            0.004981 |       0.004598  |    0.8296    | 1         |       0.03111  | False                   |
+| O3          |         0.005 | final_recall | cmaes          |            0.004981 |       0.004598  |    0.861     | 1         |       0.03111  | False                   |
 | O3          |         0.005 | final_recall | social_ws      |            0.004981 |       0.005747  |    0.5637    | 1         |      -0.08111  | False                   |
-| O3          |         0.005 | final_recall | static_diverse |            0.004981 |       0.0003831 |    0.004897  | 0.04407   |       0.3356   | True                    |
+| O3          |         0.005 | final_recall | static_diverse |            0.004981 |       0.0003831 |    0.004897  | 0.04897   |       0.3356   | True                    |
 | O3          |         0.005 | recall_auc   | random         |            0.00222  |       0.001637  |    0.7172    | 1         |       0.07778  | False                   |
 | O3          |         0.005 | recall_auc   | greedy_walk    |            0.00222  |       0.002064  |    0.9306    | 1         |       0.02222  | False                   |
 | O3          |         0.005 | recall_auc   | gp_ei          |            0.00222  |       0.00189   |    0.7938    | 1         |       0.004444 | False                   |
@@ -598,60 +640,67 @@ Without replacement, the expected recall of random search after B evaluations is
 | O3          |         0.005 | recall_auc   | de             |            0.00222  |       0.002369  |    0.6576    | 1         |      -0.01333  | False                   |
 | O3          |         0.005 | recall_auc   | pso            |            0.00222  |       0.002029  |    0.8311    | 1         |       0.06222  | False                   |
 | O3          |         0.005 | recall_auc   | ga             |            0.00222  |       0.001916  |    0.9652    | 1         |       0.01667  | False                   |
+| O3          |         0.005 | recall_auc   | cmaes          |            0.00222  |       0.001811  |    0.7322    | 1         |       0.04778  | False                   |
 | O3          |         0.005 | recall_auc   | social_ws      |            0.00222  |       0.002961  |    0.3258    | 1         |      -0.1289   | False                   |
-| O3          |         0.005 | recall_auc   | static_diverse |            0.00222  |       0.0002438 |    0.02056   | 0.185     |       0.3267   | False                   |
+| O3          |         0.005 | recall_auc   | static_diverse |            0.00222  |       0.0002438 |    0.02056   | 0.2056    |       0.3267   | False                   |
 | O3          |         0.01  | final_recall | random         |            0.01226  |       0.01111   |    0.7397    | 1         |       0.1056   | False                   |
 | O3          |         0.01  | final_recall | greedy_walk    |            0.01226  |       0.01149   |    0.5272    | 1         |       0.1322   | False                   |
 | O3          |         0.01  | final_recall | gp_ei          |            0.01226  |       0.01379   |    0.8016    | 1         |      -0.04444  | False                   |
-| O3          |         0.01  | final_recall | ensemble_ts    |            0.01226  |       0.0249    |    0.002145  | 0.0193    |      -0.4122   | True                    |
+| O3          |         0.01  | final_recall | ensemble_ts    |            0.01226  |       0.0249    |    0.002145  | 0.02145   |      -0.4122   | True                    |
 | O3          |         0.01  | final_recall | de             |            0.01226  |       0.01341   |    0.6083    | 1         |       0.01444  | False                   |
 | O3          |         0.01  | final_recall | pso            |            0.01226  |       0.01686   |    0.1967    | 1         |      -0.07778  | False                   |
 | O3          |         0.01  | final_recall | ga             |            0.01226  |       0.01341   |    0.572     | 1         |       0.03778  | False                   |
-| O3          |         0.01  | final_recall | social_ws      |            0.01226  |       0.006897  |    0.01562   | 0.1093    |       0.3133   | False                   |
-| O3          |         0.01  | final_recall | static_diverse |            0.01226  |       0.004598  |    0.005284  | 0.04228   |       0.4667   | True                    |
+| O3          |         0.01  | final_recall | cmaes          |            0.01226  |       0.01034   |    0.4708    | 1         |       0.1167   | False                   |
+| O3          |         0.01  | final_recall | social_ws      |            0.01226  |       0.006897  |    0.01562   | 0.125     |       0.3133   | False                   |
+| O3          |         0.01  | final_recall | static_diverse |            0.01226  |       0.004598  |    0.005284  | 0.04756   |       0.4667   | True                    |
 | O3          |         0.01  | recall_auc   | random         |            0.005562 |       0.004893  |    0.6488    | 1         |       0.1167   | False                   |
 | O3          |         0.01  | recall_auc   | greedy_walk    |            0.005562 |       0.00458   |    0.7569    | 1         |       0.1522   | False                   |
 | O3          |         0.01  | recall_auc   | gp_ei          |            0.005562 |       0.00536   |    0.7375    | 1         |       0.04     | False                   |
-| O3          |         0.01  | recall_auc   | ensemble_ts    |            0.005562 |       0.01015   |    0.02881   | 0.2305    |      -0.2878   | False                   |
+| O3          |         0.01  | recall_auc   | ensemble_ts    |            0.005562 |       0.01015   |    0.02881   | 0.2593    |      -0.2878   | False                   |
 | O3          |         0.01  | recall_auc   | de             |            0.005562 |       0.006544  |    0.6308    | 1         |      -0.04333  | False                   |
 | O3          |         0.01  | recall_auc   | pso            |            0.005562 |       0.006306  |    0.6473    | 1         |       0.01     | False                   |
 | O3          |         0.01  | recall_auc   | ga             |            0.005562 |       0.005434  |    0.6184    | 1         |       0.1056   | False                   |
-| O3          |         0.01  | recall_auc   | social_ws      |            0.005562 |       0.003752  |    0.1362    | 0.9536    |       0.15     | False                   |
-| O3          |         0.01  | recall_auc   | static_diverse |            0.005562 |       0.001876  |    0.00296   | 0.02664   |       0.49     | True                    |
-| O3          |         0.02  | final_recall | random         |            0.02567  |       0.01801   |    0.06624   | 0.3883    |       0.3133   | False                   |
+| O3          |         0.01  | recall_auc   | cmaes          |            0.005562 |       0.004642  |    0.7538    | 1         |       0.1344   | False                   |
+| O3          |         0.01  | recall_auc   | social_ws      |            0.005562 |       0.003752  |    0.1362    | 1         |       0.15     | False                   |
+| O3          |         0.01  | recall_auc   | static_diverse |            0.005562 |       0.001876  |    0.00296   | 0.0296    |       0.49     | True                    |
+| O3          |         0.02  | final_recall | random         |            0.02567  |       0.01801   |    0.06624   | 0.4531    |       0.3133   | False                   |
 | O3          |         0.02  | final_recall | greedy_walk    |            0.02567  |       0.02605   |    0.959     | 1         |       0.09222  | False                   |
-| O3          |         0.02  | final_recall | gp_ei          |            0.02567  |       0.03678   |    0.01341   | 0.09384   |      -0.3922   | False                   |
-| O3          |         0.02  | final_recall | ensemble_ts    |            0.02567  |       0.059     |    0.0001002 | 0.0009014 |      -0.7133   | True                    |
+| O3          |         0.02  | final_recall | gp_ei          |            0.02567  |       0.03678   |    0.01341   | 0.1072    |      -0.3922   | False                   |
+| O3          |         0.02  | final_recall | ensemble_ts    |            0.02567  |       0.059     |    0.0001002 | 0.001002  |      -0.7133   | True                    |
 | O3          |         0.02  | final_recall | de             |            0.02567  |       0.0295    |    0.3778    | 1         |      -0.06667  | False                   |
 | O3          |         0.02  | final_recall | pso            |            0.02567  |       0.03065   |    0.407     | 1         |      -0.03333  | False                   |
-| O3          |         0.02  | final_recall | ga             |            0.02567  |       0.03103   |    0.08104   | 0.3883    |      -0.2278   | False                   |
-| O3          |         0.02  | final_recall | social_ws      |            0.02567  |       0.01877   |    0.06472   | 0.3883    |       0.2956   | False                   |
-| O3          |         0.02  | final_recall | static_diverse |            0.02567  |       0.01571   |    0.00248   | 0.01984   |       0.4422   | True                    |
+| O3          |         0.02  | final_recall | ga             |            0.02567  |       0.03103   |    0.08104   | 0.4531    |      -0.2278   | False                   |
+| O3          |         0.02  | final_recall | cmaes          |            0.02567  |       0.02989   |    0.3056    | 1         |      -0.1367   | False                   |
+| O3          |         0.02  | final_recall | social_ws      |            0.02567  |       0.01877   |    0.06472   | 0.4531    |       0.2956   | False                   |
+| O3          |         0.02  | final_recall | static_diverse |            0.02567  |       0.01571   |    0.00248   | 0.02232   |       0.4422   | True                    |
 | O3          |         0.02  | recall_auc   | random         |            0.01181  |       0.009962  |    0.2989    | 1         |       0.2411   | False                   |
 | O3          |         0.02  | recall_auc   | greedy_walk    |            0.01181  |       0.01112   |    0.7       | 1         |       0.14     | False                   |
 | O3          |         0.02  | recall_auc   | gp_ei          |            0.01181  |       0.01427   |    0.195     | 1         |      -0.1622   | False                   |
-| O3          |         0.02  | recall_auc   | ensemble_ts    |            0.01181  |       0.02618   |    8.915e-05 | 0.0008023 |      -0.64     | True                    |
+| O3          |         0.02  | recall_auc   | ensemble_ts    |            0.01181  |       0.02618   |    8.915e-05 | 0.0008915 |      -0.64     | True                    |
 | O3          |         0.02  | recall_auc   | de             |            0.01181  |       0.01521   |    0.2748    | 1         |      -0.1356   | False                   |
 | O3          |         0.02  | recall_auc   | pso            |            0.01181  |       0.01502   |    0.4224    | 1         |      -0.01889  | False                   |
 | O3          |         0.02  | recall_auc   | ga             |            0.01181  |       0.0147    |    0.1836    | 1         |      -0.1311   | False                   |
-| O3          |         0.02  | recall_auc   | social_ws      |            0.01181  |       0.00859   |    0.06267   | 0.4387    |       0.2567   | False                   |
-| O3          |         0.02  | recall_auc   | static_diverse |            0.01181  |       0.005908  |    0.0007155 | 0.005724  |       0.53     | True                    |
+| O3          |         0.02  | recall_auc   | cmaes          |            0.01181  |       0.01283   |    0.829     | 1         |      -0.04889  | False                   |
+| O3          |         0.02  | recall_auc   | social_ws      |            0.01181  |       0.00859   |    0.06267   | 0.5014    |       0.2567   | False                   |
+| O3          |         0.02  | recall_auc   | static_diverse |            0.01181  |       0.005908  |    0.0007155 | 0.006439  |       0.53     | True                    |
 | O3          |         0.05  | final_recall | random         |            0.05134  |       0.04713   |    0.612     | 1         |       0.09     | False                   |
 | O3          |         0.05  | final_recall | greedy_walk    |            0.05134  |       0.05441   |    0.9136    | 1         |       0.05444  | False                   |
-| O3          |         0.05  | final_recall | gp_ei          |            0.05134  |       0.1176    |    2.759e-06 | 2.483e-05 |      -0.9067   | True                    |
-| O3          |         0.05  | final_recall | ensemble_ts    |            0.05134  |       0.1425    |    3.714e-06 | 2.971e-05 |      -0.9478   | True                    |
-| O3          |         0.05  | final_recall | de             |            0.05134  |       0.08123   |    0.0007729 | 0.005411  |      -0.43     | True                    |
+| O3          |         0.05  | final_recall | gp_ei          |            0.05134  |       0.1176    |    2.759e-06 | 2.759e-05 |      -0.9067   | True                    |
+| O3          |         0.05  | final_recall | ensemble_ts    |            0.05134  |       0.1425    |    3.714e-06 | 3.342e-05 |      -0.9478   | True                    |
+| O3          |         0.05  | final_recall | de             |            0.05134  |       0.08123   |    0.0007729 | 0.006184  |      -0.43     | True                    |
 | O3          |         0.05  | final_recall | pso            |            0.05134  |       0.06705   |    0.02469   | 0.1234    |      -0.2611   | False                   |
 | O3          |         0.05  | final_recall | ga             |            0.05134  |       0.06322   |    0.06836   | 0.2735    |      -0.2422   | False                   |
+| O3          |         0.05  | final_recall | cmaes          |            0.05134  |       0.07126   |    0.009645  | 0.05787   |      -0.4044   | False                   |
 | O3          |         0.05  | final_recall | social_ws      |            0.05134  |       0.04138   |    0.09593   | 0.2878    |       0.2256   | False                   |
-| O3          |         0.05  | final_recall | static_diverse |            0.05134  |       0.02912   |    0.002335  | 0.01401   |       0.5122   | True                    |
+| O3          |         0.05  | final_recall | static_diverse |            0.05134  |       0.02912   |    0.002335  | 0.01635   |       0.5122   | True                    |
 | O3          |         0.05  | recall_auc   | random         |            0.02511  |       0.02427   |    0.7303    | 1         |       0.04444  | False                   |
 | O3          |         0.05  | recall_auc   | greedy_walk    |            0.02511  |       0.02915   |    0.6216    | 1         |      -0.02222  | False                   |
-| O3          |         0.05  | recall_auc   | gp_ei          |            0.02511  |       0.05146   |    2.762e-06 | 2.21e-05  |      -0.7889   | True                    |
-| O3          |         0.05  | recall_auc   | ensemble_ts    |            0.02511  |       0.07283   |    2.608e-08 | 2.347e-07 |      -0.9178   | True                    |
-| O3          |         0.05  | recall_auc   | de             |            0.02511  |       0.04027   |    0.0008941 | 0.006259  |      -0.3889   | True                    |
+| O3          |         0.05  | recall_auc   | gp_ei          |            0.02511  |       0.05146   |    2.762e-06 | 2.486e-05 |      -0.7889   | True                    |
+| O3          |         0.05  | recall_auc   | ensemble_ts    |            0.02511  |       0.07283   |    2.608e-08 | 2.608e-07 |      -0.9178   | True                    |
+| O3          |         0.05  | recall_auc   | de             |            0.02511  |       0.04027   |    0.0008941 | 0.007153  |      -0.3889   | True                    |
 | O3          |         0.05  | recall_auc   | pso            |            0.02511  |       0.03635   |    0.03272   | 0.1309    |      -0.2756   | False                   |
 | O3          |         0.05  | recall_auc   | ga             |            0.02511  |       0.03466   |    0.01566   | 0.09393   |      -0.3444   | False                   |
+| O3          |         0.05  | recall_auc   | cmaes          |            0.02511  |       0.03657   |    0.008143  | 0.057     |      -0.3933   | False                   |
 | O3          |         0.05  | recall_auc   | social_ws      |            0.02511  |       0.02072   |    0.1386    | 0.4159    |       0.1711   | False                   |
 | O3          |         0.05  | recall_auc   | static_diverse |            0.02511  |       0.017     |    0.01853   | 0.09393   |       0.3444   | False                   |
 | O4          |         0.005 | final_recall | random         |            0.006173 |       0.008025  |    0.6354    | 0.6587    |      -0.04222  | False                   |
@@ -659,8 +708,9 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.005 | final_recall | gp_ei          |            0.006173 |       0.01481   |    0.01098   | 0.06587   |      -0.1778   | False                   |
 | O4          |         0.005 | final_recall | ensemble_ts    |            0.006173 |       0.03519   |    0.01147   | 0.06587   |      -0.2956   | False                   |
 | O4          |         0.005 | final_recall | de             |            0.006173 |       0.01049   |    0.3293    | 0.6587    |      -0.02222  | False                   |
-| O4          |         0.005 | final_recall | pso            |            0.006173 |       0.03025   |    0.001003  | 0.009025  |      -0.3244   | True                    |
+| O4          |         0.005 | final_recall | pso            |            0.006173 |       0.03025   |    0.001003  | 0.01003   |      -0.3244   | True                    |
 | O4          |         0.005 | final_recall | ga             |            0.006173 |       0.01728   |    0.01686   | 0.06743   |      -0.1289   | False                   |
+| O4          |         0.005 | final_recall | cmaes          |            0.006173 |       0.02407   |    0.001017  | 0.01003   |      -0.3711   | True                    |
 | O4          |         0.005 | final_recall | social_ws      |            0.006173 |       0.001852  |    0.008151  | 0.06521   |       0.1733   | False                   |
 | O4          |         0.005 | final_recall | static_diverse |            0.006173 |       0.001852  |    0.008151  | 0.06521   |       0.1733   | False                   |
 | O4          |         0.005 | recall_auc   | random         |            0.003457 |       0.004444  |    0.5092    | 1         |      -0.04889  | False                   |
@@ -668,8 +718,9 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.005 | recall_auc   | gp_ei          |            0.003457 |       0.005355  |    0.07835   | 0.3134    |      -0.1267   | False                   |
 | O4          |         0.005 | recall_auc   | ensemble_ts    |            0.003457 |       0.01566   |    0.02275   | 0.1437    |      -0.2811   | False                   |
 | O4          |         0.005 | recall_auc   | de             |            0.003457 |       0.00412   |    0.9063    | 1         |      -0.01111  | False                   |
-| O4          |         0.005 | recall_auc   | pso            |            0.003457 |       0.0123    |    0.002836  | 0.02552   |      -0.2767   | True                    |
+| O4          |         0.005 | recall_auc   | pso            |            0.003457 |       0.0123    |    0.002836  | 0.02836   |      -0.2767   | True                    |
 | O4          |         0.005 | recall_auc   | ga             |            0.003457 |       0.006744  |    0.02766   | 0.1437    |      -0.1033   | False                   |
+| O4          |         0.005 | recall_auc   | cmaes          |            0.003457 |       0.008889  |    0.0062    | 0.0558    |      -0.2978   | False                   |
 | O4          |         0.005 | recall_auc   | social_ws      |            0.003457 |       0.001528  |    0.01796   | 0.1437    |       0.1544   | False                   |
 | O4          |         0.005 | recall_auc   | static_diverse |            0.003457 |       0.001528  |    0.01796   | 0.1437    |       0.1544   | False                   |
 | O4          |         0.01  | final_recall | random         |            0.01111  |       0.01111   |    0.8905    | 0.9904    |      -0.03667  | False                   |
@@ -677,8 +728,9 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.01  | final_recall | gp_ei          |            0.01111  |       0.03025   |    0.001735  | 0.01214   |      -0.3144   | True                    |
 | O4          |         0.01  | final_recall | ensemble_ts    |            0.01111  |       0.05247   |    0.001238  | 0.009903  |      -0.39     | True                    |
 | O4          |         0.01  | final_recall | de             |            0.01111  |       0.02531   |    0.02737   | 0.08212   |      -0.1767   | False                   |
-| O4          |         0.01  | final_recall | pso            |            0.01111  |       0.0642    |    3.021e-05 | 0.0002719 |      -0.5922   | True                    |
+| O4          |         0.01  | final_recall | pso            |            0.01111  |       0.0642    |    3.021e-05 | 0.0003021 |      -0.5922   | True                    |
 | O4          |         0.01  | final_recall | ga             |            0.01111  |       0.02654   |    0.01954   | 0.07816   |      -0.12     | False                   |
+| O4          |         0.01  | final_recall | cmaes          |            0.01111  |       0.04198   |    0.0002281 | 0.002053  |      -0.4711   | True                    |
 | O4          |         0.01  | final_recall | social_ws      |            0.01111  |       0.004321  |    0.002282  | 0.01303   |       0.2833   | True                    |
 | O4          |         0.01  | final_recall | static_diverse |            0.01111  |       0.001852  |    0.002172  | 0.01303   |       0.31     | True                    |
 | O4          |         0.01  | recall_auc   | random         |            0.005247 |       0.005738  |    0.9405    | 0.9791    |      -0.03444  | False                   |
@@ -686,17 +738,19 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.01  | recall_auc   | gp_ei          |            0.005247 |       0.01035   |    0.005129  | 0.03077   |      -0.2267   | True                    |
 | O4          |         0.01  | recall_auc   | ensemble_ts    |            0.005247 |       0.02274   |    0.01055   | 0.05275   |      -0.3289   | False                   |
 | O4          |         0.01  | recall_auc   | de             |            0.005247 |       0.007362  |    0.4896    | 0.9791    |      -0.07556  | False                   |
-| O4          |         0.01  | recall_auc   | pso            |            0.005247 |       0.02218   |    6.436e-05 | 0.0005793 |      -0.4667   | True                    |
+| O4          |         0.01  | recall_auc   | pso            |            0.005247 |       0.02218   |    6.436e-05 | 0.0006436 |      -0.4667   | True                    |
 | O4          |         0.01  | recall_auc   | ga             |            0.005247 |       0.01061   |    0.0294    | 0.1176    |      -0.07556  | False                   |
+| O4          |         0.01  | recall_auc   | cmaes          |            0.005247 |       0.01454   |    0.002233  | 0.02009   |      -0.3722   | True                    |
 | O4          |         0.01  | recall_auc   | social_ws      |            0.005247 |       0.001749  |    0.00333   | 0.02664   |       0.2744   | True                    |
 | O4          |         0.01  | recall_auc   | static_diverse |            0.005247 |       0.001612  |    0.00333   | 0.02664   |       0.2744   | True                    |
 | O4          |         0.02  | final_recall | random         |            0.02469  |       0.02531   |    0.8056    | 1         |      -0.1833   | False                   |
 | O4          |         0.02  | final_recall | greedy_walk    |            0.02469  |       0.0284    |    0.972     | 1         |       0.17     | False                   |
 | O4          |         0.02  | final_recall | gp_ei          |            0.02469  |       0.08951   |    0.0002177 | 0.001524  |      -0.6356   | True                    |
-| O4          |         0.02  | final_recall | ensemble_ts    |            0.02469  |       0.1895    |    5.145e-06 | 4.116e-05 |      -0.8567   | True                    |
+| O4          |         0.02  | final_recall | ensemble_ts    |            0.02469  |       0.1895    |    5.145e-06 | 4.529e-05 |      -0.8567   | True                    |
 | O4          |         0.02  | final_recall | de             |            0.02469  |       0.08148   |    0.0003481 | 0.002088  |      -0.5589   | True                    |
-| O4          |         0.02  | final_recall | pso            |            0.02469  |       0.1457    |    3.997e-06 | 3.597e-05 |      -0.8567   | True                    |
+| O4          |         0.02  | final_recall | pso            |            0.02469  |       0.1457    |    3.997e-06 | 3.997e-05 |      -0.8567   | True                    |
 | O4          |         0.02  | final_recall | ga             |            0.02469  |       0.07037   |    0.002159  | 0.01079   |      -0.4978   | True                    |
+| O4          |         0.02  | final_recall | cmaes          |            0.02469  |       0.1049    |    5.032e-06 | 4.529e-05 |      -0.8156   | True                    |
 | O4          |         0.02  | final_recall | social_ws      |            0.02469  |       0.02284   |    0.8949    | 1         |       0.07444  | False                   |
 | O4          |         0.02  | final_recall | static_diverse |            0.02469  |       0.004938  |    0.00494   | 0.01976   |       0.28     | True                    |
 | O4          |         0.02  | recall_auc   | random         |            0.006796 |       0.01152   |    0.116     | 0.3479    |      -0.3022   | False                   |
@@ -704,96 +758,100 @@ Without replacement, the expected recall of random search after B evaluations is
 | O4          |         0.02  | recall_auc   | gp_ei          |            0.006796 |       0.03393   |    5.565e-05 | 0.0003895 |      -0.63     | True                    |
 | O4          |         0.02  | recall_auc   | ensemble_ts    |            0.006796 |       0.07289   |    6.98e-06  | 5.584e-05 |      -0.8244   | True                    |
 | O4          |         0.02  | recall_auc   | de             |            0.006796 |       0.02838   |    0.0001466 | 0.000733  |      -0.5456   | True                    |
-| O4          |         0.02  | recall_auc   | pso            |            0.006796 |       0.06517   |    1.863e-09 | 1.676e-08 |      -0.8733   | True                    |
+| O4          |         0.02  | recall_auc   | pso            |            0.006796 |       0.06517   |    1.863e-09 | 1.863e-08 |      -0.8733   | True                    |
 | O4          |         0.02  | recall_auc   | ga             |            0.006796 |       0.0306    |    0.0001096 | 0.0006576 |      -0.5322   | True                    |
+| O4          |         0.02  | recall_auc   | cmaes          |            0.006796 |       0.04284   |    2.877e-06 | 2.589e-05 |      -0.8333   | True                    |
 | O4          |         0.02  | recall_auc   | social_ws      |            0.006796 |       0.006396  |    0.9519    | 0.9519    |       0.07111  | False                   |
 | O4          |         0.02  | recall_auc   | static_diverse |            0.006796 |       0.002292  |    0.01056   | 0.04223   |       0.2356   | True                    |
 | O4          |         0.05  | final_recall | random         |            0.08457  |       0.06049   |    0.08792   | 0.08792   |       0.2389   | False                   |
 | O4          |         0.05  | final_recall | greedy_walk    |            0.08457  |       0.04444   |    0.0411    | 0.08221   |       0.5267   | False                   |
-| O4          |         0.05  | final_recall | gp_ei          |            0.08457  |       0.3531    |    1.704e-06 | 1.516e-05 |      -0.9867   | True                    |
-| O4          |         0.05  | final_recall | ensemble_ts    |            0.08457  |       0.5235    |    1.7e-06   | 1.516e-05 |      -1        | True                    |
+| O4          |         0.05  | final_recall | gp_ei          |            0.08457  |       0.3531    |    1.704e-06 | 1.685e-05 |      -0.9867   | True                    |
+| O4          |         0.05  | final_recall | ensemble_ts    |            0.08457  |       0.5235    |    1.7e-06   | 1.685e-05 |      -1        | True                    |
 | O4          |         0.05  | final_recall | de             |            0.08457  |       0.229     |    3.845e-05 | 0.0002307 |      -0.6733   | True                    |
-| O4          |         0.05  | final_recall | pso            |            0.08457  |       0.3438    |    1.685e-06 | 1.516e-05 |      -0.9889   | True                    |
+| O4          |         0.05  | final_recall | pso            |            0.08457  |       0.3438    |    1.685e-06 | 1.685e-05 |      -0.9889   | True                    |
 | O4          |         0.05  | final_recall | ga             |            0.08457  |       0.1704    |    0.0006775 | 0.003388  |      -0.5944   | True                    |
+| O4          |         0.05  | final_recall | cmaes          |            0.08457  |       0.2259    |    9.827e-06 | 6.879e-05 |      -0.8267   | True                    |
 | O4          |         0.05  | final_recall | social_ws      |            0.08457  |       0.0463    |    0.0175    | 0.0525    |       0.3811   | False                   |
 | O4          |         0.05  | final_recall | static_diverse |            0.08457  |       0.04198   |    0.002556  | 0.01022   |       0.4122   | True                    |
 | O4          |         0.05  | recall_auc   | random         |            0.02902  |       0.0305    |    0.5425    | 0.5425    |      -0.04889  | False                   |
 | O4          |         0.05  | recall_auc   | greedy_walk    |            0.02902  |       0.02954   |    0.1504    | 0.3009    |       0.4044   | False                   |
-| O4          |         0.05  | recall_auc   | gp_ei          |            0.02902  |       0.1478    |    3.725e-09 | 2.608e-08 |      -0.9844   | True                    |
-| O4          |         0.05  | recall_auc   | ensemble_ts    |            0.02902  |       0.2484    |    1.863e-09 | 1.676e-08 |      -0.9933   | True                    |
+| O4          |         0.05  | recall_auc   | gp_ei          |            0.02902  |       0.1478    |    3.725e-09 | 2.98e-08  |      -0.9844   | True                    |
+| O4          |         0.05  | recall_auc   | ensemble_ts    |            0.02902  |       0.2484    |    1.863e-09 | 1.863e-08 |      -0.9933   | True                    |
 | O4          |         0.05  | recall_auc   | de             |            0.02902  |       0.1047    |    1.08e-05  | 6.482e-05 |      -0.7211   | True                    |
-| O4          |         0.05  | recall_auc   | pso            |            0.02902  |       0.1762    |    1.863e-09 | 1.676e-08 |      -0.9756   | True                    |
+| O4          |         0.05  | recall_auc   | pso            |            0.02902  |       0.1762    |    1.863e-09 | 1.863e-08 |      -0.9756   | True                    |
 | O4          |         0.05  | recall_auc   | ga             |            0.02902  |       0.08322   |    4.175e-05 | 0.0002087 |      -0.5978   | True                    |
+| O4          |         0.05  | recall_auc   | cmaes          |            0.02902  |       0.1184    |    4.283e-06 | 2.998e-05 |      -0.9044   | True                    |
 | O4          |         0.05  | recall_auc   | social_ws      |            0.02902  |       0.0187    |    0.0359    | 0.1077    |       0.3356   | False                   |
 | O4          |         0.05  | recall_auc   | static_diverse |            0.02902  |       0.01487   |    0.004338  | 0.01735   |       0.3089   | True                    |
 
 ### Friedman test and mean ranks
 
-Friedman χ² = 102.53, p = 4.83e-18 over 16 blocks.
+Friedman χ² = 109.80, p = 5.85e-19 over 16 blocks.
 
 | method         |   mean_rank |
 |:---------------|------------:|
 | ensemble_ts    |        1.25 |
-| pso            |        3.00 |
-| gp_ei          |        3.94 |
-| de             |        4.00 |
-| ga             |        4.75 |
-| graph_social   |        6.06 |
-| social_ws      |        6.97 |
-| greedy_walk    |        7.44 |
-| random         |        8.09 |
-| static_diverse |        9.50 |
+| pso            |        3.16 |
+| gp_ei          |        4.28 |
+| de             |        4.31 |
+| ga             |        5.09 |
+| cmaes          |        5.75 |
+| graph_social   |        6.69 |
+| social_ws      |        7.72 |
+| greedy_walk    |        8.22 |
+| random         |        9.03 |
+| static_diverse |       10.50 |
 
 ## T5 — Ablations (O2, O3; 2% budget)
 
-| objective   | ablation                                                   |   runs | final_recall   | recall_auc    | family_coverage   |   p_vs_default |   cliffs_delta_vs_default |
-|:------------|:-----------------------------------------------------------|-------:|:---------------|:--------------|:------------------|---------------:|--------------------------:|
-| O2          | default                                                    |     30 | 0.063 ± 0.032  | 0.026 ± 0.016 | 0.065 ± 0.031     |    nan         |                nan        |
-| O2          | topology (b) +ρ=0.10                                       |     30 | 0.063 ± 0.032  | 0.026 ± 0.016 | 0.065 ± 0.031     |      1         |                  0        |
-| O2          | uniform neighbor weights                                   |     30 | 0.052 ± 0.032  | 0.022 ± 0.016 | 0.056 ± 0.032     |      0.101     |                 -0.2056   |
-| O2          | no neighbor term (α=β=0)                                   |     30 | 0.057 ± 0.025  | 0.018 ± 0.011 | 0.065 ± 0.027     |      0.4193    |                 -0.1244   |
-| O2          | centrality = degree                                        |     30 | 0.058 ± 0.032  | 0.023 ± 0.015 | 0.063 ± 0.030     |      0.4714    |                 -0.09333  |
-| O2          | centrality = PageRank                                      |     30 | 0.070 ± 0.038  | 0.027 ± 0.017 | 0.072 ± 0.036     |      0.2263    |                  0.08778  |
-| O2          | mutation off                                               |     30 | 0.057 ± 0.032  | 0.026 ± 0.018 | 0.058 ± 0.029     |      0.1525    |                 -0.09556  |
-| O2          | uniform mutation                                           |     30 | 0.057 ± 0.028  | 0.024 ± 0.013 | 0.065 ± 0.030     |      0.2711    |                 -0.1267   |
-| O2          | sync off                                                   |     30 | 0.062 ± 0.031  | 0.026 ± 0.014 | 0.064 ± 0.028     |      0.8293    |                 -0.02556  |
-| O2          | elite off                                                  |     30 | 0.058 ± 0.029  | 0.025 ± 0.015 | 0.067 ± 0.029     |      0.3343    |                 -0.1156   |
-| O2          | P = 5                                                      |     30 | 0.061 ± 0.033  | 0.023 ± 0.013 | 0.060 ± 0.030     |      0.8066    |                 -0.07778  |
-| O2          | P = 20                                                     |     30 | 0.072 ± 0.033  | 0.031 ± 0.015 | 0.075 ± 0.030     |      0.2568    |                  0.1589   |
-| O2          | h = 1                                                      |     30 | 0.053 ± 0.023  | 0.019 ± 0.011 | 0.061 ± 0.027     |      0.1403    |                 -0.1956   |
-| O2          | topology (a) MOFGalaxyNet                                  |     30 | 0.060 ± 0.027  | 0.019 ± 0.010 | 0.062 ± 0.025     |      0.6804    |                 -0.05667  |
-| O2          | φ = 0.7                                                    |     30 | 0.060 ± 0.027  | 0.019 ± 0.010 | 0.062 ± 0.025     |      0.6804    |                 -0.05667  |
-| O2          | topology (b) +ρ=0.05                                       |     30 | 0.059 ± 0.025  | 0.023 ± 0.014 | 0.064 ± 0.025     |      0.6178    |                 -0.07889  |
-| O2          | topology (b) +ρ=0.20                                       |     30 | 0.059 ± 0.030  | 0.026 ± 0.017 | 0.063 ± 0.030     |      0.2826    |                 -0.07778  |
-| O2          | topology (c) degree-preserving random                      |     30 | 0.054 ± 0.030  | 0.022 ± 0.014 | 0.058 ± 0.029     |      0.1912    |                 -0.1756   |
-| O2          | topology (d) Watts–Strogatz                                |     30 | 0.056 ± 0.021  | 0.031 ± 0.015 | 0.060 ± 0.021     |      0.2672    |                 -0.1344   |
-| O2          | φ = 0.8                                                    |     30 | 0.049 ± 0.024  | 0.018 ± 0.011 | 0.060 ± 0.028     |      0.06915   |                 -0.2633   |
-| O2          | φ = 0.9                                                    |     30 | 0.051 ± 0.026  | 0.018 ± 0.011 | 0.061 ± 0.030     |      0.112     |                 -0.2411   |
-| O2          | decoupled embedding, topology (a) MOFGalaxyNet             |     30 | 0.017 ± 0.017  | 0.008 ± 0.009 | 0.022 ± 0.022     |      1.313e-05 |                 -0.7867   |
-| O2          | decoupled embedding, topology (c) degree-preserving random |     30 | 0.019 ± 0.016  | 0.009 ± 0.009 | 0.025 ± 0.019     |      5.549e-05 |                 -0.7578   |
-| O3          | default                                                    |     30 | 0.026 ± 0.015  | 0.012 ± 0.007 | 0.038 ± 0.021     |    nan         |                nan        |
-| O3          | topology (b) +ρ=0.10                                       |     30 | 0.026 ± 0.015  | 0.012 ± 0.007 | 0.038 ± 0.021     |      1         |                  0        |
-| O3          | uniform neighbor weights                                   |     30 | 0.019 ± 0.012  | 0.010 ± 0.007 | 0.028 ± 0.019     |      0.02237   |                 -0.26     |
-| O3          | no neighbor term (α=β=0)                                   |     30 | 0.021 ± 0.015  | 0.009 ± 0.006 | 0.031 ± 0.022     |      0.3843    |                 -0.1433   |
-| O3          | centrality = degree                                        |     30 | 0.023 ± 0.012  | 0.012 ± 0.006 | 0.035 ± 0.020     |      0.1492    |                 -0.08333  |
-| O3          | centrality = PageRank                                      |     30 | 0.026 ± 0.014  | 0.012 ± 0.007 | 0.038 ± 0.022     |      0.8709    |                  0.04444  |
-| O3          | mutation off                                               |     30 | 0.020 ± 0.013  | 0.009 ± 0.006 | 0.028 ± 0.019     |      0.1401    |                 -0.2067   |
-| O3          | uniform mutation                                           |     30 | 0.021 ± 0.010  | 0.011 ± 0.006 | 0.031 ± 0.016     |      0.1715    |                 -0.1711   |
-| O3          | sync off                                                   |     30 | 0.021 ± 0.012  | 0.011 ± 0.006 | 0.032 ± 0.018     |      0.173     |                 -0.1478   |
-| O3          | elite off                                                  |     30 | 0.023 ± 0.013  | 0.011 ± 0.008 | 0.035 ± 0.019     |      0.6371    |                 -0.08889  |
-| O3          | P = 5                                                      |     30 | 0.021 ± 0.015  | 0.010 ± 0.008 | 0.030 ± 0.017     |      0.24      |                 -0.2211   |
-| O3          | P = 20                                                     |     30 | 0.017 ± 0.013  | 0.011 ± 0.009 | 0.028 ± 0.019     |      0.02516   |                 -0.3522   |
-| O3          | h = 1                                                      |     30 | 0.020 ± 0.016  | 0.009 ± 0.008 | 0.032 ± 0.024     |      0.1521    |                 -0.1856   |
-| O3          | topology (a) MOFGalaxyNet                                  |     30 | 0.019 ± 0.014  | 0.009 ± 0.007 | 0.029 ± 0.021     |      0.06611   |                 -0.26     |
-| O3          | φ = 0.7                                                    |     30 | 0.019 ± 0.014  | 0.009 ± 0.007 | 0.029 ± 0.021     |      0.06611   |                 -0.26     |
-| O3          | topology (b) +ρ=0.05                                       |     30 | 0.022 ± 0.013  | 0.011 ± 0.008 | 0.033 ± 0.019     |      0.3253    |                 -0.15     |
-| O3          | topology (b) +ρ=0.20                                       |     30 | 0.019 ± 0.014  | 0.011 ± 0.009 | 0.029 ± 0.022     |      0.05411   |                 -0.2789   |
-| O3          | topology (c) degree-preserving random                      |     30 | 0.019 ± 0.013  | 0.009 ± 0.008 | 0.028 ± 0.020     |      0.02677   |                 -0.2511   |
-| O3          | topology (d) Watts–Strogatz                                |     30 | 0.025 ± 0.011  | 0.012 ± 0.007 | 0.039 ± 0.016     |      1         |                 -0.002222 |
-| O3          | φ = 0.8                                                    |     30 | 0.018 ± 0.013  | 0.009 ± 0.007 | 0.027 ± 0.019     |      0.0474    |                 -0.3      |
-| O3          | φ = 0.9                                                    |     30 | 0.020 ± 0.013  | 0.009 ± 0.007 | 0.029 ± 0.019     |      0.1573    |                 -0.2178   |
-| O3          | decoupled embedding, topology (a) MOFGalaxyNet             |     30 | 0.015 ± 0.016  | 0.008 ± 0.009 | 0.024 ± 0.026     |      0.002385  |                 -0.5267   |
-| O3          | decoupled embedding, topology (c) degree-preserving random |     30 | 0.010 ± 0.010  | 0.005 ± 0.006 | 0.016 ± 0.016     |      7.763e-06 |                 -0.6589   |
+| objective   | ablation                                                       |   runs | final_recall   | recall_auc    | family_coverage   |   p_vs_default |   cliffs_delta_vs_default |
+|:------------|:---------------------------------------------------------------|-------:|:---------------|:--------------|:------------------|---------------:|--------------------------:|
+| O2          | default                                                        |     30 | 0.063 ± 0.032  | 0.026 ± 0.016 | 0.065 ± 0.031     |    nan         |                nan        |
+| O2          | topology (b) +ρ=0.10                                           |     30 | 0.063 ± 0.032  | 0.026 ± 0.016 | 0.065 ± 0.031     |      1         |                  0        |
+| O2          | uniform neighbor weights                                       |     30 | 0.052 ± 0.032  | 0.022 ± 0.016 | 0.056 ± 0.032     |      0.101     |                 -0.2056   |
+| O2          | no neighbor term (α=β=0)                                       |     30 | 0.057 ± 0.025  | 0.018 ± 0.011 | 0.065 ± 0.027     |      0.4193    |                 -0.1244   |
+| O2          | centrality = degree                                            |     30 | 0.058 ± 0.032  | 0.023 ± 0.015 | 0.063 ± 0.030     |      0.4714    |                 -0.09333  |
+| O2          | centrality = PageRank                                          |     30 | 0.070 ± 0.038  | 0.027 ± 0.017 | 0.072 ± 0.036     |      0.2263    |                  0.08778  |
+| O2          | mutation off                                                   |     30 | 0.057 ± 0.032  | 0.026 ± 0.018 | 0.058 ± 0.029     |      0.1525    |                 -0.09556  |
+| O2          | uniform mutation                                               |     30 | 0.057 ± 0.028  | 0.024 ± 0.013 | 0.065 ± 0.030     |      0.2711    |                 -0.1267   |
+| O2          | sync off                                                       |     30 | 0.062 ± 0.031  | 0.026 ± 0.014 | 0.064 ± 0.028     |      0.8293    |                 -0.02556  |
+| O2          | elite off                                                      |     30 | 0.058 ± 0.029  | 0.025 ± 0.015 | 0.067 ± 0.029     |      0.3343    |                 -0.1156   |
+| O2          | P = 5                                                          |     30 | 0.061 ± 0.033  | 0.023 ± 0.013 | 0.060 ± 0.030     |      0.8066    |                 -0.07778  |
+| O2          | P = 20                                                         |     30 | 0.072 ± 0.033  | 0.031 ± 0.015 | 0.075 ± 0.030     |      0.2568    |                  0.1589   |
+| O2          | h = 1                                                          |     30 | 0.053 ± 0.023  | 0.019 ± 0.011 | 0.061 ± 0.027     |      0.1403    |                 -0.1956   |
+| O2          | topology (a) MOFGalaxyNet                                      |     30 | 0.060 ± 0.027  | 0.019 ± 0.010 | 0.062 ± 0.025     |      0.6804    |                 -0.05667  |
+| O2          | φ = 0.7                                                        |     30 | 0.060 ± 0.027  | 0.019 ± 0.010 | 0.062 ± 0.025     |      0.6804    |                 -0.05667  |
+| O2          | topology (b) +ρ=0.05                                           |     30 | 0.059 ± 0.025  | 0.023 ± 0.014 | 0.064 ± 0.025     |      0.6178    |                 -0.07889  |
+| O2          | topology (b) +ρ=0.20                                           |     30 | 0.059 ± 0.030  | 0.026 ± 0.017 | 0.063 ± 0.030     |      0.2826    |                 -0.07778  |
+| O2          | topology (c) degree-preserving random                          |     30 | 0.054 ± 0.030  | 0.022 ± 0.014 | 0.058 ± 0.029     |      0.1912    |                 -0.1756   |
+| O2          | topology (d) Watts–Strogatz                                    |     30 | 0.056 ± 0.021  | 0.031 ± 0.015 | 0.060 ± 0.021     |      0.2672    |                 -0.1344   |
+| O2          | φ = 0.8                                                        |     30 | 0.049 ± 0.024  | 0.018 ± 0.011 | 0.060 ± 0.028     |      0.06915   |                 -0.2633   |
+| O2          | φ = 0.9                                                        |     30 | 0.051 ± 0.026  | 0.018 ± 0.011 | 0.061 ± 0.030     |      0.112     |                 -0.2411   |
+| O2          | geometry-only embedding, topology (a) MOFGalaxyNet             |     30 | 0.017 ± 0.017  | 0.008 ± 0.009 | 0.022 ± 0.022     |      1.313e-05 |                 -0.7867   |
+| O2          | geometry-only embedding, topology (c) degree-preserving random |     30 | 0.019 ± 0.016  | 0.009 ± 0.009 | 0.025 ± 0.019     |      5.549e-05 |                 -0.7578   |
+| O3          | default                                                        |     30 | 0.026 ± 0.015  | 0.012 ± 0.007 | 0.038 ± 0.021     |    nan         |                nan        |
+| O3          | topology (b) +ρ=0.10                                           |     30 | 0.026 ± 0.015  | 0.012 ± 0.007 | 0.038 ± 0.021     |      1         |                  0        |
+| O3          | uniform neighbor weights                                       |     30 | 0.019 ± 0.012  | 0.010 ± 0.007 | 0.028 ± 0.019     |      0.02237   |                 -0.26     |
+| O3          | no neighbor term (α=β=0)                                       |     30 | 0.021 ± 0.015  | 0.009 ± 0.006 | 0.031 ± 0.022     |      0.3843    |                 -0.1433   |
+| O3          | centrality = degree                                            |     30 | 0.023 ± 0.012  | 0.012 ± 0.006 | 0.035 ± 0.020     |      0.1492    |                 -0.08333  |
+| O3          | centrality = PageRank                                          |     30 | 0.026 ± 0.014  | 0.012 ± 0.007 | 0.038 ± 0.022     |      0.8709    |                  0.04444  |
+| O3          | mutation off                                                   |     30 | 0.020 ± 0.013  | 0.009 ± 0.006 | 0.028 ± 0.019     |      0.1401    |                 -0.2067   |
+| O3          | uniform mutation                                               |     30 | 0.021 ± 0.010  | 0.011 ± 0.006 | 0.031 ± 0.016     |      0.1715    |                 -0.1711   |
+| O3          | sync off                                                       |     30 | 0.021 ± 0.012  | 0.011 ± 0.006 | 0.032 ± 0.018     |      0.173     |                 -0.1478   |
+| O3          | elite off                                                      |     30 | 0.023 ± 0.013  | 0.011 ± 0.008 | 0.035 ± 0.019     |      0.6371    |                 -0.08889  |
+| O3          | P = 5                                                          |     30 | 0.021 ± 0.015  | 0.010 ± 0.008 | 0.030 ± 0.017     |      0.24      |                 -0.2211   |
+| O3          | P = 20                                                         |     30 | 0.017 ± 0.013  | 0.011 ± 0.009 | 0.028 ± 0.019     |      0.02516   |                 -0.3522   |
+| O3          | h = 1                                                          |     30 | 0.020 ± 0.016  | 0.009 ± 0.008 | 0.032 ± 0.024     |      0.1521    |                 -0.1856   |
+| O3          | topology (a) MOFGalaxyNet                                      |     30 | 0.019 ± 0.014  | 0.009 ± 0.007 | 0.029 ± 0.021     |      0.06611   |                 -0.26     |
+| O3          | φ = 0.7                                                        |     30 | 0.019 ± 0.014  | 0.009 ± 0.007 | 0.029 ± 0.021     |      0.06611   |                 -0.26     |
+| O3          | topology (b) +ρ=0.05                                           |     30 | 0.022 ± 0.013  | 0.011 ± 0.008 | 0.033 ± 0.019     |      0.3253    |                 -0.15     |
+| O3          | topology (b) +ρ=0.20                                           |     30 | 0.019 ± 0.014  | 0.011 ± 0.009 | 0.029 ± 0.022     |      0.05411   |                 -0.2789   |
+| O3          | topology (c) degree-preserving random                          |     30 | 0.019 ± 0.013  | 0.009 ± 0.008 | 0.028 ± 0.020     |      0.02677   |                 -0.2511   |
+| O3          | topology (d) Watts–Strogatz                                    |     30 | 0.025 ± 0.011  | 0.012 ± 0.007 | 0.039 ± 0.016     |      1         |                 -0.002222 |
+| O3          | φ = 0.8                                                        |     30 | 0.018 ± 0.013  | 0.009 ± 0.007 | 0.027 ± 0.019     |      0.0474    |                 -0.3      |
+| O3          | φ = 0.9                                                        |     30 | 0.020 ± 0.013  | 0.009 ± 0.007 | 0.029 ± 0.019     |      0.1573    |                 -0.2178   |
+| O3          | geometry-only embedding, topology (a) MOFGalaxyNet             |     30 | 0.015 ± 0.016  | 0.008 ± 0.009 | 0.024 ± 0.026     |      0.002385  |                 -0.5267   |
+| O3          | geometry-only embedding, topology (c) degree-preserving random |     30 | 0.010 ± 0.010  | 0.005 ± 0.006 | 0.016 ± 0.016     |      7.763e-06 |                 -0.6589   |
 
 ### φ × ρ grid (mean final recall)
 
@@ -828,6 +886,7 @@ Evaluations that found the first hit of a Leiden community and had a top-weighte
 | pso            |   0.050 |   0.072 |    0.022 |    0.549 |
 | social_ws      |   0.033 |   0.034 |    0.022 |    0.217 |
 | static_diverse |   0.057 |   0.052 |    0.038 |    0.279 |
+| cmaes          |   0.071 |   0.060 |    0.048 |    0.297 |
 | graph_social   |   0.298 |   0.335 |    0.150 |    1.888 |
 | gp_ei          | 224.804 | 412.970 |    8.244 | 1407.713 |
 | ensemble_ts    |  32.628 |  45.018 |    8.803 |  159.980 |
