@@ -95,6 +95,30 @@ def main() -> int:
                          "search, the held-out rank correlation of the GP model is low for that objective (table "
                          "above), so EI concentrates evaluations in regions that the model wrongly ranks as "
                          "promising." if len(trail) else ""), ""]
+    # 6. Periodic refits (every 10 evaluations) vs refits at every evaluation, same seeds (D12).
+    import json
+    import re
+
+    arch = ROOT / "results" / "archive" / "gp_ei_refit_every_step"
+    rows = []
+    for f in sorted(arch.glob("gp_ei__*.json")):
+        new = ROOT / "results" / "runs" / f.name
+        if not new.exists():
+            continue
+        m = re.search(r"__(O\d)__b([\d.]+)__.*__s(\d+)\.json$", f.name)
+        a, b = json.loads(f.read_text()), json.loads(new.read_text())
+        rows.append({"objective": m.group(1), "budget_frac": float(m.group(2)), "seed": int(m.group(3)),
+                     "recall_every_step": a["final_recall"], "recall_every_10": b["final_recall"]})
+    if rows:
+        d = pd.DataFrame(rows)
+        g = d.groupby(["objective", "budget_frac"])
+        cmp = pd.DataFrame({"seeds": g.size(), "every_step": g.recall_every_step.mean(),
+                            "every_10": g.recall_every_10.mean()}).reset_index()
+        pv = [stats.wilcoxon(x.recall_every_10, x.recall_every_step).pvalue
+              if not np.allclose(x.recall_every_10, x.recall_every_step) else 1.0 for _, x in g]
+        cmp["p_wilcoxon_two_sided"] = pv
+        lines += ["## 6. Hyperparameter refits every 10 evaluations vs every evaluation (same seeds)", "",
+                  cmp.to_markdown(index=False, floatfmt=".4f"), ""]
     (ROOT / "reports" / "GP_EI_CHECKS.md").write_text("\n".join(lines) + "\n")
     print("wrote reports/GP_EI_CHECKS.md")
     return 0
