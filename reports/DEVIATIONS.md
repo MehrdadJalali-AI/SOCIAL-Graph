@@ -86,3 +86,12 @@ The window form f = max(0, 1.5 − gap, gap − 2.5) is zero for all 2,251 MOFs 
 ## D11 — Unique-building-block recall (revision, post hoc)
 
 This is computed from the existing evaluation logs, with no new runs. A hit counts once per distinct (linker, metal) group. Duplicate-group membership of hits is counted within each objective's pool.
+
+## D12 — GP-EI hyperparameters re-optimized every 10 evaluations (revision, 2026-10-03)
+
+The ARD GP-EI of D10 re-optimized all 34 hyperparameters (with 5 restarts) after every evaluation. That made a 5%-budget run take about 2.5 h, and the full set about 30 h of wall time. **Decision (user, 2026-10-03):** keep the ARD kernel, 5 restarts, normalized targets and ξ = 0.01, but re-optimize hyperparameters only at the first step and then every 10 evaluations (warm-started from the previous fit). In between, the GP is conditioned on all evaluated MOFs with the current hyperparameters, so every acquisition uses all observations. This is standard practice in Bayesian optimization.
+
+- **Speed:** one O1 2% run (174 evaluations) took 29 s, against about 9 min with refits at every step.
+- **Same-seed check:** that run found 16 hits; the every-step run with the same seed found 13.
+- **Rerun:** all 480 GP-EI runs are redone with this schedule for one consistent protocol.
+- **Archive:** the 360 completed every-step runs are kept in `results/archive/gp_ei_refit_every_step/` and are compared with the new runs for the 0.5–2% budgets in `reports/GP_EI_CHECKS.md`.

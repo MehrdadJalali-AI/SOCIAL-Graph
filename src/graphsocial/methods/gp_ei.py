@@ -2,7 +2,9 @@
 
 Kernel: Constant x Matern(nu=2.5, ARD: one length scale per embedding dimension) + White; normalised
 targets; 5 optimiser restarts; EI for minimisation with xi = 0.01 and the incumbent = best observed f.
-Each refit starts the optimiser from the previous step's fitted hyperparameters (plus 5 random restarts).
+Hyperparameters are re-optimised at the first step and then every ``refit_every`` evaluations (warm start from the
+previous fit plus 5 random restarts); in between, the GP is conditioned on all evaluated MOFs with the current
+hyperparameters. Every acquisition therefore uses all observations (DEVIATIONS D12).
 """
 
 from __future__ import annotations
@@ -30,8 +32,8 @@ def expected_improvement(mu: np.ndarray, sd: np.ndarray, best: float, xi: float 
 class GPEI(Method):
     name = "gp_ei"
 
-    def __init__(self, n_restarts: int = 5, xi: float = 0.01, ard: bool = True, **params):
-        super().__init__(n_restarts=n_restarts, xi=xi, ard=ard, **params)
+    def __init__(self, n_restarts: int = 5, xi: float = 0.01, ard: bool = True, refit_every: int = 10, **params):
+        super().__init__(n_restarts=n_restarts, xi=xi, ard=ard, refit_every=refit_every, **params)
 
     def run(self, prob: Problem, budget: int, seed: int, init: np.ndarray) -> BudgetedOracle:
         p = self.params
@@ -47,8 +49,13 @@ class GPEI(Method):
             step += 1
             Xtr = prob.X[oracle.order]
             ytr = np.asarray(oracle.values)
-            gp = GaussianProcessRegressor(kernel=kernel, normalize_y=True, n_restarts_optimizer=p["n_restarts"],
-                                          random_state=int(rng.integers(2**31)))
+            refit = (step - 1) % p["refit_every"] == 0
+            seed = int(rng.integers(2**31))  # drawn every step so the stream does not depend on refit_every
+            if refit:
+                gp = GaussianProcessRegressor(kernel=kernel, normalize_y=True, n_restarts_optimizer=p["n_restarts"],
+                                              random_state=seed)
+            else:  # condition on all data with the current hyperparameters
+                gp = GaussianProcessRegressor(kernel=kernel, normalize_y=True, optimizer=None)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", ConvergenceWarning)
                 gp.fit(Xtr, ytr)

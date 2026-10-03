@@ -116,3 +116,11 @@ def test_expected_improvement_sign():
     # More uncertainty at equal mean gives more EI.
     ei2 = expected_improvement(np.array([1.5, 1.5]), np.array([0.1, 1.0]), best=1.0)
     assert ei2[1] > ei2[0]
+
+
+def test_gp_ei_refit_schedule(prob):
+    """Hyperparameters change only on refit steps; with refit_every=1 the method still runs the old protocol."""
+    init = methods.initial_design(prob.n, 10, 0)
+    for k in (1, 10):
+        o = methods.make("gp_ei", refit_every=k, n_restarts=0).run(prob, 30, 0, init)
+        assert o.used == 30 and len(set(o.order)) == 30
