@@ -152,7 +152,9 @@ def cd_diagram(ranks: pd.Series, nemenyi: pd.DataFrame, stem: Path) -> None:
     fig, ax = plt.subplots(figsize=(8, 3))
     ranks = ranks.rename(index=display)
     nemenyi = nemenyi.rename(index=display, columns=display)
-    sp.critical_difference_diagram(ranks, nemenyi, ax=ax)
+    # two decimals, as in the text (the library default .2g prints 10.50 as '10')
+    sp.critical_difference_diagram(ranks, nemenyi, ax=ax, label_fmt_left="{label} ({rank:.2f})",
+                                   label_fmt_right="({rank:.2f}) {label}")
     save(fig, stem)
 
 
