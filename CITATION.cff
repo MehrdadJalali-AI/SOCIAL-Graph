@@ -1,28 +1,67 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
-title: "Graph-SOCIAL: Centrality-Guided Search over Metal–Organic Framework Similarity Networks for Budget-Limited Discovery"
+message: "If you use this software, please cite the article below and this repository."
+title: "Search-Space Geometry Governs Social-Network Optimization for Budget-Limited Discovery of Metal–Organic Frameworks: A Benchmark on QMOF"
 type: software
-version: 0.1.0
-date-released: 2026-10-01
+version: v1.0-jcim
+date-released: 2026-10-04
 license: MIT
 repository-code: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
-authors:
+url: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
+keywords:
+  - metal-organic frameworks
+  - QMOF
+  - Bayesian optimization
+  - metaheuristics
+  - graph networks
+  - materials informatics
+authors: &authors
   - family-names: Jalali
     given-names: Mehrdad
+    email: mehrdad.jalali@srh.de
+    affiliation: "Institute of Functional Interfaces (IFG), Karlsruhe Institute of Technology (KIT), Eggenstein-Leopoldshafen, Germany; Applied Data Science and Artificial Intelligence, SRH University Heidelberg, Heidelberg, Germany"
+  - family-names: Vu
+    given-names: Binh
+    affiliation: "Applied Data Science and Artificial Intelligence, SRH University Heidelberg, Heidelberg, Germany; Faculty of Mathematics and Computer Science, University of Hagen, Hagen, Germany"
+  - family-names: Chandna
+    given-names: Swati
+    affiliation: "Applied Data Science and Artificial Intelligence, SRH University Heidelberg, Heidelberg, Germany"
+  - family-names: Nadimi-Shahraki
+    given-names: Mohammad H.
+    affiliation: "International Graduate School of Artificial Intelligence, National Yunlin University of Science and Technology, Douliu, Yunlin, Taiwan"
+preferred-citation:
+  type: article
+  title: "Search-Space Geometry Governs Social-Network Optimization for Budget-Limited Discovery of Metal–Organic Frameworks: A Benchmark on QMOF"
+  authors: *authors
+  journal: "Journal of Chemical Information and Modeling"
+  year: 2026
+  status: submitted
 references:
   - type: article
     title: "SOCIAL: Social network optimization algorithm via centrality and influence-aware learning"
-    authors: [{family-names: Jalali, given-names: Mehrdad}, {family-names: Vu, given-names: Binh}, {family-names: Chandna, given-names: Swati}, {family-names: Nadimi-Shahraki, given-names: Mohammad H.}]
+    authors:
+      - {family-names: Jalali, given-names: Mehrdad}
+      - {family-names: Vu, given-names: Binh}
+      - {family-names: Chandna, given-names: Swati}
+      - {family-names: Nadimi-Shahraki, given-names: Mohammad H.}
     journal: "Applied Soft Computing"
     volume: 194
+    start: 114914
     year: 2026
+    doi: 10.1016/j.asoc.2026.114914
   - type: article
     title: "MOFGalaxyNet: a social network analysis for predicting guest accessibility in metal–organic frameworks utilizing graph convolutional networks"
-    authors: [{family-names: Jalali, given-names: Mehrdad}]
+    authors:
+      - {family-names: Jalali, given-names: Mehrdad}
+      - {family-names: Wonanke, given-names: A. D. Dinga}
+      - {family-names: Wöll, given-names: Christof}
     journal: "Journal of Cheminformatics"
+    volume: 15
+    start: 94
     year: 2023
     doi: 10.1186/s13321-023-00764-2
-  - type: dataset
+  - type: data
     title: "QMOF Database"
+    authors:
+      - name: "QMOF Database (Rosen et al.)"
     doi: 10.6084/m9.figshare.13147324
     version: "18"
