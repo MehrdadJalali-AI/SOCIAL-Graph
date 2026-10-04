@@ -24,3 +24,11 @@ manuscript/build_*.log
 results/v0.2/runs_replaced/
 results/archive/
 results/runs_bench23/
+# internal material kept outside the public repository
+submission/
+manuscript/
+CHANGELOG_revision.md
+reports/REVISION_DIFF.md
+docs/SOCIAL_ASOC_2026.pdf
+REPO_CLEANUP_LOG.md
+.claude/settings.local.json
