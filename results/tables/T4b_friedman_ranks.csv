@@ -1,12 +1,12 @@
 method,mean_rank
 ensemble_ts,1.25
-pso,3.15625
+pso,3.21875
 gp_ei,4.28125
 de,4.3125
 ga,5.09375
 cmaes,5.75
 graph_social,6.6875
-social_ws,7.71875
-greedy_walk,8.21875
-random,9.03125
-static_diverse,10.5
+social_ws,7.78125
+greedy_walk,8.15625
+random,9.0
+static_diverse,10.46875

@@ -366,7 +366,7 @@ def _dedup_seed(seed: int) -> list[dict]:
     from graphsocial.store import Problem
 
     cfg = cfg_()
-    cache_dir = OUT / "dedup_runs"
+    cache_dir = OUT / "dedup_runs_fobs"  # D22: Graph-SOCIAL with the evaluated-only influence shift
     cache_dir.mkdir(exist_ok=True)
     out_path = cache_dir / f"seed{seed}.json"
     if out_path.exists():

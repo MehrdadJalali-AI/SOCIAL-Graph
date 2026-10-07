@@ -182,3 +182,25 @@ Output: `holm_families.csv`.
 - **Contraction by objective:** distance-to-centroid percentiles by objective in `contraction_by_objective.csv`.
 - **Figure 1:** in the embedding panel, the rose family is placed around agents i and j.
 - **TOC graphic:** redrawn.
+
+## D22 — Influence shift computed from evaluated MOFs only (correction, 2026-10-07)
+
+### The problem
+- **Leak:** SOCIAL's influence (eq 3) needs a non-negative objective, f′ = f − shift. The implementation took the shift as the minimum of f over the *whole pool* (`Objective.shift`), which includes MOFs that had not been evaluated.
+- **Consequence:** the neighbor weights of Graph-SOCIAL and SOCIAL-WS depended on the value of the best MOF in the pool before that MOF was found. This is information that a real campaign does not have (oracle leakage).
+- **Scope:** no other method used the shift. Global best and elite memory always used evaluated values only.
+
+### The correction
+- **Code:** `methods/graph_social.py` now uses f′ = f − (smallest value among the MOFs evaluated so far in the run). `Objective.shift` is documented as analysis-only.
+- **Test:** `test_graph_social_does_not_use_pool_minimum` passes on the corrected code and fails on the previous code.
+
+### Rerun
+- **What was rerun:** every Graph-SOCIAL and SOCIAL-WS run: pilot, benchmark, ablations, φ × ρ grid and deduplicated pool.
+- **Run keys:** corrected runs carry the tag `__fobs`. The previous pool-shift runs (5,040 files without the tag) are kept on disk in `results/runs/` for comparison and are no longer loaded.
+- **Downstream:** stages 6–8, `scripts/revision2_analyses.py` (outputs in `results/revision2/`; deduplicated runs in `dedup_runs_fobs/`), all tables, numbers and figures.
+- **Pilot selection:** unchanged; it still selects ρ = 0.10, and gate 6 is still FAIL.
+
+### Effect
+- **Benchmark recall:** Graph-SOCIAL and SOCIAL-WS final recall changes by at most 0.014 in any cell (`results/revision2/pool_shift_comparison.csv`).
+- **Ranks:** Graph-SOCIAL's mean Friedman rank is unchanged (6.69, 7th of 11).
+- **Conclusions:** unchanged. No topology or ablation test survives Holm correction, and the O2 centroid pattern persists.

@@ -3,20 +3,21 @@
 Centrality-guided search over metal–organic framework (MOF) similarity networks for budget-limited discovery.
 SOCIAL is used as a model-free, structure-aware acquisition policy: it decides which MOF to evaluate next under a fixed evaluation budget, and its communication topology is the MOFGalaxyNet similarity graph.
 
-This repository accompanies the manuscript "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery", submitted to the Journal of Chemical Information and Modeling (release v1.3-jcim).
+This repository accompanies the manuscript "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery", submitted to the Journal of Chemical Information and Modeling (release v1.4-jcim).
 
 ## Main findings
 
 - Band gaps are strongly homophilous on the MOF similarity network (r = 0.515 vs ≈0 for degree-preserving null graphs), but the communication topology has only a small, objective-dependent effect.
 - Graph-SOCIAL's gains concentrate on the lowest band gaps (O2), whose top MOFs lie near the centroid of the chemistry-aware embedding; a centroid-only policy reaches similar or higher recall there, and SOCIAL's evaluations concentrate near the centroid from the first iterations. The pattern persists on a pool deduplicated to one MOF per building block.
-- Ensemble Thompson sampling ranks first (highest recall in 13 of 16 objective–budget cells). Over 11 methods, PSO ranks 2nd, GP-EI 3rd, DE 4th, GA 5th, CMA-ES 6th and Graph-SOCIAL 7th (mean Friedman ranks 1.25, 3.16, 4.28, 4.31, 5.09, 5.75 and 6.69; `results/tables/T4b_friedman_ranks.csv`).
-- Analyses added after the results were known are documented as deviations D9–D21 in `reports/DEVIATIONS.md`:
+- Ensemble Thompson sampling ranks first (highest recall in 13 of 16 objective–budget cells). Over 11 methods, PSO ranks 2nd, GP-EI 3rd, DE 4th, GA 5th, CMA-ES 6th and Graph-SOCIAL 7th (mean Friedman ranks 1.25, 3.22, 4.28, 4.31, 5.09, 5.75 and 6.69; `results/tables/T4b_friedman_ranks.csv`).
+- Analyses added after the results were known are documented as deviations D9–D22 in `reports/DEVIATIONS.md`:
   - O3 redefined as a target-value objective;
   - ARD GP-EI with hyperparameter refits every 10 evaluations;
   - unique-building-block recall;
   - the post hoc center-bias analyses, including a shifted-optimum control on the classic benchmark functions;
   - the CMA-ES baseline with the snap operator;
   - the centroid-only policy that includes the shared ten-MOF initial design;
+  - D22: SOCIAL's influence shift is computed from evaluated MOFs only (an earlier version used the pool minimum); all Graph-SOCIAL and SOCIAL-WS runs were redone;
   - revision 2: confirmatory topology seeds 10–29, rank-biserial effect sizes with bootstrap CIs, explicit Holm families, rank sensitivity, a run-level bridge analysis and duplicate controls (`scripts/revision2_analyses.py`, `results/revision2/`).
 
 Re-running stage 7 or 8 requires `--force` because gate 6 is recorded as FAIL. Stage 8 refuses to run on incomplete results unless `--provisional` is given.

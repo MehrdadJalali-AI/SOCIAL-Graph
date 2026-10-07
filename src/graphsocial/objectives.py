@@ -5,7 +5,9 @@ O2 min PBE gap:      f = gap
 O3 target value:     f = |gap - 2.0|   (eV)
 O4 max HSE06 gap:    f = -gap_HSE   (universe = MOFs with an HSE06 gap)
 
-f' = f - min_f over the universe (precomputed) is what SOCIAL's influence formula sees.
+SOCIAL's influence formula sees f' = f - (minimum over the MOFs evaluated so far), computed inside the method;
+`shift` / `f_shifted` (minimum over the whole universe) are reference quantities for analysis only and must not be
+used by acquisition methods, because they reveal the value of unevaluated MOFs (DEVIATIONS D22).
 Hits: the ceil(1%) MOFs with the lowest f (ties broken by index), for every objective.
 
 O3 was previously a window objective, max(0, 1.5 - gap, gap - 2.5). It is zero for every MOF inside the
@@ -30,7 +32,7 @@ class Objective:
     name: str
     universe: np.ndarray  # indices into the clean QMOF table
     f: np.ndarray         # raw minimised objective on the universe
-    shift: float          # min f over the universe
+    shift: float          # min f over the universe (analysis only; never used by acquisition methods)
     hits: np.ndarray      # boolean mask over the universe
     gap: np.ndarray       # underlying band gap (for reporting)
 

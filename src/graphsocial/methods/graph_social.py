@@ -9,6 +9,7 @@ among themselves (the original SOCIAL; used as baseline 6).
 Per iteration t (T = floor(budget / P) iterations including the initial design):
     alpha_t = alpha (1 - t/T), beta_t = beta (1 - t/T), gamma_t = gamma t/T, delta_t = delta t/T   (8-11)
     I_j = 1 - log(1 + |f'_j|) / (log(1 + max f') + 1e-6)          (influence, on shifted objective f')
+    f' = f - (minimum objective value among the MOFs evaluated so far); only evaluated values are used (D22)
     w_ij = (alpha_t c_j + beta_t I_j) / sum_k (alpha_t c_k + beta_t I_k)                         (12)
     x_i <- (1 - a - b - g - d) x_i + (a + b) x_neigh + g x_gbest + d x_elite                      (13)
     x_i <- (1 - omega) x_i + omega x_mean                                                     (14-15)
@@ -90,7 +91,6 @@ class GraphSOCIAL(Method):
         snap = Snapper(prob.X)
         lo, hi = snap.bounds()
         span = hi - lo
-        fshift = prob.objective.shift
         P = len(init)
         T = budget // P
         cent_all = prob.cent[p["centrality"]] if p["agent_topology"] == "mof" else None
@@ -108,7 +108,7 @@ class GraphSOCIAL(Method):
             d_t = p["delta"] * frac if p["elite"] else 0.0
             gbest_x = x[np.argmin(f)].copy()
             x_mean = x.mean(axis=0)
-            fs = f - fshift
+            fs = f - min(oracle.values)  # shift from evaluated MOFs only, never from the unevaluated pool
             infl = self._influence(fs)
             if p["agent_topology"] == "mof":
                 nbrs = self._mof_neighbors(prob, cur)

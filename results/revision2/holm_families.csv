@@ -1,5 +1,5 @@
 family,definition,families,tests_per_family,tests_total,significant,min_adjusted_p
-(a) Graph-SOCIAL vs each baseline,"one family per baseline: its 16 objective–budget cells, two-sided paired Wilcoxon on final recall",10,16,160,71,2.6888733131650214e-05
-(b) topology comparisons,"3 pilot (seeds 0–9) + 10 thirty-seed comparisons, one-sided",1,13,13,0,0.17399729270887895
-(c) non-representation ablations,"each ablation vs default on O2 and O3, two-sided",1,36,36,0,0.8052132343680934
+(a) Graph-SOCIAL vs each baseline,"one family per baseline: its 16 objective–budget cells, two-sided paired Wilcoxon on final recall",10,16,160,72,2.6466371702031276e-05
+(b) topology comparisons,"3 pilot (seeds 0–9) + 10 thirty-seed comparisons, one-sided",1,13,13,0,0.20691204783816214
+(c) non-representation ablations,"each ablation vs default on O2 and O3, two-sided",1,36,36,0,0.45218874203969633
 (d) random search vs expectation,exact two-sided hypergeometric test per cell,1,16,16,0,0.6043983008684608

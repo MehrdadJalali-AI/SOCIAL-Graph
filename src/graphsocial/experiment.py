@@ -39,8 +39,11 @@ class RunSpec:
     @property
     def key(self) -> str:
         emb = "" if self.embedding == "default" else f"__emb={self.embedding}"
+        # SOCIAL runs carry "__fobs": influence shift from evaluated MOFs only (D22); earlier runs without the tag
+        # used the pool minimum and are kept on disk for comparison but never loaded.
+        tag = "__fobs" if self.method in ("graph_social", "social_ws") else ""
         raw = (f"{self.method}__{self.variant}__{self.objective}__b{self.budget_frac:g}__P{self.P}"
-               f"__c{self.comm_phi:.2f}{emb}__s{self.seed}")
+               f"__c{self.comm_phi:.2f}{emb}{tag}__s{self.seed}")
         return re.sub(r"[^A-Za-z0-9_.=-]+", "-", raw)
 
     def paths(self, runs_dir: Path) -> tuple[Path, Path]:

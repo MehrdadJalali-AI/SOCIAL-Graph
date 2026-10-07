@@ -124,3 +124,29 @@ def test_gp_ei_refit_schedule(prob):
     for k in (1, 10):
         o = methods.make("gp_ei", refit_every=k, n_restarts=0).run(prob, 30, 0, init)
         assert o.used == 30 and len(set(o.order)) == 30
+
+
+def test_graph_social_does_not_use_pool_minimum():
+    """Graph-SOCIAL must not read the pool-level shift (min f over unevaluated MOFs): changing it leaves runs unchanged."""
+    import dataclasses
+
+    from graphsocial import methods
+
+    rng = np.random.default_rng(0)
+    n = 120
+    X = rng.normal(size=(n, 4))
+    f = rng.normal(size=n)
+    obj = objectives.Objective("test", np.arange(n), f, float(f.min()), objectives._top_fraction(f, 0.05), f)
+    from graphsocial.graph.topologies import Topology
+    from graphsocial.store import Problem
+
+    edges = np.array([(i, j) for i in range(n) for j in range(i + 1, n)])  # complete graph: influence matters
+    top = Topology.from_pairs("complete", n, edges)
+    cent = {"betweenness": np.ones(n), "degree": np.ones(n), "pagerank": np.ones(n)}
+    comm = np.arange(n) % 7
+    prob = Problem(obj, X, top, cent, comm, np.arange(n).astype(str), "complete")
+    init = methods.initial_design(n, 10, 3)
+    a = methods.make("graph_social").run(prob, 60, 3, init).order
+    prob2 = dataclasses.replace(prob, objective=dataclasses.replace(obj, shift=float(f.min()) - 5.0))
+    b = methods.make("graph_social").run(prob2, 60, 3, init).order
+    assert a == b
