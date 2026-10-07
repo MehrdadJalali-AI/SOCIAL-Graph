@@ -145,8 +145,8 @@ def coverage_vs_recall(means: pd.DataFrame, stem: Path) -> None:
     save(fig, stem)
 
 
-def cd_diagram(ranks: pd.Series, nemenyi: pd.DataFrame, stem: Path) -> None:
-    """F5: critical-difference diagram (scikit-posthocs), lower rank = better."""
+def cd_diagram(ranks: pd.Series, nemenyi: pd.DataFrame, stem: Path, cd: float | None = None) -> None:
+    """F5: critical-difference diagram (scikit-posthocs), lower rank = better; ``cd`` adds a Nemenyi CD scale bar."""
     import scikit_posthocs as sp
 
     fig, ax = plt.subplots(figsize=(8, 3))
@@ -155,6 +155,13 @@ def cd_diagram(ranks: pd.Series, nemenyi: pd.DataFrame, stem: Path) -> None:
     # two decimals, as in the text (the library default .2g prints 10.50 as '10')
     sp.critical_difference_diagram(ranks, nemenyi, ax=ax, label_fmt_left="{label} ({rank:.2f})",
                                    label_fmt_right="({rank:.2f}) {label}")
+    if cd is not None:
+        lo = float(np.floor(ranks.min()))
+        tr = ax.get_xaxis_transform()
+        ax.plot([lo, lo + cd], [1.32, 1.32], color="k", lw=1.6, transform=tr, clip_on=False)
+        for x in (lo, lo + cd):
+            ax.plot([x, x], [1.28, 1.36], color="k", lw=1.2, transform=tr, clip_on=False)
+        ax.text(lo + cd / 2, 1.39, f"CD = {cd:.2f}", ha="center", va="bottom", fontsize=9, transform=tr)
     save(fig, stem)
 
 

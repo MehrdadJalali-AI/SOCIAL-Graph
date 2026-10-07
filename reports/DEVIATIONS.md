@@ -125,3 +125,60 @@ None of these were pre-specified. No pre-specified hyperparameter, seed set, hit
    - the pilot random-search check;
    - the iteration accounting;
    - the stage 4 rerun, whose homophily output is identical to the earlier one.
+
+## D15–D21 — Revision 2 (post hoc, 2026-10-07)
+
+None of these analyses were pre-specified. They were added at the second revision. Pre-specified hyperparameters, seed sets, hit definitions and existing results are unchanged.
+
+- **Code and outputs:** `scripts/revision2_analyses.py` (subcommands `stats`, `homophily`, `dedup`); outputs in `results/revision2/`.
+- **In the manuscript:** every analysis below is labelled as added at revision.
+
+### D15 — Confirmatory topology seeds
+- **What:** the RQ1 topology comparisons are recomputed on seeds 10–29 only.
+- **Why:** pilot seeds 0–9 were used to select ρ = 0.10.
+- **Reported:** alongside the 30-seed values.
+- **Output:** `topology_tests.csv`.
+
+### D16 — Paired effect sizes
+- **What:** the matched-pairs rank-biserial correlation r_rb replaces Cliff's δ.
+  - r_rb = (W+ − W−)/(W+ + W−), with zero differences dropped as in the signed-rank test.
+  - Each r_rb comes with a 95% percentile bootstrap CI of the paired mean difference (10,000 resamples of seeds).
+- **Kept:** Cliff's δ remains in one labelled SI column (topology table) for continuity.
+- **Outputs:** `topology_tests.csv`, `pairwise_rrb.csv`, `ablations_rrb.csv`.
+
+### D17 — Holm families defined explicitly
+There are four families:
+- **(a) Graph-SOCIAL vs each baseline:** one family per baseline over its 16 objective–budget cells. Previously the family was one per cell over the 10 baselines; this changes 6 cell-level calls.
+- **(b)** the 13 topology tests.
+- **(c)** the 36 non-representation ablation tests.
+- **(d)** the 16 random-search checks.
+
+Output: `holm_families.csv`.
+
+### D18 — Friedman ranks
+- **Status:** ranks are declared descriptive.
+- **Added:**
+  - per-budget sensitivity (4 blocks each);
+  - the Nemenyi critical difference, also drawn in Figure 5 (`plots.cd_diagram(..., cd=)`).
+- **Outputs:** `friedman_sensitivity*.csv`.
+
+### D19 — RQ2 at the run level
+- **What:** the evaluation-level binomial test is replaced by a run-level analysis.
+- **Method:** per Graph-SOCIAL run, the new-family top-decile share minus the run's base rate, tested with a cluster bootstrap over runs (10,000 resamples).
+- **Output:** `rq2_cluster*.csv`.
+
+### D20 — Duplicate controls
+- **(a) Collapsed building blocks:** homophily at φ = 0.7 on the network with building blocks collapsed (mean gap per block; blocks linked if any members are linked), against 100 degree-preserving nulls. Output: `homophily_collapsed.csv`.
+- **(b) Deduplicated pool, new runs:**
+  - one random MOF per building block per seed, chosen with RNG seed 10,000 + seed;
+  - hit sets recomputed as the top 1% of the reduced pool;
+  - Graph-SOCIAL (default configuration and topology), random search, ensemble TS, CMA-ES and the centroid policy with the shared initial design;
+  - O1–O4 at 2% and 5%, seeds 0–29;
+  - centralities recomputed on the induced subgraph.
+  - Outputs: `dedup_*.csv` and `dedup_runs/`.
+
+### D21 — Reporting additions
+- **Enrichment factor** (final recall / (B/N)): per cell, in `full_benchmark.csv`, which is also the separate SI file.
+- **Contraction by objective:** distance-to-centroid percentiles by objective in `contraction_by_objective.csv`.
+- **Figure 1:** in the embedding panel, the rose family is placed around agents i and j.
+- **TOC graphic:** redrawn.

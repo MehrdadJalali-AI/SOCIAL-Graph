@@ -32,3 +32,4 @@ reports/REVISION_DIFF.md
 docs/SOCIAL_ASOC_2026.pdf
 REPO_CLEANUP_LOG.md
 .claude/settings.local.json
+results/revision2/*.log

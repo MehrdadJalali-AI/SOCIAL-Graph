@@ -1,9 +1,9 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite the article below and this repository."
-title: "Search-Space Geometry Governs Social-Network Optimization for Budget-Limited Discovery of Metal–Organic Frameworks: A Benchmark on QMOF"
+title: "Search-Space Geometry Shapes Budget-Limited MOF Discovery with Social-Network Optimization"
 type: software
-version: v1.0-jcim
-date-released: 2026-10-04
+version: v1.1-jcim
+date-released: 2026-10-07
 license: MIT
 repository-code: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
 url: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
@@ -30,7 +30,7 @@ authors: &authors
     affiliation: "International Graduate School of Artificial Intelligence, National Yunlin University of Science and Technology, Douliu, Yunlin, Taiwan"
 preferred-citation:
   type: article
-  title: "Search-Space Geometry Governs Social-Network Optimization for Budget-Limited Discovery of Metal–Organic Frameworks: A Benchmark on QMOF"
+  title: "Search-Space Geometry Shapes Budget-Limited MOF Discovery with Social-Network Optimization"
   authors: *authors
   journal: "Journal of Chemical Information and Modeling"
   year: 2026

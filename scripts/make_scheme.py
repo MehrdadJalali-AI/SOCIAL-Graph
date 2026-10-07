@@ -195,10 +195,11 @@ def panel_embedding(ax, rng):
         ax.spines[side].set_visible(True)
         ax.spines[side].set_color("#b0b7c0")
         ax.spines[side].set_linewidth(0.6)
-    regions = [(0.10, 0.40), (0.88, 0.70), (0.14, 0.20), (0.82, 0.18)]
+    regions = [(0.12, 0.84), (0.88, 0.70), (0.14, 0.20), (0.82, 0.18)]
     pts, fam = [], []
     for k, ctr in enumerate(regions):
-        p = np.clip(ctr + rng.normal(scale=(0.06, 0.05), size=(7, 2)), 0.04, 0.96)
+        sc = (0.045, 0.035) if k == 0 else (0.06, 0.05)           # rose family sits around agents i and j
+        p = np.clip(ctr + rng.normal(scale=sc, size=(7, 2)), 0.04, 0.96)
         pts.append(p)
         fam += [k] * len(p)
     conn = np.array([[0.36, 0.42], [0.58, 0.40], [0.62, 0.80], [0.46, 0.95], [0.52, 0.22], [0.70, 0.50],
@@ -218,7 +219,7 @@ def panel_embedding(ax, rng):
     fam = np.r_[fam, -2]
     evaluated = np.array([0.0] * len(pts), dtype=bool)
     evaluated[[1, 5, 8, 10, 16, 19, 24, 30]] = True
-    ex = np.array([[0.10, 0.88], [0.06, 0.52], [0.58, 0.86], [0.88, 0.70], [0.08, 0.10], [0.92, 0.10],
+    ex = np.array([[0.04, 0.70], [0.06, 0.52], [0.58, 0.86], [0.88, 0.70], [0.08, 0.10], [0.92, 0.10],
                    [0.62, 0.12], [0.40, 0.08], [0.92, 0.40]])
     free = ~evaluated
     col = [FAM[f] if f >= 0 else (SNAP if f == -2 else CONN) for f in fam]
