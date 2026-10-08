@@ -3,7 +3,7 @@
 Centrality-guided search over metal–organic framework (MOF) similarity networks for budget-limited discovery.
 SOCIAL is used as a model-free, structure-aware acquisition policy: it decides which MOF to evaluate next under a fixed evaluation budget, and its communication topology is the MOFGalaxyNet similarity graph.
 
-This repository accompanies the manuscript "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery", submitted to the Journal of Chemical Information and Modeling (release v1.5-jcim).
+This repository accompanies the manuscript "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery", submitted to the Journal of Chemical Information and Modeling (release v1.6-jcim).
 
 ## Main findings
 
@@ -44,7 +44,7 @@ The full pipeline is `python -m graphsocial.run --stage all` (see Run below). St
 | Manuscript item | Output file(s) (under `results/`) | Produced by |
 |---|---|---|
 | Figure 1 (method overview) | `figures/F0_graph_social_scheme.*` | `scripts/make_scheme.py` |
-| Figure 2 (QMOF network: communities, band gaps) | `figures/F1_graph_overview.*` | stage 8 |
+| Figure 2 (QMOF network with zoom panels and MOF labels) | `figures/Figure2.*`, `figures/fig2_layout.csv` | `scripts/make_figure2.py` (same sample and layout as stage 8) |
 | Figure 3 (homophily) | `figures/F2_homophily.*` | stage 8 (data from stage 4) |
 | Figure 4 (recall curves) | `figures/F3_recall_curves.*` | stage 8 |
 | Figure 5 (critical-difference diagram) | `figures/F5_critical_difference.*` | stage 8 |
@@ -138,7 +138,7 @@ Runs started with `nohup … &` survive SSH or IPython disconnection. Each compl
 analysis/     center_bias_benchmarks/ (shifted-optimum control on the classic benchmark functions)
 configs/      default.yaml, smoke.yaml, data_versions.yaml (pinned data + checksums)
 docs/         REFERENCES.md, MOFGalaxyNet paper (J. Cheminform. 2023, open access)
-scripts/      check_env.py, fetch_data.py, check_numbers.py, make_scheme.py (Figure 1), gp_ei_checks.py,
+scripts/      check_env.py, fetch_data.py, check_numbers.py, make_scheme.py (Figure 1), make_figure2.py, gp_ei_checks.py,
               revision_phase1.py, revision2_analyses.py, revision_diff.py
 src/graphsocial/
   data/       metals.py (mendeleev/mordred descriptors), linkers.py (fingerprints, Tanimoto), mofgalaxynet_2k.py
