@@ -6,9 +6,15 @@ Data are the pipeline's: the phi* network, Leiden partition, max-normalized betw
 3,000-node BFS sample and Fruchterman-Reingold layout as stage 8 (plots._giant_sample, seed 0). The layout is saved
 to fig2_layout.csv and reused on later runs.
 
-Panels: (a) Leiden communities, (b) PBE band gap, (c) the largest building-block group (identical linker and metal)
-in the sample, (d) the neighborhood of the highest-betweenness MOF, (e) the region with the most O2 hits.
-Zoom regions are chosen by these rules in code; the chosen nodes are printed.
+Panels: (a) Leiden communities with boxes marking the zoom regions, (b) PBE band gap, and three zooms, each with its
+own local layout (Kamada-Kawai, deterministic) of the selected MOFs and their neighbors:
+  (c) the largest building-block group (identical linker and metal) in the sample, plus the 20 neighbors with the most
+      edges into the group;
+  (d) the highest-betweenness MOF in the center with all its neighbors, one Leiden community on each side;
+  (e) the O2 hit with the most other O2 hits within 6% of the layout span, those hits and the 25 neighbors with the most
+      edges into them.
+If a zoom region would overlap an earlier one in panel a, the next-best region under the same rule is taken. Chosen
+nodes are printed.
 
 Labels come from QMOF metadata only: the CSD refcode for MOFs whose source is the CSD, otherwise the QMOF ID; band
 gaps are the QMOF PBE values. The building-block tag of panel c is "metal | linker formula", with the formula computed
@@ -96,271 +102,338 @@ def linker_formula(smiles: str) -> str | None:
 
 
 # --------------------------------------------------------------------------------------------- selection rules
-def box_around(pts: np.ndarray, span: float, margin: float = 0.18, min_half: float = 0.045) -> tuple[float, float, float, float]:
+N_NEIGH_C, N_NEIGH_E = 20, 25
+
+
+def box_around(pts: np.ndarray, span: float, margin: float = 0.25, min_half: float = 0.025):
     lo, hi = pts.min(0), pts.max(0)
-    c, half = (lo + hi) / 2, np.maximum((hi - lo) / 2 * (1 + margin), min_half * span)
-    half[:] = half.max()  # square boxes so zooms keep the aspect ratio
-    return c[0] - half[0], c[1] - half[1], c[0] + half[0], c[1] + half[1]
+    c = (lo + hi) / 2
+    half = max(float(((hi - lo) / 2).max()) * (1 + margin), min_half * span)
+    return c[0] - half, c[1] - half, c[0] + half, c[1] + half
+
+
+def overlaps(a, b) -> bool:
+    return not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
+
+
+def candidates_c(D):
+    df, nodes, bc = D["df"], D["nodes"], D["bc"]
+    d = df.iloc[nodes].assign(node=nodes, bc=bc[nodes])
+    grp = d.groupby("bb_group").agg(n=("node", "size"), bcs=("bc", "sum")).sort_values(["n", "bcs"], ascending=False)
+    for g in grp.index:
+        yield {"group": int(g), "nodes": d[d.bb_group == g].node.to_numpy()}
+
+
+def candidates_d(D):
+    nodes, bc, sub = D["nodes"], D["bc"], D["sub"]
+    for k in np.argsort(-bc[nodes], kind="stable"):
+        yield {"bridge": int(nodes[k]), "nodes": np.array([int(nodes[j]) for j in sub.neighbors(int(k))])}
+
+
+def candidates_e(D):
+    nodes, lay, hit = D["nodes"], D["lay"], D["hit"]
+    span = float(np.ptp(lay, axis=0).max())
+    H = np.array([k for k, v in enumerate(nodes) if hit[v]])
+    dd = np.linalg.norm(lay[H][:, None] - lay[H][None], axis=-1)
+    R = 0.06 * span
+    cnt = (dd <= R).sum(1)
+    for b in np.lexsort((np.where(dd <= R, dd, 0).sum(1) / cnt, -cnt)):
+        yield {"nodes": np.array([int(nodes[k]) for k in H[dd[b] <= R]])}
 
 
 def select(D: dict) -> dict:
-    df, nodes, lay, bc, comm, hit = D["df"], D["nodes"], D["lay"], D["bc"], D["comm"], D["hit"]
+    df, lay, nodes = D["df"], D["lay"], D["nodes"]
+    idx = {int(v): k for k, v in enumerate(nodes)}
     span = float(np.ptp(lay, axis=0).max())
-    pos = {int(v): lay[k] for k, v in enumerate(nodes)}
-    sub = D["sub"]
-    # c: largest building-block group (identical linker + metal) inside the sample; ties -> larger betweenness sum
-    d = df.iloc[nodes].assign(node=nodes, bc=bc[nodes])
-    grp = d.groupby("bb_group").agg(n=("node", "size"), bcs=("bc", "sum")).sort_values(["n", "bcs"], ascending=False)
-    g = int(grp.index[0])
-    c_nodes = d[d.bb_group == g].node.to_numpy()
-    # d: highest-betweenness MOF and its 1-hop neighborhood
-    k_b = int(np.argmax(bc[nodes]))
-    bridge = int(nodes[k_b])
-    d_nb = np.array([int(nodes[k]) for k in sub.neighbors(k_b)])
-    # e: O2 hit with the most other O2 hits within 6% of the layout span; ties -> smaller mean distance
-    H = np.array([int(v) for v in nodes if hit[v]])
-    P = np.array([pos[v] for v in H])
-    dd = np.linalg.norm(P[:, None] - P[None], axis=-1)
-    R = 0.06 * span
-    cnt = (dd <= R).sum(1)
-    best = np.lexsort((np.where(dd <= R, dd, 0).sum(1) / cnt, -cnt))[0]
-    e_hits = H[dd[best] <= R]
-    sel = {"c": {"nodes": c_nodes, "box": box_around(np.array([pos[v] for v in c_nodes]), span, margin=0.9,
-                                                       min_half=0.02), "group": g},
-           "d": {"bridge": bridge, "nodes": d_nb,
-                 # window: the bridge and its neighbors up to the 85th percentile of distance (far ones stay as edges)
-                 "box": box_around(np.array([pos[bridge]] + [pos[v] for v in d_nb if np.linalg.norm(pos[v] - pos[bridge])
-                                   <= np.quantile([np.linalg.norm(pos[u] - pos[bridge]) for u in d_nb], 0.85)]),
-                                   span, margin=0.12)},
-           "e": {"nodes": e_hits, "box": box_around(np.array([pos[v] for v in e_hits]), span, margin=0.6)}}
-    print("c: building-block group", g, "|", len(c_nodes), "MOFs:", ", ".join(df.qmof_id.to_numpy()[c_nodes][:10]), "...")
-    print("d: bridge", df.qmof_id[bridge], label_of(df, bridge)[0], "| 1-hop neighbors:", len(d_nb),
-          "| communities:", pd.Series(comm[d_nb]).value_counts().to_dict())
-    print("e: O2 hits in region:", len(e_hits), ":", ", ".join(df.qmof_id.to_numpy()[e_hits]), f"(sample has {len(H)})")
-    return sel
+    core = {"c": lambda s: s["nodes"], "d": lambda s: [s["bridge"]], "e": lambda s: s["nodes"]}
+    gens = {"c": candidates_c(D), "d": candidates_d(D), "e": candidates_e(D)}
+    S, boxes = {}, []
+    for key in "cde":
+        for rank, cand in enumerate(gens[key]):
+            box = box_around(lay[[idx[v] for v in core[key](cand)]], span)
+            if not any(overlaps(box, b) for b in boxes):
+                cand.update(box=box, rank=rank)
+                S[key] = cand
+                boxes.append(box)
+                if rank:
+                    print(f"{key}: best region overlapped an earlier box; using rank {rank} under the same rule")
+                break
+    c, d, e = S["c"], S["d"], S["e"]
+    print("c: building-block group", c["group"], "|", len(c["nodes"]), "MOFs (rank", c["rank"], "):",
+          ", ".join(df.qmof_id.to_numpy()[c["nodes"]][:10]), "...")
+    print("d: bridge", df.qmof_id[d["bridge"]], label_of(df, d["bridge"])[0], "(rank", d["rank"], ") | 1-hop neighbors:",
+          len(d["nodes"]), "| communities:", pd.Series(D["comm"][d["nodes"]]).value_counts().to_dict())
+    print("e: O2 hits in region (rank", e["rank"], "):", ", ".join(df.qmof_id.to_numpy()[e["nodes"]]))
+    return S
 
 
-# --------------------------------------------------------------------------------------------- drawing helpers
+# --------------------------------------------------------------------------------------------- local layouts
+def neighbors_most_connected(D, core, n):
+    """The n non-core neighbors with the most edges into ``core`` (ties: higher betweenness, then node id)."""
+    nodes, sub, bc = D["nodes"], D["sub"], D["bc"]
+    idx = {int(v): k for k, v in enumerate(nodes)}
+    cnt: dict[int, int] = {}
+    cs = set(map(int, core))
+    for v in core:
+        for k in sub.neighbors(idx[int(v)]):
+            u = int(nodes[k])
+            if u not in cs:
+                cnt[u] = cnt.get(u, 0) + 1
+    return sorted(cnt, key=lambda u: (-cnt[u], -bc[u], u))[:n]
+
+
+def local_graph(D, members):
+    import networkx as nx
+
+    nodes, sub = D["nodes"], D["sub"]
+    idx = {int(v): k for k, v in enumerate(nodes)}
+    ms = list(map(int, members))
+    G = nx.Graph()
+    G.add_nodes_from(ms)
+    ks = {idx[v]: v for v in ms}
+    for k, v in ks.items():
+        for j in sub.neighbors(k):
+            if j in ks and v < ks[j]:
+                G.add_edge(v, ks[j])
+    return G
+
+
+def kk_layout(G, seed=0):
+    import networkx as nx
+
+    init = nx.spring_layout(G, seed=seed)
+    return nx.kamada_kawai_layout(G, pos=init)
+
+
+def bridge_layout(D, bridge, nbrs):
+    """Bridge at the origin; neighbors grouped by Leiden community, each community laid out on its own side."""
+    import networkx as nx
+
+    comm = D["comm"]
+    pos = {bridge: np.array([0.0, 0.0])}
+    groups = pd.Series({v: comm[v] for v in nbrs}).groupby(lambda v: comm[v]).groups
+    order = sorted(groups, key=lambda c: -len(groups[c]))
+    angles = np.linspace(np.pi, -np.pi, len(order), endpoint=False) if len(order) > 2 else [np.pi, 0.0][: len(order)]
+    for c, a in zip(order, angles):
+        members = list(groups[c])
+        G = local_graph(D, members)
+        lp = kk_layout(G) if len(members) > 2 else {v: np.array([0.0, k * 0.5]) for k, v in enumerate(members)}
+        P = np.array([lp[v] for v in members])
+        P = P - P.mean(0)
+        scale = 0.55 * np.sqrt(len(members) / max(len(nbrs), 1)) + 0.25
+        P = P / max(np.abs(P).max(), 1e-9) * scale
+        center = 1.15 * np.array([np.cos(a), np.sin(a)])
+        for v, q in zip(members, P):
+            pos[v] = q + center
+    return pos
+
+
+# --------------------------------------------------------------------------------------------- drawing
 def top_communities(comm_s: np.ndarray) -> list[int]:
     return list(pd.Series(comm_s).value_counts().index[:10])
 
 
 def comm_color(c: int, top10: list[int]) -> str:
-    return plots.PALETTE[top10.index(c)] if c in top10 else OTHER
+    return plots.PALETTE[top10.index(c)] if c in top10 else "#b9c1c9"
 
 
-def draw_net(ax, D, colors, sizes, keep=None, edge_lw=0.2, edge_alpha=0.15):
-    lay, sub = D["lay"], D["sub"]
-    el = np.asarray(sub.get_edgelist())
-    if keep is not None:
-        el = el[keep[el[:, 0]] & keep[el[:, 1]]]
-    ax.add_collection(LineCollection(lay[el], colors=EDGE, linewidths=edge_lw, alpha=edge_alpha, zorder=1, rasterized=True))
-    m = np.ones(len(lay), bool) if keep is None else keep
-    ax.scatter(lay[m, 0], lay[m, 1], s=sizes[m], c=np.asarray(colors, dtype=object)[m].tolist() if isinstance(colors, list)
-               else colors[m], linewidths=0, zorder=2, rasterized=True)
+def draw_local(ax, G, pos, colors, sizes, edge_extra=()):
+    segs = [[pos[u], pos[v]] for u, v in G.edges()] + [list(e) for e in edge_extra]
+    ax.add_collection(LineCollection(segs, colors="#8a96a3", linewidths=0.3, alpha=0.3, zorder=1))
+    vs = list(G.nodes) if not hasattr(G, "draw_nodes") else G.draw_nodes
+    P = np.array([pos[v] for v in vs])
+    ax.scatter(P[:, 0], P[:, 1], s=[sizes[v] for v in vs], c=[colors[v] for v in vs], linewidths=0.4,
+               edgecolors="white", zorder=2)
+    return P
 
 
-def place_labels(ax, items, fig, box, obstacles=()):
-    """Greedy, overlap-free label placement. items: list of (xy, text, bold). Candidate offsets around each point are
-    tried in order; a candidate is accepted if its text box overlaps no placed label, no marked point and stays inside
-    the panel. Leader lines connect label and point."""
-    renderer = fig.canvas.get_renderer()
-    placed = [o.get_window_extent(renderer).expanded(1.05, 1.1) for o in obstacles]
-    x0, y0, x1, y1 = box
-    w, h = x1 - x0, y1 - y0
-    pts_disp = [ax.transData.transform(xy) for xy, *_ in items]
-    ax_bb = ax.get_window_extent(renderer)
-    dirs = [(1, 1), (-1, 1), (1, -1), (-1, -1), (1, 0), (-1, 0), (0, 1), (0, -1)]
-    failed = []
-    for (xy, text, bold), pdisp in zip(items, pts_disp):
-        done = False
-        for r in (0.10, 0.17, 0.25, 0.33, 0.42):
-            for dx, dy in dirs:
-                tx, ty = xy[0] + dx * r * w, xy[1] + dy * r * h * 0.8
-                if not (x0 + 0.02 * w < tx < x1 - 0.02 * w and y0 + 0.03 * h < ty < y1 - 0.03 * h):
-                    continue
-                ha = "left" if dx > 0 else ("right" if dx < 0 else "center")
-                va = "bottom" if dy > 0 else ("top" if dy < 0 else "center")
-                t = ax.text(tx, ty, text, fontsize=LABEL_PT, ha=ha, va=va, fontweight="bold" if bold else "normal",
-                            zorder=6, bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85))
-                bb = t.get_window_extent(renderer).expanded(1.04, 1.12)
-                inside = (bb.x0 >= ax_bb.x0 and bb.x1 <= ax_bb.x1 and bb.y0 >= ax_bb.y0 and bb.y1 <= ax_bb.y1)
-                clash = any(bb.overlaps(p) for p in placed) or any(bb.contains(*q) for q in pts_disp)
-                if inside and not clash:
-                    placed.append(bb)
-                    ax.plot([xy[0], tx], [xy[1], ty], color="#37424a", lw=0.35, zorder=5)
-                    done = True
-                    break
-                t.remove()
-            if done:
-                break
-        if not done:
-            failed.append(text)
-    return failed
-
-
-def _inside(xy, box) -> bool:
-    return box[0] <= xy[0] <= box[2] and box[1] <= xy[1] <= box[3]
-
-
-def zoom_axes(ax, box, letter, title):
-    x0, y0, x1, y1 = box
-    ax.set_xlim(x0, x1)
-    ax.set_ylim(y0, y1)
+def finish_zoom(ax, P, letter, title):
+    lo, hi = P.min(0), P.max(0)
+    c, half = (lo + hi) / 2, (hi - lo) / 2 * 1.18 + 0.08 * (hi - lo).max()
+    ax.set_xlim(c[0] - half[0], c[0] + half[0])
+    ax.set_ylim(c[1] - half[1], c[1] + half[1])
     ax.set_xticks([])
     ax.set_yticks([])
-    for s in ax.spines.values():
-        s.set_color("#9aa4ae")
-        s.set_linewidth(0.6)
-    ax.text(0.0, 1.03, letter, transform=ax.transAxes, fontsize=8.5, fontweight="bold", ha="left", va="bottom")
-    ax.text(0.07, 1.03, title, transform=ax.transAxes, fontsize=6.5, ha="left", va="bottom", color="#263238")
+    for sp in ax.spines.values():
+        sp.set_color("#9aa4ae")
+        sp.set_linewidth(0.6)
+    ax.text(0.0, 1.025, letter, transform=ax.transAxes, fontsize=8.5, fontweight="bold", ha="left", va="bottom")
+    ax.text(0.075, 1.025, title, transform=ax.transAxes, fontsize=6.5, ha="left", va="bottom", color="#263238")
 
 
-# --------------------------------------------------------------------------------------------- figure
+def add_labels(ax, pos, label_nodes, df, P_all, bold=(), unresolved=None, obstacles=()):
+    from adjustText import adjust_text
+
+    texts, fixed = [], []
+    for v in label_nodes:
+        lab, ok = label_of(df, v)
+        if not ok and unresolved is not None:
+            unresolved.append(lab)
+        txt = f"{lab} · {df.pbe_gap[v]:.2f} eV"
+        box = dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85)
+        if v in bold:  # pinned directly below its node; the other labels avoid it
+            fixed.append(ax.text(pos[v][0], pos[v][1] - 0.16, txt, fontsize=LABEL_PT, zorder=6, fontweight="bold",
+                                 ha="center", va="top", bbox=box))
+        else:
+            texts.append(ax.text(pos[v][0], pos[v][1], txt, fontsize=LABEL_PT, zorder=6, bbox=box))
+    ax.figure.canvas.draw()
+    anchors = [pos[v] for v in label_nodes if v not in bold]
+    adjust_text(texts, x=P_all[:, 0], y=P_all[:, 1], objects=(fixed + list(obstacles)) or None, ax=ax, expand=(1.3, 1.6),
+                force_text=(0.6, 0.8), force_static=(0.4, 0.6), ensure_inside_axes=True, max_move=None)
+    # leader lines: from each node to the nearest point of its (moved) label box
+    ax.figure.canvas.draw()
+    r = ax.figure.canvas.get_renderer()
+    inv = ax.transData.inverted()
+    for t, (x, y) in zip(texts, anchors):
+        (bx0, by0), (bx1, by1) = inv.transform(t.get_window_extent(r).get_points())
+        qx, qy = min(max(x, bx0), bx1), min(max(y, by0), by1)
+        if (qx, qy) != (x, y):
+            ax.plot([x, qx], [y, qy], color="#37424a", lw=0.35, zorder=5)
+    return texts + fixed + list(obstacles)
+
+
+def check_overlaps(fig, axes_texts) -> list[str]:
+    fig.canvas.draw()
+    r = fig.canvas.get_renderer()
+    bad = []
+    for ts in axes_texts:
+        bbs = [(t.get_text(), t.get_window_extent(r)) for t in ts]
+        for i in range(len(bbs)):
+            for j in range(i + 1, len(bbs)):
+                if bbs[i][1].overlaps(bbs[j][1]):
+                    bad.append(f"{bbs[i][0]} / {bbs[j][0]}")
+    return bad
+
+
 def main() -> None:
     D = load()
     S = select(D)
-    df, nodes, lay, bc, comm, hit = D["df"], D["nodes"], D["lay"], D["bc"], D["comm"], D["hit"]
-    idx = {int(v): k for k, v in enumerate(nodes)}
+    df, nodes, lay, bc, comm = D["df"], D["nodes"], D["lay"], D["bc"], D["comm"]
     cs = comm[nodes]
     top10 = top_communities(cs)
     ccols = [comm_color(c, top10) for c in cs]
-    gap = df.pbe_gap.to_numpy()[nodes]
+    gap_all = df.pbe_gap.to_numpy()
+    gap = gap_all[nodes]
     vmax = float(np.quantile(gap, 0.99))
+    norm = matplotlib.colors.Normalize(0, vmax)
+    cmap = matplotlib.colormaps[GAPMAP]
     size_main = 1.5 + 30 * bc[nodes] / bc[nodes].max()
 
     fig = plt.figure(figsize=(7.2, 5.6), facecolor="white")
-    ax_a = fig.add_axes([0.01, 0.43, 0.45, 0.55])
-    ax_b = fig.add_axes([0.49, 0.43, 0.42, 0.55])
-    cax = fig.add_axes([0.925, 0.50, 0.011, 0.40])
-    ax_z = [fig.add_axes([0.035 + k * 0.325, 0.025, 0.285, 0.34]) for k in range(3)]
+    ax_a = fig.add_axes([0.005, 0.385, 0.47, 0.585])
+    ax_b = fig.add_axes([0.485, 0.385, 0.43, 0.585])
+    cax = fig.add_axes([0.925, 0.47, 0.011, 0.40])
+    ax_z = [fig.add_axes([0.02 + k * 0.33, 0.02, 0.30, 0.315]) for k in range(3)]
+    el = np.asarray(D["sub"].get_edgelist())
     for ax in (ax_a, ax_b):
+        ax.add_collection(LineCollection(lay[el], colors=EDGE, linewidths=0.2, alpha=0.15, zorder=1, rasterized=True))
         ax.set_aspect("equal")
         ax.set_axis_off()
-    draw_net(ax_a, D, ccols, size_main)
-    el = np.asarray(D["sub"].get_edgelist())
-    ax_b.add_collection(LineCollection(lay[el], colors=EDGE, linewidths=0.2, alpha=0.15, zorder=1, rasterized=True))
-    sc = ax_b.scatter(lay[:, 0], lay[:, 1], s=size_main, c=gap, cmap=GAPMAP, vmin=0, vmax=vmax, linewidths=0, zorder=2,
+    ax_a.scatter(lay[:, 0], lay[:, 1], s=size_main, c=ccols, linewidths=0, zorder=2, rasterized=True)
+    sc = ax_b.scatter(lay[:, 0], lay[:, 1], s=size_main, c=gap, cmap=GAPMAP, norm=norm, linewidths=0, zorder=2,
                       rasterized=True)
-    cb = fig.colorbar(sc, cax=cax)
-    cb.set_label("PBE band gap (eV)", fontsize=6.5)
-    cb.ax.tick_params(labelsize=6, width=0.5, length=2)
-    cb.outline.set_linewidth(0.5)
     for ax in (ax_a, ax_b):
         ax.autoscale()
     ax_b.set_xlim(ax_a.get_xlim())
     ax_b.set_ylim(ax_a.get_ylim())
-    for x, letter, title in ((0.012, "a", "Leiden communities"), (0.49, "b", "PBE band gap")):
+    cb = fig.colorbar(sc, cax=cax)
+    cb.set_label("PBE band gap (eV)", fontsize=6)
+    cb.ax.tick_params(labelsize=5.5, width=0.5, length=2)
+    cb.outline.set_linewidth(0.5)
+    for x, letter, title in ((0.012, "a", "Leiden communities"), (0.485, "b", "PBE band gap")):
         fig.text(x, 0.985, letter, fontsize=8.5, fontweight="bold", va="top")
         fig.text(x + 0.022, 0.983, title, fontsize=6.5, va="top", color="#263238")
+    for key in "cde":
+        x0, y0, x1, y1 = S[key]["box"]
+        ax_a.add_patch(FancyBboxPatch((x0, y0), x1 - x0, y1 - y0, boxstyle="round,pad=0,rounding_size=0.015",
+                                      fc="none", ec="#37424a", lw=0.8, zorder=4))
+        ax_a.text(x1, y1, key, fontsize=7, fontweight="bold", ha="left", va="bottom", color="#263238", zorder=5,
+                  bbox=dict(boxstyle="round,pad=0.08", fc="white", ec="none", alpha=0.85))
 
-    # zoom boxes on panel a, connectors to the zoom panels
-    for (key, sel), axz in zip(S.items(), ax_z):
-        x0, y0, x1, y1 = sel["box"]
-        ax_a.add_patch(FancyBboxPatch((x0, y0), x1 - x0, y1 - y0, boxstyle="round,pad=0,rounding_size=0.02",
-                                      fc="none", ec="#37424a", lw=0.6, zorder=4, mutation_aspect=1))
-        lx, ly, ha, va = (x1, y0, "left", "top") if key == "d" else (x0, y1, "right", "bottom")
-        ax_a.text(lx, ly, key, fontsize=6.5, fontweight="bold", ha=ha, va=va, color="#263238", zorder=5,
-                  bbox=dict(boxstyle="round,pad=0.1", fc="white", ec="none", alpha=0.8))
-        for xa, xz in ((x0, 0.0), (x1, 1.0)):
-            fig.add_artist(ConnectionPatch(xyA=(xa, y0), coordsA=ax_a.transData, xyB=(xz, 1.0), coordsB=axz.transAxes,
-                                           color="#9aa4ae", lw=0.35, alpha=0.6, zorder=0))
+    unresolved, all_texts = [], []
+    zsize = lambda v, base=14: base + 70 * bc[v] / bc[nodes].max()  # noqa: E731
+    ccol = lambda v: comm_color(comm[v], top10)  # noqa: E731
 
-    unresolved = []
-
-    def zoom(axz, sel, color_mode, title, letter, label_nodes, bold=(), focus=None, star_from=None, notes=()):
-        x0, y0, x1, y1 = sel["box"]
-        keep = (lay[:, 0] >= x0) & (lay[:, 0] <= x1) & (lay[:, 1] >= y0) & (lay[:, 1] <= y1)
-        foc = np.zeros(len(lay), bool)
-        if focus is not None:
-            foc[[idx[v] for v in focus]] = True
-        zsize = 7 + 40 * bc[nodes] / bc[nodes].max()
-        el = np.asarray(D["sub"].get_edgelist())
-        el = el[keep[el[:, 0]] & keep[el[:, 1]]]
-        if focus is None:
-            axz.add_collection(LineCollection(lay[el], colors="#c9d1d9", linewidths=0.15, alpha=0.12, zorder=1))
-        if focus is not None:
-            fe = el[foc[el[:, 0]] & foc[el[:, 1]]]
-            axz.add_collection(LineCollection(lay[fe], colors="#7a8794", linewidths=0.3, alpha=0.35, zorder=1))
-        if star_from is not None:  # edges from the bridge to all its neighbors (clipped at the panel border)
-            kb = idx[star_from]
-            segs = [[lay[kb], lay[idx[v]]] for v in sel["nodes"]]
-            axz.add_collection(LineCollection(segs, colors="#37424a", linewidths=0.4, alpha=0.6, zorder=2))
-        if color_mode == "community":
-            cc = np.asarray(ccols, dtype=object)
-            bg = keep & ~foc if focus is not None else np.zeros(len(lay), bool)
-            fg = keep & foc if focus is not None else keep
-            axz.scatter(lay[bg, 0], lay[bg, 1], s=zsize[bg] * 0.6, c="#e9ecef", linewidths=0, zorder=2)
-            axz.scatter(lay[fg, 0], lay[fg, 1], s=zsize[fg], c=cc[fg].tolist(), linewidths=0.4, edgecolors="white",
-                        zorder=3)
-        else:
-            axz.scatter(lay[keep, 0], lay[keep, 1], s=zsize[keep], c=gap[keep], cmap=GAPMAP, vmin=0, vmax=vmax,
-                        linewidths=0.3, edgecolors="white", zorder=2)
-            hk = np.array([idx[v] for v in sel["nodes"]])
-            axz.scatter(lay[hk, 0], lay[hk, 1], s=zsize[hk] * 2.2, facecolors="none", edgecolors="k", linewidths=0.8,
-                        zorder=3)
-        zoom_axes(axz, sel["box"], letter, title)
-        items = []
-        for v in label_nodes:
-            lab, ok = label_of(df, v)
-            if not ok:
-                unresolved.append(lab)
-            items.append((lay[idx[v]], f"{lab} · {df.pbe_gap[v]:.2f} eV", v in bold))
-        obst = [axz.text(*xy, txt, transform=axz.transAxes, fontsize=LABEL_PT, ha=ha, va=va, color=col, zorder=7,
-                         bbox=dict(boxstyle="round,pad=0.25", fc="white", ec=col, lw=0.5, alpha=0.95))
-                for xy, txt, ha, va, col in notes]
-        fig.canvas.draw()
-        return place_labels(axz, items, fig, sel["box"], obstacles=obst)
-
-    # c: label up to 8 members of the group, spread over the group (highest betweenness first, distinct labels)
-    sc_ = S["c"]
-    members = sorted(sc_["nodes"], key=lambda v: -bc[v])
+    # c: building-block group + most-connected neighbors
+    c = S["c"]
+    nb_c = neighbors_most_connected(D, c["nodes"], N_NEIGH_C)
+    Gc = local_graph(D, list(c["nodes"]) + nb_c)
+    pc = kk_layout(Gc)
+    colors = {v: ccol(v) if v in set(map(int, c["nodes"])) else "#cfd6dd" for v in Gc.nodes}
+    sizes = {v: zsize(v) for v in Gc.nodes}
+    Pc = draw_local(ax_z[0], Gc, pc, colors, sizes)
+    r0 = df.iloc[c["nodes"][0]]
+    finish_zoom(ax_z[0], Pc, "c", f"Building-block near-clique: {r0.metal} | {linker_formula(r0.linker_smiles)}")
+    members = sorted(map(int, c["nodes"]), key=lambda v: -bc[v])
     lab_c, seen = [], set()
     for v in members:
-        if label_of(df, v)[0] not in seen and len(lab_c) < 8:
+        if label_of(df, v)[0] not in seen and len(lab_c) < 7:
             lab_c.append(v)
             seen.add(label_of(df, v)[0])
-    r0 = df.iloc[sc_["nodes"][0]]
-    tag = f"{r0.metal} | {linker_formula(r0.linker_smiles)}"
-    fc = zoom(ax_z[0], sc_, "community", f"Building-block near-clique: {tag}, {len(sc_['nodes'])} MOFs", "c", lab_c,
-              focus=sc_["nodes"])
-    # d: bridge in bold + the highest-betweenness neighbor of each community, then the next highest, up to 7
-    sd = S["d"]
-    nb = sorted(sd["nodes"], key=lambda v: -bc[v])
-    lab_d, comms = [], []
-    for v in nb:
-        if comm[v] not in comms:
-            lab_d.append(v)
-            comms.append(comm[v])
-    for v in nb:
-        if len(lab_d) >= 7:
-            break
-        if v not in lab_d:
-            lab_d.append(v)
-    lab_d = [v for v in lab_d if _inside(lay[idx[v]], sd["box"])]
-    out = [v for v in sd["nodes"] if not _inside(lay[idx[v]], sd["box"])]
-    notes = []
-    if out:
-        cnt = pd.Series(comm[out]).value_counts()
-        for c, n in cnt.items():
-            vec = np.array([lay[idx[v]] for v in out if comm[v] == c]).mean(0) - lay[idx[sd["bridge"]]]
-            right, up = vec[0] > 0, vec[1] > 0
-            col = comm_color(c, top10) if comm_color(c, top10) != OTHER else "#37424a"
-            notes.append(((0.97 if right else 0.03, 0.96 if up else 0.04),
-                          f"{n} neighbor{'s' if n > 1 else ''} in this family\n(outside view)",
-                          "right" if right else "left", "top" if up else "bottom", col))
-        print("d: neighbors outside the zoom window by community:", cnt.to_dict())
-    fd = zoom(ax_z[1], sd, "community", "Bridge between families", "d", [sd["bridge"]] + lab_d, bold=(sd["bridge"],),
-              focus=np.r_[sd["bridge"], sd["nodes"]], star_from=sd["bridge"], notes=notes)
-    # e: label the O2 hits in the region (up to 10, lowest gap first)
-    se = S["e"]
-    lab_e = sorted(se["nodes"], key=lambda v: df.pbe_gap[v])[:10]
-    fe = zoom(ax_z[2], se, "gap", "Low-gap region (O2 hits)", "e", lab_e)
+    all_texts.append(add_labels(ax_z[0], pc, lab_c, df, Pc, unresolved=unresolved))
 
-    print("labels that could not be placed without overlap:", fc + fd + fe or "none")
+    # d: bridge in the center, neighbor families on either side
+    d = S["d"]
+    nb_d = list(map(int, d["nodes"]))
+    pdl = bridge_layout(D, d["bridge"], nb_d)
+    Gd = local_graph(D, [d["bridge"]] + nb_d)
+    colors = {v: ccol(v) for v in Gd.nodes}
+    sizes = {v: zsize(v) for v in Gd.nodes}
+    sizes[d["bridge"]] = zsize(d["bridge"], 30)
+    Pd = draw_local(ax_z[1], Gd, pdl, colors, sizes)
+    ax_z[1].scatter(*pdl[d["bridge"]], s=sizes[d["bridge"]] * 1.9, facecolors="none", edgecolors="k", linewidths=0.8,
+                    zorder=3)
+    finish_zoom(ax_z[1], Pd, "d", f"Bridge between families: {label_of(df, d['bridge'])[0]}")
+    fams = pd.Series({v: comm[v] for v in nb_d})
+    lab_d = []
+    for cfam in fams.value_counts().index:  # the three highest-betweenness neighbors of each family
+        lab_d.append(sorted(fams[fams == cfam].index, key=lambda v: -bc[v])[:3])
+    lab_d = [v for grp in lab_d for v in grp][:6]
+    labs = add_labels(ax_z[1], pdl, [d["bridge"]] + lab_d, df, Pd, bold=(d["bridge"],), unresolved=unresolved)
+    fig.canvas.draw()
+    r = fig.canvas.get_renderer()
+    taken = [t.get_window_extent(r) for t in labs]
+    axbb = ax_z[1].get_window_extent(r)
+    for cfam, n in fams.value_counts().items():  # community captions: first free spot around each group
+        pts = np.array([pdl[v] for v in fams[fams == cfam].index])
+        cx, cy = pts[:, 0].mean(), pts[:, 1].mean()
+        spots = [(cx, pts[:, 1].min() - 0.10, "center", "top"), (cx, pts[:, 1].max() + 0.10, "center", "bottom"),
+                 (pts[:, 0].max() + 0.08, cy, "left", "center"), (pts[:, 0].min() - 0.08, cy, "right", "center")]
+        for x, y, ha, va in spots:
+            t = ax_z[1].text(x, y, f"community {cfam} ({n})", fontsize=5.6, ha=ha, va=va, zorder=4,
+                             color=ccol(int(fams[fams == cfam].index[0])))
+            bb = t.get_window_extent(r)
+            ok = (bb.x0 >= axbb.x0 and bb.x1 <= axbb.x1 and bb.y0 >= axbb.y0 and bb.y1 <= axbb.y1
+                  and not any(bb.overlaps(o) for o in taken))
+            if ok:
+                taken.append(bb)
+                labs.append(t)
+                break
+            t.remove()
+        else:
+            print("could not place caption for community", cfam)
+    all_texts.append(labs)
+
+    # e: O2-hit region
+    e = S["e"]
+    nb_e = neighbors_most_connected(D, e["nodes"], N_NEIGH_E)
+    Ge = local_graph(D, list(e["nodes"]) + nb_e)
+    pe = kk_layout(Ge)
+    colors = {v: cmap(norm(gap_all[v])) for v in Ge.nodes}
+    sizes = {v: zsize(v) for v in Ge.nodes}
+    Pe = draw_local(ax_z[2], Ge, pe, colors, sizes)
+    H = np.array([pe[v] for v in e["nodes"]])
+    ax_z[2].scatter(H[:, 0], H[:, 1], s=[sizes[v] * 2.4 for v in e["nodes"]], facecolors="none", edgecolors="k",
+                    linewidths=0.8, zorder=3)
+    finish_zoom(ax_z[2], Pe, "e", "Low-gap region (O2 hits)")
+    lab_e = sorted(map(int, e["nodes"]), key=lambda v: gap_all[v])[:7]
+    all_texts.append(add_labels(ax_z[2], pe, lab_e, df, Pe, unresolved=unresolved))
+
+    bad = check_overlaps(fig, all_texts)
+    print("overlapping labels:", bad or "none")
     print("labels without a CSD refcode (QMOF ID used):", sorted(set(unresolved)) or "none")
     for ext in ("pdf", "svg", "png", "tiff"):
-        kw = {"dpi": 600} if ext in ("png", "tiff") else {"dpi": 600}
+        kw = {"dpi": 600}
         if ext == "tiff":
             kw["pil_kwargs"] = {"compression": "tiff_lzw"}
         fig.savefig(OUT / f"Figure2.{ext}", facecolor="white", **kw)

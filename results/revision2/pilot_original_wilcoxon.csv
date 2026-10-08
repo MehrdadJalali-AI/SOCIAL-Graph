@@ -1,0 +1,5 @@
+variant,vs,mean_diff,wilcoxon_p_one_sided,cliffs_delta
+MOFGalaxyNet,degree-preserving random,0.013793103448275862,0.1953125,0.26
+MOFGalaxyNet+ρ=0.10,degree-preserving random,0.014942528735632182,0.0869140625,0.22
+MOFGalaxyNet,Watts–Strogatz,0.004597701149425287,0.298828125,0.14
+MOFGalaxyNet,random search,0.05172413793103449,0.0009765625,0.96

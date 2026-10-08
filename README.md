@@ -3,7 +3,7 @@
 Centrality-guided search over metal–organic framework (MOF) similarity networks for budget-limited discovery.
 SOCIAL is used as a model-free, structure-aware acquisition policy: it decides which MOF to evaluate next under a fixed evaluation budget, and its communication topology is the MOFGalaxyNet similarity graph.
 
-This repository accompanies the manuscript "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery", submitted to the Journal of Chemical Information and Modeling (release v1.6-jcim).
+This repository accompanies the manuscript "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery", submitted to the Journal of Chemical Information and Modeling (release v1.7-jcim).
 
 ## Main findings
 
