@@ -148,9 +148,10 @@ def graph_overview(top, comm: np.ndarray, bc: np.ndarray, stem: Path, max_nodes:
     save(fig, stem)
 
 
-def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 0) -> None:
-    """F10: every MOF. Each connected component gets its own Fruchterman-Reingold layout scaled to a box whose side
-    grows with sqrt(size); boxes are shelf-packed by size, isolated MOFs form a grid at the bottom."""
+def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 0, min_size: int = 5) -> dict:
+    """F10: all connected components with at least ``min_size`` MOFs (isolated MOFs and smaller components are
+    omitted for clarity). Each component gets its own Fruchterman-Reingold layout scaled to a box whose side grows
+    with sqrt(size); boxes are shelf-packed by size. Returns the counts of shown and omitted MOFs/components."""
     import random
 
     import igraph as ig
@@ -160,8 +161,8 @@ def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 
     ig.set_random_number_generator(random.Random(seed))
     comps = sorted(g.connected_components(), key=len, reverse=True)
     xy = np.zeros((g.vcount(), 2))
-    big = [c for c in comps if len(c) > 1]
-    single = [c[0] for c in comps if len(c) == 1]
+    big = [c for c in comps if len(c) >= min_size]
+    small = [c for c in comps if len(c) < min_size]
     row_w = 2.2 * np.sqrt(len(big[0]))
     x0 = y0 = row_h = 0.0
     for c in big:
@@ -175,19 +176,23 @@ def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 
         xy[c] = lay + [x0, y0 - side]
         x0 += side + 0.6
         row_h = max(row_h, side)
-    y0 -= row_h + 1.5
-    k = int(np.ceil(np.sqrt(len(single) * 4)))
-    for t, v in enumerate(single):
-        xy[v] = [(t % k) * row_w / k, y0 - (t // k) * row_w / k]
+    shown = np.zeros(g.vcount(), dtype=bool)
+    for c in big:
+        shown[c] = True  # isolated MOFs and components smaller than min_size are not drawn
     fig, ax = plt.subplots(figsize=(7, 7))
-    ax.add_collection(LineCollection(xy[np.asarray(g.get_edgelist())], colors="#94a3b8", linewidths=0.15, alpha=0.15,
-                                     zorder=1))
-    ax.scatter(xy[:, 0], xy[:, 1], s=1 + 15 * bc / max(bc.max(), 1e-12), c=_community_colors(comm), linewidths=0,
-               zorder=2)
+    edges = np.asarray(g.get_edgelist())
+    edges = edges[shown[edges[:, 0]] & shown[edges[:, 1]]]
+    ax.add_collection(LineCollection(xy[edges], colors="#94a3b8", linewidths=0.15, alpha=0.15, zorder=1))
+    cols = np.array(_community_colors(comm), dtype=object)
+    ax.scatter(xy[shown, 0], xy[shown, 1], s=(1 + 15 * bc / max(bc.max(), 1e-12))[shown], c=list(cols[shown]),
+               linewidths=0, zorder=2)
     ax.set_aspect("equal")
     ax.autoscale()
     ax.set_axis_off()
     save(fig, stem)
+    return {"min_component_size": min_size, "mofs_total": int(g.vcount()), "mofs_shown": int(shown.sum()),
+            "components_shown": len(big), "mofs_omitted": int((~shown).sum()), "components_omitted": len(small),
+            "isolated_mofs": sum(len(c) == 1 for c in comps), "giant_component_mofs": len(comps[0])}
 
 
 def coverage_vs_recall(means: pd.DataFrame, stem: Path) -> None:

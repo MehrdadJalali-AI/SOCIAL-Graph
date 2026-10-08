@@ -1,6 +1,6 @@
 # Graph-SOCIAL — Results
 
-Generated 2026-10-08T07:07:14.
+Generated 2026-10-08T07:16:10.
 φ* = 0.7; Graph-SOCIAL search topology = `mgn_phi0.70_rho0.10`.
 Every number is a mean ± std over seeds 0–29 unless stated otherwise.
 
@@ -902,7 +902,7 @@ Evaluations that found the first hit of a Leiden community and had a top-weighte
 - **F7** — φ × ρ sensitivity (mean final recall): [F7_phi_rho_heatmap.png](results/figures/F7_phi_rho_heatmap.png)
 - **F8** — H3: bridge-node analysis: [F8_h3_bridge_nodes.png](results/figures/F8_h3_bridge_nodes.png)
 - **F9** — Runtime per run, excluding oracle lookups: [F9_runtime.png](results/figures/F9_runtime.png)
-- **F10** — All MOFs of MOFGalaxyNet(φ*): components laid out separately and packed by size, coloured by Leiden community: [F10_network_full.png](results/figures/F10_network_full.png)
+- **F10** — MOFGalaxyNet(φ*), components with at least 5 MOFs: components laid out separately and packed by size, coloured by Leiden community: [F10_network_full.png](results/figures/F10_network_full.png)
 
 ## Deviations
 

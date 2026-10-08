@@ -20,7 +20,7 @@ FIGURES = [
     ("F7", "F7_phi_rho_heatmap", "φ × ρ sensitivity (mean final recall)"),
     ("F8", "F8_h3_bridge_nodes", "H3: bridge-node analysis"),
     ("F9", "F9_runtime", "Runtime per run, excluding oracle lookups"),
-    ("F10", "F10_network_full", "All MOFs of MOFGalaxyNet(φ*): components laid out separately and packed by size, coloured by Leiden community"),
+    ("F10", "F10_network_full", "MOFGalaxyNet(φ*), components with at least 5 MOFs: components laid out separately and packed by size, coloured by Leiden community"),
 ]
 
 

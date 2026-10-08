@@ -178,7 +178,8 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     top = Topology.load(st.graph(graph_name(phi)))
     comm_phi, bc_phi = np.load(st.communities(phi)), st.centralities(graph_name(phi))["betweenness"]
     plots.graph_overview(top, comm_phi, bc_phi, figs / "F1_graph_overview", gap=st.load_clean()["pbe_gap"].to_numpy())
-    plots.network_full(top, comm_phi, bc_phi, figs / "F10_network_full")
+    pd.DataFrame([plots.network_full(top, comm_phi, bc_phi, figs / "F10_network_full")]).to_csv(
+        tables / "network_full_stats.csv", index=False)
     for ext in ("png", "pdf"):
         src = figs / f"phase4_homophily.{ext}"
         if src.exists():
