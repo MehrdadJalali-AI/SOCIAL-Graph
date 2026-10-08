@@ -1,6 +1,6 @@
 # Graph-SOCIAL — Results
 
-Generated 2026-10-07T12:04:57.
+Generated 2026-10-08T07:07:14.
 φ* = 0.7; Graph-SOCIAL search topology = `mgn_phi0.70_rho0.10`.
 Every number is a mean ± std over seeds 0–29 unless stated otherwise.
 
@@ -893,7 +893,7 @@ Evaluations that found the first hit of a Leiden community and had a top-weighte
 
 ## Figures
 
-- **F1** — Giant component of MOFGalaxyNet(φ*), coloured by Leiden community, sized by betweenness: [F1_graph_overview.png](results/figures/F1_graph_overview.png)
+- **F1** — Giant component of MOFGalaxyNet(φ*) (3,000-MOF sample), sized by betweenness: (a) Leiden community, (b) PBE band gap: [F1_graph_overview.png](results/figures/F1_graph_overview.png)
 - **F2** — Band-gap homophily: observed vs degree-preserving null distributions: [F2_homophily.png](results/figures/F2_homophily.png)
 - **F3** — Top-1% recall vs evaluations (mean, 95% CI), one panel per objective: [F3_recall_curves.png](results/figures/F3_recall_curves.png)
 - **F4** — Family coverage vs final recall (method means): [F4_coverage_vs_recall.png](results/figures/F4_coverage_vs_recall.png)
@@ -902,6 +902,7 @@ Evaluations that found the first hit of a Leiden community and had a top-weighte
 - **F7** — φ × ρ sensitivity (mean final recall): [F7_phi_rho_heatmap.png](results/figures/F7_phi_rho_heatmap.png)
 - **F8** — H3: bridge-node analysis: [F8_h3_bridge_nodes.png](results/figures/F8_h3_bridge_nodes.png)
 - **F9** — Runtime per run, excluding oracle lookups: [F9_runtime.png](results/figures/F9_runtime.png)
+- **F10** — All MOFs of MOFGalaxyNet(φ*): components laid out separately and packed by size, coloured by Leiden community: [F10_network_full.png](results/figures/F10_network_full.png)
 
 ## Deviations
 
@@ -1089,4 +1090,26 @@ Output: `holm_families.csv`.
 - **Contraction by objective:** distance-to-centroid percentiles by objective in `contraction_by_objective.csv`.
 - **Figure 1:** in the embedding panel, the rose family is placed around agents i and j.
 - **TOC graphic:** redrawn.
+
+## D22 — Influence shift computed from evaluated MOFs only (correction, 2026-10-07)
+
+### The problem
+- **Leak:** SOCIAL's influence (eq 3) needs a non-negative objective, f′ = f − shift. The implementation took the shift as the minimum of f over the *whole pool* (`Objective.shift`), which includes MOFs that had not been evaluated.
+- **Consequence:** the neighbor weights of Graph-SOCIAL and SOCIAL-WS depended on the value of the best MOF in the pool before that MOF was found. This is information that a real campaign does not have (oracle leakage).
+- **Scope:** no other method used the shift. Global best and elite memory always used evaluated values only.
+
+### The correction
+- **Code:** `methods/graph_social.py` now uses f′ = f − (smallest value among the MOFs evaluated so far in the run). `Objective.shift` is documented as analysis-only.
+- **Test:** `test_graph_social_does_not_use_pool_minimum` passes on the corrected code and fails on the previous code.
+
+### Rerun
+- **What was rerun:** every Graph-SOCIAL and SOCIAL-WS run: pilot, benchmark, ablations, φ × ρ grid and deduplicated pool.
+- **Run keys:** corrected runs carry the tag `__fobs`. The previous pool-shift runs (5,040 files without the tag) are kept on disk in `results/runs/` for comparison and are no longer loaded.
+- **Downstream:** stages 6–8, `scripts/revision2_analyses.py` (outputs in `results/revision2/`; deduplicated runs in `dedup_runs_fobs/`), all tables, numbers and figures.
+- **Pilot selection:** unchanged; it still selects ρ = 0.10, and gate 6 is still FAIL.
+
+### Effect
+- **Benchmark recall:** Graph-SOCIAL and SOCIAL-WS final recall changes by at most 0.014 in any cell (`results/revision2/pool_shift_comparison.csv`).
+- **Ranks:** Graph-SOCIAL's mean Friedman rank is unchanged (6.69, 7th of 11).
+- **Conclusions:** unchanged. No topology or ablation test survives Holm correction, and the O2 centroid pattern persists.
 

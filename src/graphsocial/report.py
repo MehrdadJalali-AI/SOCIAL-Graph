@@ -11,7 +11,7 @@ from pathlib import Path
 from . import config as C
 
 FIGURES = [
-    ("F1", "F1_graph_overview", "Giant component of MOFGalaxyNet(φ*), coloured by Leiden community, sized by betweenness"),
+    ("F1", "F1_graph_overview", "Giant component of MOFGalaxyNet(φ*) (3,000-MOF sample), sized by betweenness: (a) Leiden community, (b) PBE band gap"),
     ("F2", "F2_homophily", "Band-gap homophily: observed vs degree-preserving null distributions"),
     ("F3", "F3_recall_curves", "Top-1% recall vs evaluations (mean, 95% CI), one panel per objective"),
     ("F4", "F4_coverage_vs_recall", "Family coverage vs final recall (method means)"),
@@ -20,6 +20,7 @@ FIGURES = [
     ("F7", "F7_phi_rho_heatmap", "φ × ρ sensitivity (mean final recall)"),
     ("F8", "F8_h3_bridge_nodes", "H3: bridge-node analysis"),
     ("F9", "F9_runtime", "Runtime per run, excluding oracle lookups"),
+    ("F10", "F10_network_full", "All MOFs of MOFGalaxyNet(φ*): components laid out separately and packed by size, coloured by Leiden community"),
 ]
 
 

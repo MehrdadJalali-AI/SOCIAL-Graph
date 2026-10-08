@@ -106,7 +106,7 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     pd.DataFrame([{"chi2": chi2, "p": pf, "blocks": len(blocks), "methods": blocks.shape[1]}]).to_csv(
         tables / "T4e_friedman_test.csv", index=False)
     if ranks.notna().all():
-        plots.cd_diagram(ranks, nem, figs / "F5_critical_difference")
+        plots.cd_diagram(ranks, nem, figs / "F5_critical_difference", cd=S.nemenyi_cd(blocks.shape[1], len(blocks)))
 
     # F3 recall curves at 2% budget, F4 coverage vs recall.
     curves_b = 0.02 if 0.02 in res.budget_frac.unique() else sorted(res.budget_frac.unique())[-1]
@@ -176,8 +176,9 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     # F1 graph overview, F2 homophily (copied from Phase 4).
     best = plan.best_topology(cfg)
     top = Topology.load(st.graph(graph_name(phi)))
-    plots.graph_overview(top, np.load(st.communities(phi)), st.centralities(graph_name(phi))["betweenness"],
-                         figs / "F1_graph_overview")
+    comm_phi, bc_phi = np.load(st.communities(phi)), st.centralities(graph_name(phi))["betweenness"]
+    plots.graph_overview(top, comm_phi, bc_phi, figs / "F1_graph_overview", gap=st.load_clean()["pbe_gap"].to_numpy())
+    plots.network_full(top, comm_phi, bc_phi, figs / "F10_network_full")
     for ext in ("png", "pdf"):
         src = figs / f"phase4_homophily.{ext}"
         if src.exists():

@@ -98,29 +98,94 @@ def recall_curves(curves: dict[str, np.ndarray], stem: Path, title: str = "", ax
         save(fig, stem)
 
 
-def graph_overview(top, comm: np.ndarray, bc: np.ndarray, stem: Path, max_nodes: int = 3000, seed: int = 0) -> None:
-    """F1: giant component (subsampled to ``max_nodes`` by BFS from the highest-betweenness node)."""
+def _giant_sample(top, bc: np.ndarray, max_nodes: int, seed: int):
+    """Giant component, subsampled to ``max_nodes`` by BFS from its highest-betweenness node, with an FR layout."""
     import igraph as ig
 
     g = top.to_igraph()
-    giant = max(g.connected_components(), key=len)
-    nodes = np.asarray(giant)
+    nodes = np.asarray(max(g.connected_components(), key=len))
     if len(nodes) > max_nodes:
         start = int(nodes[np.argmax(bc[nodes])])
-        order = g.bfs(start)[0]
-        nodes = np.asarray(order[:max_nodes])
+        nodes = np.asarray(g.bfs(start)[0][:max_nodes])
     nodes = np.sort(nodes)  # induced_subgraph orders vertices by id; keep attributes aligned with it
     sub = g.induced_subgraph(nodes.tolist())
     ig.set_random_number_generator(__import__("random").Random(seed))
-    lay = np.asarray(sub.layout_fruchterman_reingold(niter=500).coords)
-    cm = comm[nodes]
-    top_comms = pd.Series(cm).value_counts().index[:10]
-    colors = [PALETTE[list(top_comms).index(c)] if c in set(top_comms) else "#cbd5e1" for c in cm]
+    return nodes, sub, np.asarray(sub.layout_fruchterman_reingold(niter=500).coords)
+
+
+def _community_colors(cm: np.ndarray) -> list[str]:
+    top_comms = list(pd.Series(cm).value_counts().index[:10])
+    return [PALETTE[top_comms.index(c)] if c in top_comms else "#cbd5e1" for c in cm]
+
+
+def graph_overview(top, comm: np.ndarray, bc: np.ndarray, stem: Path, max_nodes: int = 3000, seed: int = 0,
+                   gap: np.ndarray | None = None) -> None:
+    """F1: giant component (subsampled to ``max_nodes`` by BFS from the highest-betweenness node), colored by Leiden
+    community; with ``gap``, a second panel shows the same layout colored by the PBE band gap (homophily)."""
+    from matplotlib.collections import LineCollection
+
+    nodes, sub, lay = _giant_sample(top, bc, max_nodes, seed)
     sizes = 4 + 60 * bc[nodes] / max(bc[nodes].max(), 1e-12)
+    segs = [lay[list(e)] for e in sub.get_edgelist()]
+    panels = 1 if gap is None else 2
+    fig, axes = plt.subplots(1, panels, figsize=(7 * panels / 1.4, 7 / 1.4), squeeze=False)
+    for k, ax in enumerate(axes[0]):
+        ax.add_collection(LineCollection(segs, colors="#e2e8f0", linewidths=0.3, zorder=1))
+        if k == 0:
+            ax.scatter(lay[:, 0], lay[:, 1], s=sizes, c=_community_colors(comm[nodes]), linewidths=0, zorder=2)
+        else:
+            g = gap[nodes]
+            sc = ax.scatter(lay[:, 0], lay[:, 1], s=sizes, c=g, cmap="viridis", vmin=0,
+                            vmax=float(np.quantile(g, 0.99)), linewidths=0, zorder=2)
+            cb = fig.colorbar(sc, ax=ax, fraction=0.04, pad=0.01)
+            cb.set_label("PBE band gap (eV)", fontsize=9)
+        ax.set_aspect("equal")
+        ax.autoscale()
+        ax.set_axis_off()
+        if panels == 2:
+            ax.text(0.0, 1.0, "ab"[k], transform=ax.transAxes, fontsize=12, fontweight="bold", va="top")
+    fig.subplots_adjust(wspace=0.02)
+    save(fig, stem)
+
+
+def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 0) -> None:
+    """F10: every MOF. Each connected component gets its own Fruchterman-Reingold layout scaled to a box whose side
+    grows with sqrt(size); boxes are shelf-packed by size, isolated MOFs form a grid at the bottom."""
+    import random
+
+    import igraph as ig
+    from matplotlib.collections import LineCollection
+
+    g = top.to_igraph()
+    ig.set_random_number_generator(random.Random(seed))
+    comps = sorted(g.connected_components(), key=len, reverse=True)
+    xy = np.zeros((g.vcount(), 2))
+    big = [c for c in comps if len(c) > 1]
+    single = [c[0] for c in comps if len(c) == 1]
+    row_w = 2.2 * np.sqrt(len(big[0]))
+    x0 = y0 = row_h = 0.0
+    for c in big:
+        side = max(np.sqrt(len(c)), 1.5)
+        lay = (np.asarray(g.induced_subgraph(c).layout_fruchterman_reingold(niter=500).coords) if len(c) > 2
+               else np.array([[0.0, 0.0], [1.0, 0.0]]))
+        lay = lay - lay.min(0)
+        lay = lay / max(lay.max(), 1e-9) * side * 0.9
+        if x0 + side > row_w and x0 > 0:
+            x0, y0, row_h = 0.0, y0 - row_h - 0.6, 0.0
+        xy[c] = lay + [x0, y0 - side]
+        x0 += side + 0.6
+        row_h = max(row_h, side)
+    y0 -= row_h + 1.5
+    k = int(np.ceil(np.sqrt(len(single) * 4)))
+    for t, v in enumerate(single):
+        xy[v] = [(t % k) * row_w / k, y0 - (t // k) * row_w / k]
     fig, ax = plt.subplots(figsize=(7, 7))
-    for e in sub.get_edgelist():
-        ax.plot(lay[list(e), 0], lay[list(e), 1], color="#e2e8f0", lw=0.3, zorder=1)
-    ax.scatter(lay[:, 0], lay[:, 1], s=sizes, c=colors, linewidths=0, zorder=2)
+    ax.add_collection(LineCollection(xy[np.asarray(g.get_edgelist())], colors="#94a3b8", linewidths=0.15, alpha=0.15,
+                                     zorder=1))
+    ax.scatter(xy[:, 0], xy[:, 1], s=1 + 15 * bc / max(bc.max(), 1e-12), c=_community_colors(comm), linewidths=0,
+               zorder=2)
+    ax.set_aspect("equal")
+    ax.autoscale()
     ax.set_axis_off()
     save(fig, stem)
 

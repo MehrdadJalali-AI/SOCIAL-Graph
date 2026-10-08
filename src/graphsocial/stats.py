@@ -114,3 +114,9 @@ def hypergeom_sum_test(total_found: int, n_runs: int, N: int, K: int, B: int) ->
     obs = pmf[total_found] if total_found < len(pmf) else 0.0
     p = float(min(1.0, pmf[pmf <= obs * (1 + 1e-9)].sum()))
     return float(n_runs * B * K / N), p
+
+
+def nemenyi_cd(k: int, n_blocks: int, alpha: float = 0.05) -> float:
+    """Nemenyi critical difference q_alpha * sqrt(k (k + 1) / (6 n)) for k methods ranked over n blocks."""
+    q = stats.studentized_range.ppf(1 - alpha, k, np.inf) / np.sqrt(2)
+    return float(q * np.sqrt(k * (k + 1) / (6 * n_blocks)))
