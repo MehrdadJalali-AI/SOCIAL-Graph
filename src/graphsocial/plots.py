@@ -148,7 +148,7 @@ def graph_overview(top, comm: np.ndarray, bc: np.ndarray, stem: Path, max_nodes:
     save(fig, stem)
 
 
-def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 0, min_size: int = 5) -> dict:
+def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 0, min_size: int = 20) -> dict:
     """F10: all connected components with at least ``min_size`` MOFs (isolated MOFs and smaller components are
     omitted for clarity). Each component gets its own Fruchterman-Reingold layout scaled to a box whose side grows
     with sqrt(size); boxes are shelf-packed by size. Returns the counts of shown and omitted MOFs/components."""
@@ -163,18 +163,27 @@ def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 
     xy = np.zeros((g.vcount(), 2))
     big = [c for c in comps if len(c) >= min_size]
     small = [c for c in comps if len(c) < min_size]
-    row_w = 2.2 * np.sqrt(len(big[0]))
-    x0 = y0 = row_h = 0.0
-    for c in big:
-        side = max(np.sqrt(len(c)), 1.5)
+    def comp_layout(c, side):
         lay = (np.asarray(g.induced_subgraph(c).layout_fruchterman_reingold(niter=500).coords) if len(c) > 2
                else np.array([[0.0, 0.0], [1.0, 0.0]]))
         lay = lay - lay.min(0)
-        lay = lay / max(lay.max(), 1e-9) * side * 0.9
-        if x0 + side > row_w and x0 > 0:
-            x0, y0, row_h = 0.0, y0 - row_h - 0.6, 0.0
-        xy[c] = lay + [x0, y0 - side]
-        x0 += side + 0.6
+        return lay / max(lay.max(), 1e-9) * side * 0.9
+
+    # giant component on the left; the other components shelf-packed into the area to its right, then below
+    side0 = np.sqrt(len(big[0]))
+    xy[big[0]] = comp_layout(big[0], side0) + [0.0, -side0]
+    gap = 0.08 * side0
+    x_start, area_w = side0 + gap, 1.25 * side0
+    x0, y0, row_h = x_start, 0.0, 0.0
+    for c in big[1:]:
+        side = max(np.sqrt(len(c)), 1.5)
+        if x0 + side > x_start + area_w and x0 > x_start:
+            x0, y0, row_h = x_start, y0 - row_h - gap, 0.0
+        if y0 - side < -side0 - 1e-9 and x_start > 0:   # right area full: continue below the giant, full width
+            x_start, area_w = 0.0, side0 + gap + 1.25 * side0
+            x0, y0, row_h = 0.0, min(y0, -side0) - gap, 0.0
+        xy[c] = comp_layout(c, side) + [x0, y0 - side]
+        x0 += side + gap
         row_h = max(row_h, side)
     shown = np.zeros(g.vcount(), dtype=bool)
     for c in big:
@@ -183,7 +192,11 @@ def network_full(top, comm: np.ndarray, bc: np.ndarray, stem: Path, seed: int = 
     edges = np.asarray(g.get_edgelist())
     edges = edges[shown[edges[:, 0]] & shown[edges[:, 1]]]
     ax.add_collection(LineCollection(xy[edges], colors="#94a3b8", linewidths=0.15, alpha=0.15, zorder=1))
+    # giant component: ten largest communities colored, others gray; every other component gets its own light color
     cols = np.array(_community_colors(comm), dtype=object)
+    light = [matplotlib.colors.to_hex(c) for c in plt.get_cmap("tab20").colors[1::2]]
+    for k, c in enumerate(big[1:]):
+        cols[c] = light[k % len(light)]
     ax.scatter(xy[shown, 0], xy[shown, 1], s=(1 + 15 * bc / max(bc.max(), 1e-12))[shown], c=list(cols[shown]),
                linewidths=0, zorder=2)
     ax.set_aspect("equal")

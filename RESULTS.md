@@ -1,6 +1,6 @@
 # Graph-SOCIAL — Results
 
-Generated 2026-10-08T07:16:10.
+Generated 2026-10-08T09:53:07.
 φ* = 0.7; Graph-SOCIAL search topology = `mgn_phi0.70_rho0.10`.
 Every number is a mean ± std over seeds 0–29 unless stated otherwise.
 
@@ -1108,7 +1108,30 @@ Output: `holm_families.csv`.
 - **Downstream:** stages 6–8, `scripts/revision2_analyses.py` (outputs in `results/revision2/`; deduplicated runs in `dedup_runs_fobs/`), all tables, numbers and figures.
 - **Pilot selection:** unchanged; it still selects ρ = 0.10, and gate 6 is still FAIL.
 
+### History (from git)
+| | Commit | Date |
+|---|---|---|
+| Pool-minimum shift introduced (`fshift = prob.objective.shift`; `fs = f - fshift`) | `7a8215c` | 2026-10-01 |
+| Replaced by the running minimum (`fs = f - min(oracle.values)`) | `c2177bf` | 2026-10-07 |
+
+### Pilot and the topology selection
+The topology was selected on the **original** pilot, i.e. with the pool-minimum shift. Those outputs are preserved in `results/revision2/pilot_original_*.csv`, extracted from commit `c2177bf^`.
+
+| Comparison (vs degree-preserving random unless noted) | Original pilot | Corrected pilot |
+|---|---|---|
+| MOFGalaxyNet | +0.0138, p = 0.195 | +0.0080, p = 0.308 |
+| ρ = 0.10 variant | +0.0149, p = 0.087 | +0.0103, p = 0.156 |
+| MOFGalaxyNet vs Watts–Strogatz | +0.0046, p = 0.299 | −0.0023, p = 0.531 |
+
+- **Original selection:** ρ = 0.10 had the highest pilot mean (0.064).
+- **Corrected pilot:**
+  - MOFGalaxyNet's recall is unchanged (0.063 ± 0.027).
+  - ρ = 0.10 still has the highest mean among the MOFGalaxyNet variants (57 vs 55 hits over 10 seeds), so the selection rule gives the same choice.
+  - Overall it is tied with Watts–Strogatz (57 hits).
+- **Gate 6:** FAIL in both versions.
+
 ### Effect
+- **Graph-SOCIAL O2 at 2%:** final recall 0.063 → 0.067.
 - **Benchmark recall:** Graph-SOCIAL and SOCIAL-WS final recall changes by at most 0.014 in any cell (`results/revision2/pool_shift_comparison.csv`).
 - **Ranks:** Graph-SOCIAL's mean Friedman rank is unchanged (6.69, 7th of 11).
 - **Conclusions:** unchanged. No topology or ablation test survives Holm correction, and the O2 centroid pattern persists.

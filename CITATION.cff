@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite the article below and this repository."
 title: "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery"
 type: software
-version: v1.7-jcim
+version: v1.8-jcim
 date-released: 2026-10-07
 license: MIT
 repository-code: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
