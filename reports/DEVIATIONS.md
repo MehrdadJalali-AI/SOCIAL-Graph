@@ -25,7 +25,7 @@ mendeleev 1.3.0 replaces Mordred, as specified. Electron affinity is missing in 
 
 ## D4 — SOCIAL implementation source (planned, Phase 5)
 
-The SOCIAL-OPTIMIZATION repository's `optimizer.py` (commit c20de23) no longer matches the paper. It adds presets, LOTUS hybrids, rank-based influence and schedule variants. As the specification requires, Graph-SOCIAL will port the paper's Eqs. 8–17, Algorithm 1 and Table 2 directly, including the log-ratio influence formula. Only the `BudgetedObjective` counting/forbidding pattern is reused.
+The SOCIAL-OPTIMIZATION repository's `optimizer.py` (commit c20de23) no longer matches the paper. It adds presets, LOTUS hybrids, rank-based influence and schedule variants. As the specification requires, SOCIAL-MGN will port the paper's Eqs. 8–17, Algorithm 1 and Table 2 directly, including the log-ratio influence formula. Only the `BudgetedObjective` counting/forbidding pattern is reused.
 
 ## D5 — Stage code layout
 
@@ -47,7 +47,7 @@ Stage logic lives in `src/graphsocial/stages/phaseN.py`; `run.py` dispatches to 
 | j | Greedy walk | Best-first: take a random unevaluated neighbour of the best evaluated MOF that still has one. If none of the evaluated MOFs has one, restart at a random unevaluated MOF. | Interpretation of "best-first graph walk". |
 | k | Ensemble TS | Each step, only the sampled forest (100 trees) is fitted on its own bootstrap resample. | Same in distribution as refitting all 10 members, and 10× cheaper. GNN ensemble replaced, as the specification allows. |
 | l | GP-EI | Constant × Matern(ν=2.5, isotropic) + White; normalize_y; one optimiser start; EI with ξ = 0. | CPU cost. |
-| m | H3 event | "Hit in a previously unvisited community" = the first hit found in that Leiden community during the run. Base rate = share of all Graph-SOCIAL update evaluations whose top-weighted neighbour is in the top betweenness decile. One-sided binomial test, aggregated over all benchmark runs. | |
+| m | H3 event | "Hit in a previously unvisited community" = the first hit found in that Leiden community during the run. Base rate = share of all SOCIAL-MGN update evaluations whose top-weighted neighbour is in the top betweenness decile. One-sided binomial test, aggregated over all benchmark runs. | |
 | n | O3 hit set | 1% of MOFs closest to the window centre (2.0 eV) when more than 1% lie inside the window. | As specified. In QMOF the window holds far more than 1%. |
 | o | Smoke mode | Deterministic 600-MOF subsample, 2–3 seeds, 2 budgets, 20 null graphs. Gates are evaluated but not enforced. | Under 10 minutes. |
 | p | Run caching | Run files are keyed by (method, variant, objective, budget, P, community φ, seed), so configurations shared between the benchmark, ablations and φ×ρ grid run once. | Resumability and no duplicate work. |
@@ -57,7 +57,7 @@ Stage logic lives in `src/graphsocial/stages/phaseN.py`; `run.py` dispatches to 
 - Pilot (O2, 2% budget, seeds 0–9, φ* = 0.7): MOFGalaxyNet vs degree-preserving random topology gave +0.014 final recall (one-sided Wilcoxon p = 0.195). With +ρ = 0.10 the difference was +0.015 (p = 0.087). Gate 6 is **FAIL** and stays recorded as FAIL. **H1 is not supported at pilot scale.**
 - **Decision (user):** run Phases 7–8 with `--force`, with no change to any hyperparameter or default. The topology carried forward is still chosen by the pre-registered Phase 6 rule (highest mean pilot recall among MOFGalaxyNet variants): `mgn_phi0.70_rho0.10`.
 - **Ablations added at the user's request** (O2, O3, 2% budget, seeds 0–29):
-  1. `no_neighbor`: Graph-SOCIAL with α = β = 0 throughout, so the neighbour term is off.
+  1. `no_neighbor`: SOCIAL-MGN with α = β = 0 throughout, so the neighbour term is off.
   2. Decoupled embedding: the snap/update space is built from geometric/structural descriptors only (PLD, LCD, density, log volume, log atom count from QMOF; standardised, 5-d, no PCA), with no linker fingerprints or metal descriptors. It is run with neighbourhoods from (a) MOFGalaxyNet(φ*) and (c) the degree-preserving random topology. Mutation still uses the reference Leiden communities. These descriptors were available for every MOF, so the random-projection fallback was not needed.
 - **Additional reporting** (RESULTS.md):
   - random-search recall checked against its analytical expectation B/N (exact hypergeometric test);
@@ -148,7 +148,7 @@ None of these analyses were pre-specified. They were added at the second revisio
 
 ### D17 — Holm families defined explicitly
 There are four families:
-- **(a) Graph-SOCIAL vs each baseline:** one family per baseline over its 16 objective–budget cells. Previously the family was one per cell over the 10 baselines; this changes 6 cell-level calls.
+- **(a) SOCIAL-MGN vs each baseline:** one family per baseline over its 16 objective–budget cells. Previously the family was one per cell over the 10 baselines; this changes 6 cell-level calls.
 - **(b)** the 13 topology tests.
 - **(c)** the 36 non-representation ablation tests.
 - **(d)** the 16 random-search checks.
@@ -164,7 +164,7 @@ Output: `holm_families.csv`.
 
 ### D19 — RQ2 at the run level
 - **What:** the evaluation-level binomial test is replaced by a run-level analysis.
-- **Method:** per Graph-SOCIAL run, the new-family top-decile share minus the run's base rate, tested with a cluster bootstrap over runs (10,000 resamples).
+- **Method:** per SOCIAL-MGN run, the new-family top-decile share minus the run's base rate, tested with a cluster bootstrap over runs (10,000 resamples).
 - **Output:** `rq2_cluster*.csv`.
 
 ### D20 — Duplicate controls
@@ -172,7 +172,7 @@ Output: `holm_families.csv`.
 - **(b) Deduplicated pool, new runs:**
   - one random MOF per building block per seed, chosen with RNG seed 10,000 + seed;
   - hit sets recomputed as the top 1% of the reduced pool;
-  - Graph-SOCIAL (default configuration and topology), random search, ensemble TS, CMA-ES and the centroid policy with the shared initial design;
+  - SOCIAL-MGN (default configuration and topology), random search, ensemble TS, CMA-ES and the centroid policy with the shared initial design;
   - O1–O4 at 2% and 5%, seeds 0–29;
   - centralities recomputed on the induced subgraph.
   - Outputs: `dedup_*.csv` and `dedup_runs/`.
@@ -187,7 +187,7 @@ Output: `holm_families.csv`.
 
 ### The problem
 - **Leak:** SOCIAL's influence (eq 3) needs a non-negative objective, f′ = f − shift. The implementation took the shift as the minimum of f over the *whole pool* (`Objective.shift`), which includes MOFs that had not been evaluated.
-- **Consequence:** the neighbor weights of Graph-SOCIAL and SOCIAL-WS depended on the value of the best MOF in the pool before that MOF was found. This is information that a real campaign does not have (oracle leakage).
+- **Consequence:** the neighbor weights of SOCIAL-MGN and SOCIAL-WS depended on the value of the best MOF in the pool before that MOF was found. This is information that a real campaign does not have (oracle leakage).
 - **Scope:** no other method used the shift. Global best and elite memory always used evaluated values only.
 
 ### The correction
@@ -195,7 +195,7 @@ Output: `holm_families.csv`.
 - **Test:** `test_graph_social_does_not_use_pool_minimum` passes on the corrected code and fails on the previous code.
 
 ### Rerun
-- **What was rerun:** every Graph-SOCIAL and SOCIAL-WS run: pilot, benchmark, ablations, φ × ρ grid and deduplicated pool.
+- **What was rerun:** every SOCIAL-MGN and SOCIAL-WS run: pilot, benchmark, ablations, φ × ρ grid and deduplicated pool.
 - **Run keys:** corrected runs carry the tag `__fobs`. The previous pool-shift runs (5,040 files without the tag) are kept on disk in `results/runs/` for comparison and are no longer loaded.
 - **Downstream:** stages 6–8, `scripts/revision2_analyses.py` (outputs in `results/revision2/`; deduplicated runs in `dedup_runs_fobs/`), all tables, numbers and figures.
 - **Pilot selection:** unchanged; it still selects ρ = 0.10, and gate 6 is still FAIL.
@@ -223,7 +223,42 @@ The topology was selected on the **original** pilot, i.e. with the pool-minimum 
 - **Gate 6:** FAIL in both versions.
 
 ### Effect
-- **Graph-SOCIAL O2 at 2%:** final recall 0.063 → 0.067.
-- **Benchmark recall:** Graph-SOCIAL and SOCIAL-WS final recall changes by at most 0.014 in any cell (`results/revision2/pool_shift_comparison.csv`).
-- **Ranks:** Graph-SOCIAL's mean Friedman rank is unchanged (6.69, 7th of 11).
+- **SOCIAL-MGN O2 at 2%:** final recall 0.063 → 0.067.
+- **Benchmark recall:** SOCIAL-MGN and SOCIAL-WS final recall changes by at most 0.014 in any cell (`results/revision2/pool_shift_comparison.csv`).
+- **Ranks:** SOCIAL-MGN's mean Friedman rank is unchanged (6.69, 7th of 11).
 - **Conclusions:** unchanged. No topology or ablation test survives Holm correction, and the O2 centroid pattern persists.
+
+## D23 — Renaming, verification of the D22 disclosure and submission formatting (2026-10-09)
+
+### Renaming (display labels only)
+- **Method:** Graph-SOCIAL is now called **SOCIAL-MGN** (SOCIAL optimization on MOFGalaxyNet). The baseline keeps the name SOCIAL-WS (SOCIAL optimization on a Watts–Strogatz small-world graph).
+- **Where:** figure labels (`plots.DISPLAY`, `scripts/make_scheme.py`), report text, docstrings and comments.
+- **Unchanged:** internal identifiers (`graphsocial` package, `graph_social` method key, run keys and file names), so every run file still loads.
+- **Regenerated from their scripts:** Figure 1 (`make_scheme.py`), Figure 2 (`make_figure2.py`), and stage 8 figures F3–F10. Every table in `results/tables/` is byte-identical after the rerun. In `results/revision2/`, `scripts/revision2_analyses.py stats` changed only the family label in `holm_families.csv`.
+
+### D22 re-verification from the raw run files
+Pilot: O2, 2% budget, seeds 0–9, one-sided paired Wilcoxon against the degree-preserving random topology unless noted. Original = pool-minimum shift (run files without `__fobs`); corrected = running minimum (`__fobs`).
+
+| | Original | Corrected |
+|---|---|---|
+| MOFGalaxyNet | +0.0138, p = 0.195 | +0.0080, p = 0.308 |
+| ρ = 0.10 variant | +0.0149, p = 0.087 | +0.0103, p = 0.156 |
+| MOFGalaxyNet vs Watts–Strogatz | +0.0046, p = 0.299 | −0.0023, p = 0.531 |
+| Highest MOFGalaxyNet-variant mean | ρ = 0.10 (0.064; 56 hits) | ρ = 0.10 (0.066; 57 hits), tied with Watts–Strogatz (57) |
+
+- **MOFGalaxyNet:** recall is 0.063 ± 0.027 in both versions. Its recall curves are identical seed by seed.
+- **Pilot r_rb:** 0.20 for MOFGalaxyNet vs degree-preserving random (corrected).
+- **Conclusions:** no conclusion changed.
+
+### Separate full-benchmark file
+- **Problem:** `SI_full_benchmark.csv/.xlsx` had been exported before the D22 rerun. Its 31 SOCIAL-MGN and SOCIAL-WS rows held pre-correction values.
+- **Fix:** the file is now generated by `manuscript/make_benchmark_file.py` from `results/revision2/full_benchmark.csv`.
+- **Unaffected:** the tables and numbers in the manuscript and SI were already based on the corrected runs.
+
+### Figure 2 layout
+Changes to `scripts/make_figure2.py`:
+- tighter panel layout;
+- the neighbors in zoom c are drawn as open circles in their community color, not as gray background nodes;
+- community captions in zoom d are placed so that they avoid nodes and leader lines.
+
+The data and selection rules are unchanged.

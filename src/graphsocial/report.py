@@ -16,7 +16,7 @@ FIGURES = [
     ("F3", "F3_recall_curves", "Top-1% recall vs evaluations (mean, 95% CI), one panel per objective"),
     ("F4", "F4_coverage_vs_recall", "Family coverage vs final recall (method means)"),
     ("F5", "F5_critical_difference", "Critical-difference diagram (Friedman + Nemenyi)"),
-    ("F6", "F6_ablations", "Ablations of Graph-SOCIAL (final recall, 95% CI)"),
+    ("F6", "F6_ablations", "Ablations of SOCIAL-MGN (final recall, 95% CI)"),
     ("F7", "F7_phi_rho_heatmap", "φ × ρ sensitivity (mean final recall)"),
     ("F8", "F8_h3_bridge_nodes", "H3: bridge-node analysis"),
     ("F9", "F9_runtime", "Runtime per run, excluding oracle lookups"),
@@ -37,10 +37,10 @@ def build(cfg: dict, sections: dict[str, str], choices: dict) -> Path:
     dev = (root / "reports" / "DEVIATIONS.md")
     fig_lines = "\n".join(f"- **{k}** — {desc}: [{name}.png]({_rel(figs / (name + '.png'), out_md.parent)})"
                           for k, name, desc in FIGURES if (figs / f"{name}.png").exists())
-    text = f"""# Graph-SOCIAL — Results
+    text = f"""# SOCIAL-MGN — Results
 
 Generated {dt.datetime.now().isoformat(timespec='seconds')}{' (SMOKE RUN — not scientific results)' if cfg['smoke'] else ''}.
-φ* = {choices['phi_star']}; Graph-SOCIAL search topology = `{choices['best_topology']}`.
+φ* = {choices['phi_star']}; SOCIAL-MGN search topology = `{choices['best_topology']}`.
 Every number is a mean ± std over seeds {cfg['seeds_full'][0]}–{cfg['seeds_full'][1]} unless stated otherwise.
 
 ## Gate outcomes
@@ -104,7 +104,7 @@ Without replacement, the expected recall of random search after B evaluations is
 
 {sections['T3']}
 
-## T4 — Graph-SOCIAL vs baselines (paired Wilcoxon by seed, Holm-corrected per objective × budget × metric)
+## T4 — SOCIAL-MGN vs baselines (paired Wilcoxon by seed, Holm-corrected per objective × budget × metric)
 
 {sections['T4']}
 

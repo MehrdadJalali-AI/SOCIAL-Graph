@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-DISPLAY = {"graph_social": "Graph-SOCIAL", "random": "Random", "greedy_walk": "Greedy walk", "gp_ei": "GP-EI",
+DISPLAY = {"graph_social": "SOCIAL-MGN", "random": "Random", "greedy_walk": "Greedy walk", "gp_ei": "GP-EI",
            "ensemble_ts": "Ensemble TS", "de": "DE", "pso": "PSO", "ga": "GA", "social_ws": "SOCIAL-WS",
            "static_diverse": "Static diverse", "cmaes": "CMA-ES"}
 

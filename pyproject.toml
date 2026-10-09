@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "graphsocial"
 version = "0.1.0"
-description = "Graph-SOCIAL: centrality-guided search over MOF similarity networks for budget-limited discovery"
+description = "SOCIAL-MGN: centrality-guided search over MOF similarity networks for budget-limited discovery"
 requires-python = ">=3.11"
 authors = [{ name = "Mehrdad Jalali" }]
 license = { text = "MIT" }

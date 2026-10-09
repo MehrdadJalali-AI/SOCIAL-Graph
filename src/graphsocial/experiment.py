@@ -48,7 +48,7 @@ class RunSpec:
 
     def paths(self, runs_dir: Path) -> tuple[Path, Path]:
         # The key (not the group) names the file, so identical configurations requested by several
-        # stages (e.g. the default Graph-SOCIAL in the benchmark and in the ablations) run once.
+        # stages (e.g. the default SOCIAL-MGN in the benchmark and in the ablations) run once.
         return runs_dir / f"{self.key}.parquet", runs_dir / f"{self.key}.json"
 
 

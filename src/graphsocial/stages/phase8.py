@@ -69,7 +69,7 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     }).reset_index()
     out["T3"] = _write(t3, tables, "T3_main_results")
 
-    # T4 pairwise statistics: Graph-SOCIAL vs each baseline per (objective, budget), Holm within block.
+    # T4 pairwise statistics: SOCIAL-MGN vs each baseline per (objective, budget), Holm within block.
     rows = []
     for (obj, b), blk in res.groupby(["objective", "budget_frac"]):
         for metric in ("final_recall", "recall_auc"):
@@ -165,7 +165,7 @@ def run(cfg: dict, force: bool = False) -> GateResult:
         tables / "h3.csv", index=False)
     out["H3"] = (f"Evaluations that found the first hit of a Leiden community and had a top-weighted neighbor: "
                  f"{n}; of these, {k} ({k / max(n, 1):.1%}) had that neighbor in the top betweenness decile, vs "
-                 f"a base rate of {p0:.1%} over all {nb} Graph-SOCIAL update evaluations (one-sided binomial "
+                 f"a base rate of {p0:.1%} over all {nb} SOCIAL-MGN update evaluations (one-sided binomial "
                  f"p = {p_h3:.3g}).")
 
     # T6 runtime, F9.
@@ -194,7 +194,7 @@ def run(cfg: dict, force: bool = False) -> GateResult:
                      + ca["contraction"].to_markdown(index=False, floatfmt=".3f"))
     report.build(cfg, out, {"phi_star": phi, "best_topology": best})
     wins = t4[(t4.metric == "final_recall") & (t4.mean_graph_social > t4.mean_baseline) & t4["significant_holm_0.05"]]
-    summary = (f"Graph-SOCIAL significantly better (Holm p<0.05, final recall) in {len(wins)} of "
+    summary = (f"SOCIAL-MGN significantly better (Holm p<0.05, final recall) in {len(wins)} of "
                f"{int((t4.metric == 'final_recall').sum())} comparisons; mean rank "
                f"{ranks.get('graph_social', np.nan):.2f} of {len(ranks)}")
     return GateResult(8, True, "n/a", summary)

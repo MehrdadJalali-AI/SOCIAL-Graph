@@ -1,4 +1,4 @@
-# Graph-SOCIAL default configuration. smoke.yaml overrides a subset of keys.
+# SOCIAL-MGN default configuration. smoke.yaml overrides a subset of keys.
 seeds_full: [0, 29]          # inclusive range
 seeds_pilot: [0, 9]
 smoke: false

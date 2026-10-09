@@ -127,7 +127,7 @@ def test_gp_ei_refit_schedule(prob):
 
 
 def test_graph_social_does_not_use_pool_minimum():
-    """Graph-SOCIAL must not read the pool-level shift (min f over unevaluated MOFs): changing it leaves runs unchanged."""
+    """SOCIAL-MGN must not read the pool-level shift (min f over unevaluated MOFs): changing it leaves runs unchanged."""
     import dataclasses
 
     from graphsocial import methods

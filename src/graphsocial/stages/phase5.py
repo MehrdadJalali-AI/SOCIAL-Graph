@@ -55,7 +55,7 @@ def run(cfg: dict, force: bool = False) -> GateResult:
     gate = "PASS" if ok else "FAIL"
     summary = f"{len(tab)} methods; invariants {'hold' if ok else 'VIOLATED'} (O2, budget {budget}, φ={phi})"
     lines = [
-        "# Phase 5 — Graph-SOCIAL and baselines",
+        "# Phase 5 — SOCIAL-MGN and baselines",
         "",
         f"**Checks: {gate}** — {summary}",
         "",

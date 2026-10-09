@@ -32,7 +32,7 @@ PLANNED = {
     2: "QMOF data preparation (GATE 2, soft)",
     3: "QMOF-MOFGalaxyNet + comparison topologies",
     4: "landscape pre-checks (GATE 4)",
-    5: "Graph-SOCIAL and baselines (tests)",
+    5: "SOCIAL-MGN and baselines (tests)",
     6: "H1 pilot (GATE 6)",
     7: "full benchmark, ablations, sensitivity",
     8: "analysis, report, release",

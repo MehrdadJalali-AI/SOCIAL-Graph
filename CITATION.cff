@@ -1,9 +1,9 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite the article below and this repository."
-title: "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery"
+title: "Social-Network Optimization for Metal–Organic Framework Screening: Effects of Embedding Geometry and Communication Topology"
 type: software
-version: v1.8-jcim
-date-released: 2026-10-07
+version: v2.0-apin
+date-released: 2026-10-09
 license: MIT
 repository-code: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
 url: "https://github.com/MehrdadJalali-AI/SOCIAL-Graph"
@@ -30,9 +30,9 @@ authors: &authors
     affiliation: "International Graduate School of Artificial Intelligence, National Yunlin University of Science and Technology, Douliu, Yunlin, Taiwan"
 preferred-citation:
   type: article
-  title: "Location over Links: Search-Space Geometry Shapes Social-Network Optimization for Metal–Organic Framework Discovery"
+  title: "Social-Network Optimization for Metal–Organic Framework Screening: Effects of Embedding Geometry and Communication Topology"
   authors: *authors
-  journal: "Journal of Chemical Information and Modeling"
+  journal: "Applied Intelligence"
   year: 2026
   status: submitted
 references:

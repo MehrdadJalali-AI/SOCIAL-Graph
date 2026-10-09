@@ -9,7 +9,7 @@ to fig2_layout.csv and reused on later runs.
 Panels: (a) Leiden communities with boxes marking the zoom regions, (b) PBE band gap, and three zooms, each with its
 own local layout (Kamada-Kawai, deterministic) of the selected MOFs and their neighbors:
   (c) the largest building-block group (identical linker and metal) in the sample, plus the 20 neighbors with the most
-      edges into the group;
+      edges into the group (open circles in their community color);
   (d) the highest-betweenness MOF in the center with all its neighbors, one Leiden community on each side;
   (e) the O2 hit with the most other O2 hits within 6% of the layout span, those hits and the 25 neighbors with the most
       edges into them.
@@ -237,13 +237,21 @@ def comm_color(c: int, top10: list[int]) -> str:
     return plots.PALETTE[top10.index(c)] if c in top10 else "#b9c1c9"
 
 
-def draw_local(ax, G, pos, colors, sizes, edge_extra=()):
+def draw_local(ax, G, pos, colors, sizes, edge_extra=(), hollow=()):
     segs = [[pos[u], pos[v]] for u, v in G.edges()] + [list(e) for e in edge_extra]
     ax.add_collection(LineCollection(segs, colors="#8a96a3", linewidths=0.3, alpha=0.3, zorder=1))
     vs = list(G.nodes) if not hasattr(G, "draw_nodes") else G.draw_nodes
     P = np.array([pos[v] for v in vs])
-    ax.scatter(P[:, 0], P[:, 1], s=[sizes[v] for v in vs], c=[colors[v] for v in vs], linewidths=0.4,
-               edgecolors="white", zorder=2)
+    full = [v for v in vs if v not in hollow]
+    if full:
+        Q = np.array([pos[v] for v in full])
+        ax.scatter(Q[:, 0], Q[:, 1], s=[sizes[v] for v in full], c=[colors[v] for v in full], linewidths=0.4,
+                   edgecolors="white", zorder=2)
+    ring = [v for v in vs if v in hollow]  # neighbors of the selected MOFs: open circles in their community color
+    if ring:
+        Q = np.array([pos[v] for v in ring])
+        ax.scatter(Q[:, 0], Q[:, 1], s=[sizes[v] for v in ring], facecolors="white",
+                   edgecolors=[colors[v] for v in ring], linewidths=0.8, zorder=2)
     return P
 
 
@@ -292,6 +300,23 @@ def add_labels(ax, pos, label_nodes, df, P_all, bold=(), unresolved=None, obstac
     return texts + fixed + list(obstacles)
 
 
+def covers_node(ax, bb, P) -> bool:
+    """True if any node position (data coordinates) lies inside the display-space box ``bb``, with a small margin."""
+    xy = ax.transData.transform(P)
+    return bool(((xy[:, 0] >= bb.x0 - 3) & (xy[:, 0] <= bb.x1 + 3) & (xy[:, 1] >= bb.y0 - 3) & (xy[:, 1] <= bb.y1 + 3)).any())
+
+
+def crosses_leader(ax, bb, r) -> bool:
+    """True if any leader line of ``ax`` passes through the display-space box ``bb`` (sampled along the line)."""
+    for ln in ax.lines:
+        xy = ax.transData.transform(np.column_stack(ln.get_data()))
+        t = np.linspace(0, 1, 50)[:, None]
+        pts = xy[0] + t * (xy[-1] - xy[0])
+        if ((pts[:, 0] >= bb.x0 - 2) & (pts[:, 0] <= bb.x1 + 2) & (pts[:, 1] >= bb.y0 - 2) & (pts[:, 1] <= bb.y1 + 2)).any():
+            return True
+    return False
+
+
 def check_overlaps(fig, axes_texts) -> list[str]:
     fig.canvas.draw()
     r = fig.canvas.get_renderer()
@@ -319,11 +344,11 @@ def main() -> None:
     cmap = matplotlib.colormaps[GAPMAP]
     size_main = 1.5 + 30 * bc[nodes] / bc[nodes].max()
 
-    fig = plt.figure(figsize=(7.2, 5.6), facecolor="white")
-    ax_a = fig.add_axes([0.005, 0.385, 0.47, 0.585])
-    ax_b = fig.add_axes([0.485, 0.385, 0.43, 0.585])
-    cax = fig.add_axes([0.925, 0.47, 0.011, 0.40])
-    ax_z = [fig.add_axes([0.02 + k * 0.33, 0.02, 0.30, 0.315]) for k in range(3)]
+    fig = plt.figure(figsize=(7.2, 5.15), facecolor="white")
+    ax_a = fig.add_axes([0.0, 0.375, 0.49, 0.6])
+    ax_b = fig.add_axes([0.47, 0.375, 0.45, 0.6])
+    cax = fig.add_axes([0.93, 0.46, 0.011, 0.42])
+    ax_z = [fig.add_axes([0.012 + k * 0.332, 0.012, 0.31, 0.33]) for k in range(3)]
     el = np.asarray(D["sub"].get_edgelist())
     for ax in (ax_a, ax_b):
         ax.add_collection(LineCollection(lay[el], colors=EDGE, linewidths=0.2, alpha=0.15, zorder=1, rasterized=True))
@@ -340,9 +365,9 @@ def main() -> None:
     cb.set_label("PBE band gap (eV)", fontsize=6)
     cb.ax.tick_params(labelsize=5.5, width=0.5, length=2)
     cb.outline.set_linewidth(0.5)
-    for x, letter, title in ((0.012, "a", "Leiden communities"), (0.485, "b", "PBE band gap")):
-        fig.text(x, 0.985, letter, fontsize=8.5, fontweight="bold", va="top")
-        fig.text(x + 0.022, 0.983, title, fontsize=6.5, va="top", color="#263238")
+    for x, letter, title in ((0.012, "a", "Leiden communities"), (0.475, "b", "PBE band gap")):
+        fig.text(x, 0.99, letter, fontsize=8.5, fontweight="bold", va="top")
+        fig.text(x + 0.022, 0.988, title, fontsize=6.5, va="top", color="#263238")
     for key in "cde":
         x0, y0, x1, y1 = S[key]["box"]
         ax_a.add_patch(FancyBboxPatch((x0, y0), x1 - x0, y1 - y0, boxstyle="round,pad=0,rounding_size=0.015",
@@ -359,9 +384,10 @@ def main() -> None:
     nb_c = neighbors_most_connected(D, c["nodes"], N_NEIGH_C)
     Gc = local_graph(D, list(c["nodes"]) + nb_c)
     pc = kk_layout(Gc)
-    colors = {v: ccol(v) if v in set(map(int, c["nodes"])) else "#cfd6dd" for v in Gc.nodes}
+    core_c = set(map(int, c["nodes"]))
+    colors = {v: ccol(v) for v in Gc.nodes}
     sizes = {v: zsize(v) for v in Gc.nodes}
-    Pc = draw_local(ax_z[0], Gc, pc, colors, sizes)
+    Pc = draw_local(ax_z[0], Gc, pc, colors, sizes, hollow=set(Gc.nodes) - core_c)
     r0 = df.iloc[c["nodes"][0]]
     finish_zoom(ax_z[0], Pc, "c", f"Building-block near-clique: {r0.metal} | {linker_formula(r0.linker_smiles)}")
     members = sorted(map(int, c["nodes"]), key=lambda v: -bc[v])
@@ -398,20 +424,35 @@ def main() -> None:
         pts = np.array([pdl[v] for v in fams[fams == cfam].index])
         cx, cy = pts[:, 0].mean(), pts[:, 1].mean()
         spots = [(cx, pts[:, 1].min() - 0.10, "center", "top"), (cx, pts[:, 1].max() + 0.10, "center", "bottom"),
-                 (pts[:, 0].max() + 0.08, cy, "left", "center"), (pts[:, 0].min() - 0.08, cy, "right", "center")]
+                 (pts[:, 0].max() + 0.08, cy, "left", "center"), (pts[:, 0].min() - 0.08, cy, "right", "center"),
+                 (pts[:, 0].max(), pts[:, 1].max() + 0.10, "right", "bottom"),
+                 (pts[:, 0].max(), pts[:, 1].min() - 0.10, "right", "top")]
         for x, y, ha, va in spots:
             t = ax_z[1].text(x, y, f"community {cfam} ({n})", fontsize=5.6, ha=ha, va=va, zorder=4,
                              color=ccol(int(fams[fams == cfam].index[0])))
             bb = t.get_window_extent(r)
             ok = (bb.x0 >= axbb.x0 and bb.x1 <= axbb.x1 and bb.y0 >= axbb.y0 and bb.y1 <= axbb.y1
-                  and not any(bb.overlaps(o) for o in taken))
+                  and not any(bb.overlaps(o) for o in taken) and not crosses_leader(ax_z[1], bb, r) and not covers_node(ax_z[1], bb, Pd))
             if ok:
                 taken.append(bb)
                 labs.append(t)
                 break
             t.remove()
-        else:
-            print("could not place caption for community", cfam)
+        else:  # fall back to free spots along the panel border (axes coordinates)
+            grid = [(x, y, "center", "center") for y in np.arange(0.93, 0.05, -0.04)
+                    for x in (0.85, 0.7, 0.55, 0.4, 0.25, 0.15)]
+            for x, y, ha, va in grid:
+                t = ax_z[1].text(x, y, f"community {cfam} ({n})", fontsize=5.6, ha=ha, va=va, zorder=4,
+                                 transform=ax_z[1].transAxes, color=ccol(int(fams[fams == cfam].index[0])))
+                bb = t.get_window_extent(r)
+                if not any(bb.overlaps(o) for o in taken) and not crosses_leader(ax_z[1], bb, r) \
+                        and not covers_node(ax_z[1], bb, Pd):
+                    taken.append(bb)
+                    labs.append(t)
+                    break
+                t.remove()
+            else:
+                print("could not place caption for community", cfam)
     all_texts.append(labs)
 
     # e: O2-hit region

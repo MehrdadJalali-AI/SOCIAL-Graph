@@ -55,7 +55,7 @@ def phase6_specs(cfg: dict) -> list[tuple[str, RunSpec]]:
 
 
 def sensitivity_specs(cfg: dict, objective: str, frac: float, seed_list: list[int], group: str) -> list[RunSpec]:
-    """phi x rho grid (topology (a)/(b)) for Graph-SOCIAL; communities fixed at phi*."""
+    """phi x rho grid (topology (a)/(b)) for SOCIAL-MGN; communities fixed at phi*."""
     ps = phi_star(cfg)
     out = []
     for phi in cfg["phase3"]["phis"]:

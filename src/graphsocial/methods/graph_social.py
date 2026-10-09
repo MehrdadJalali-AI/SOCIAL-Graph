@@ -1,4 +1,4 @@
-"""Graph-SOCIAL: the SOCIAL optimiser (Jalali et al., ASOC 2026, Eqs. 8-17, Algorithm 1) as an acquisition policy.
+"""SOCIAL-MGN: the SOCIAL optimiser (Jalali et al., ASOC 2026, Eqs. 8-17, Algorithm 1) as an acquisition policy.
 
 Agents live in the 32-d embedding. After each position update an agent snaps to the nearest unevaluated
 MOF, which the oracle evaluates. Two agents are neighbours if their current MOFs are within ``h`` hops in

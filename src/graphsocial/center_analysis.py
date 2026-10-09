@@ -104,7 +104,7 @@ def run(cfg: dict) -> dict[str, pd.DataFrame]:
         con = con.groupby("method")[["early_median_percentile", "late_median_percentile"]].mean().reset_index()
     con.to_csv(tables / "center_contraction.csv", index=False)
 
-    # 4. Mechanism check: contraction for the default Graph-SOCIAL and four ablations (O2, O3; 2% budget).
+    # 4. Mechanism check: contraction for the default SOCIAL-MGN and four ablations (O2, O3; 2% budget).
     labels = ["default", "sync off", "no neighbor term (α=β=0)", "elite off", "mutation off"]
     rows = []
     for label, s in plan.ablation_specs(cfg):

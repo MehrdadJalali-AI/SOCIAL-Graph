@@ -168,7 +168,7 @@ def item3_families(tp, pw, ab) -> pd.DataFrame:
     rc.to_csv(OUT / "random_check_holm.csv", index=False)
     fam_b = tp.dropna(subset=["p_holm_topology_family"])
     rows = [
-        {"family": "(a) Graph-SOCIAL vs each baseline", "definition": "one family per baseline: its 16 objective–budget "
+        {"family": "(a) SOCIAL-MGN vs each baseline", "definition": "one family per baseline: its 16 objective–budget "
          "cells, two-sided paired Wilcoxon on final recall", "families": pw.baseline.nunique(),
          "tests_per_family": int(pw.groupby("baseline").size().iloc[0]), "tests_total": len(pw),
          "significant": int((pw.p_holm_per_baseline < 0.05).sum()), "min_adjusted_p": pw.p_holm_per_baseline.min()},
@@ -366,7 +366,7 @@ def _dedup_seed(seed: int) -> list[dict]:
     from graphsocial.store import Problem
 
     cfg = cfg_()
-    cache_dir = OUT / "dedup_runs_fobs"  # D22: Graph-SOCIAL with the evaluated-only influence shift
+    cache_dir = OUT / "dedup_runs_fobs"  # D22: SOCIAL-MGN with the evaluated-only influence shift
     cache_dir.mkdir(exist_ok=True)
     out_path = cache_dir / f"seed{seed}.json"
     if out_path.exists():
@@ -440,7 +440,7 @@ def run_dedup(n_jobs: int) -> None:
                          "hit_share_innermost_quarter": g.hit_share_innermost_quarter.mean(),
                          "runs": g.size()}).reset_index()
     summ.to_csv(OUT / "dedup_summary.csv", index=False)
-    # paired comparisons: centroid policy and baselines vs Graph-SOCIAL
+    # paired comparisons: centroid policy and baselines vs SOCIAL-MGN
     rows = []
     for (o, b), blk in runs.groupby(["objective", "budget_frac"]):
         w = blk.pivot_table(index="seed", columns="method", values="final_recall")

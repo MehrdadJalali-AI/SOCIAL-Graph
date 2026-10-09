@@ -1,4 +1,4 @@
-# Phase 5 — Graph-SOCIAL and baselines
+# Phase 5 — SOCIAL-MGN and baselines
 
 **Checks: PASS** — 10 methods; invariants hold (O2, budget 174, φ=0.7)
 

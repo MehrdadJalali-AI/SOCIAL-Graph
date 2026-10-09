@@ -102,7 +102,7 @@ def main() -> int:
 
     co, cn = counts(pd.read_csv(OLD / "T4_pairwise_stats.csv")), counts(pd.read_csv(NEW / "T4_pairwise_stats.csv"))
     both = co.join(cn, lsuffix=" (v0.2)", rsuffix=" (new)")
-    out += ["## Graph-SOCIAL vs each baseline (16 cells, Holm-corrected Wilcoxon, final recall)", "",
+    out += ["## SOCIAL-MGN vs each baseline (16 cells, Holm-corrected Wilcoxon, final recall)", "",
             both.to_markdown(), ""]
 
     t3o, t3n = pd.read_csv(OLD / "T3_main_results.csv"), pd.read_csv(NEW / "T3_main_results.csv")

@@ -1,6 +1,6 @@
 """Phase 6: H1 pilot (GATE 6) — does a chemically meaningful topology beat a degree-preserving random one?
 
-Graph-SOCIAL on MOFGalaxyNet(phi*), MOFGalaxyNet + rho long-range edges, the degree-preserving random
+SOCIAL-MGN on MOFGalaxyNet(phi*), MOFGalaxyNet + rho long-range edges, the degree-preserving random
 graph and a Watts-Strogatz graph, plus random search; O2 (min PBE gap), budget 2% of N, pilot seeds.
 Gate: some MOFGalaxyNet variant beats the random-topology variant on final top-1% recall, one-sided
 paired Wilcoxon p < 0.05. On FAIL the phi x rho sensitivity grid is run at pilot scale.

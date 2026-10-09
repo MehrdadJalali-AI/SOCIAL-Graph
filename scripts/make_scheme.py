@@ -1,10 +1,10 @@
 """Figure 1: how the SOCIAL optimizer is used in this study (method overview, schematic; no result data).
 
 (a) SOCIAL as published: agents in a continuous search space on a synthetic small-world graph.
-(b) Graph-SOCIAL: the same agents in two views. Left, the MOF similarity network defines neighborhoods (agents within
+(b) SOCIAL-MGN: the same agents in two views. Left, the MOF similarity network defines neighborhoods (agents within
     h = 2 hops) and betweenness; right, the chemistry-aware embedding is where the SOCIAL update moves an agent, which
     then snaps to the nearest unevaluated MOF. The update arrow is eq 5 with the default schedules (tau = 0.6).
-(c) One Graph-SOCIAL iteration.
+(c) One SOCIAL-MGN iteration.
 
     python scripts/make_scheme.py      -> results/figures/F0_graph_social_scheme.{pdf,svg,png}
 """
@@ -175,7 +175,7 @@ axn.annotate("neighbors of $i$:\nagents within $h$ = 2 hops", xy=Pn[i_ag] + [-0.
              arrowprops=dict(arrowstyle="-", lw=0.4, color=K["dark"]))
 axn.set_xlim(-0.92, 0.92); axn.set_ylim(-0.83, 0.92); axn.set_aspect("equal")
 fig.text(0.312, 0.985, "b", fontsize=8.5, fontweight="bold", va="top")
-fig.text(0.332, 0.985, r"$\bf{Graph}$-$\bf{SOCIAL}$ (this study): the same agents in two views",
+fig.text(0.332, 0.985, r"$\bf{SOCIAL}$-$\bf{MGN}$ (this study): the same agents in two views",
          fontsize=7.2, va="top")
 fig.text(0.477, 0.955, "MOF similarity network: who listens to whom",
          fontsize=6.4, ha="center", va="top", color=K["dark"])
@@ -261,7 +261,7 @@ arrow(axe, xi, elite, "#EF6C00", lw=0.6, ls=(0, (2, 1.5)), ms=5, sa=5, sb=5)
 arrow(axe, xi, xnew, K["dred"], lw=1.1, ms=8, sa=5, sb=4, z=7)
 axe.scatter(*xnew, s=46, facecolor="white", ec=K["dred"], lw=0.8,
             ls=(0, (2, 1.2)), zorder=7)
-axe.text(xi[0] - 0.06, xi[1] - 0.09, "SOCIAL update\n(eq 5)", fontsize=5.9,
+axe.text(xi[0] - 0.06, xi[1] - 0.09, "SOCIAL update\n(Eq. 5)", fontsize=5.9,
          color=K["dred"], ha="right", va="top", linespacing=1.05, bbox=dict(fc="white", ec="none", alpha=0.85, pad=0.4))
 arrow(axe, xnew, Pe[snap], K["green"], lw=1.2, ms=8, sa=5, sb=5, z=7)
 axe.scatter(*Pe[snap], s=48, color=K["green"], ec="white", lw=0.6, zorder=8)
@@ -292,7 +292,7 @@ wc, hc = W * 1.0, H * 0.44
 axc.set_xlim(0, 100); axc.set_ylim(0, 100 * hc / wc); axc.set_aspect("equal")
 ytop = 100 * hc / wc
 fig.text(0.012, 0.445, "c", fontsize=8.5, fontweight="bold", va="top")
-fig.text(0.032, 0.445, "One Graph-SOCIAL iteration (SOCIAL learning rules unchanged)",
+fig.text(0.032, 0.445, "One SOCIAL-MGN iteration (SOCIAL learning rules unchanged)",
          fontsize=7.2, va="top")
 
 xs = [9, 29, 50, 71, 90]
